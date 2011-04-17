@@ -238,6 +238,8 @@
 				var replaceWith = prepare(clicked.replaceWith);
 				var closeWith 	= prepare(clicked.closeWith);
 				var multilineSupport = prepare(clicked.multilineSupport);
+				var openBlockWith = prepare(clicked.openBlockWith);
+				var closeBlockWith = prepare(clicked.closeBlockWith);
 
 				if (replaceWith !== "") {
 					block = openWith + replaceWith + closeWith;
@@ -264,9 +266,8 @@
 				    block = blocks.join("\n");
 				}
 				
-				
-				// Multiline sections usually need an extra newline on top
-				if (multilineSupport == 'true') { block = "\n\n" + block };
+				block = openBlockWith + block + closeBlockWith;
+
 				return {	block:block, 
 							openWith:openWith, 
 							replaceWith:replaceWith, 
