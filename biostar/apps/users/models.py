@@ -241,6 +241,10 @@ class Profile(models.Model):
     # Opt-in to all messages from the site
     opt_in = models.BooleanField(default=False)
 
+    # GitHub integration
+    github_csrf_state = models.CharField(max_length=255, default=None, null=True)
+    github_access_token = models.CharField(max_length=255, default=None, null=True)
+
     def parse_tags(self):
         return util.split_tags(self.tag_val)
 

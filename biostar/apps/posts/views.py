@@ -1,12 +1,13 @@
 # Create your views here.
 from django.shortcuts import render_to_response
+from django.shortcuts import redirect
+from django.shortcuts import render
 from django.views.generic import TemplateView, DetailView, ListView, FormView, UpdateView
 from .models import Post
 from django import forms
 from django.core.urlresolvers import reverse
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Fieldset, Div, Submit, ButtonHolder
-from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpRequest
 from django.contrib import messages
 from . import auth
@@ -25,6 +26,12 @@ import logging
 import langdetect
 from django.template.loader import render_to_string
 
+import requests
+import json
+import urllib
+import random
+import string
+
 def english_only(text):
     try:
         text.decode('ascii')
@@ -41,6 +48,25 @@ def valid_language(text):
                     'Language "{0}" is not one of the supported languages {1}!'.format(lang, supported_languages))
 
 logger = logging.getLogger(__name__)
+
+
+def valid_github_repo(text):
+    "Validates form input"
+    text = text.strip()
+    if not text:
+        raise ValidationError('Please enter a GitHub repo')
+
+    if not re.match("^[A-Za-z0-9_.-]+$", text):
+        raise ValidationError('Please enter a valid GitHub repo name')
+
+def valid_github_user(text):
+    "Validates form input"
+    text = text.strip()
+    if not text:
+        raise ValidationError('Please enter a GitHub user or organization')
+
+    if not re.match("^[A-Za-z0-9_.-]+$", text):
+        raise ValidationError('Please enter a valid GitHub user or organization')
 
 
 def valid_title(text):
@@ -68,6 +94,7 @@ def valid_tag(text):
     if len(words) > 5:
         raise ValidationError('You have too many tags (5 allowed)')
 
+
 class PagedownWidget(forms.Textarea):
     TEMPLATE = "pagedown_widget.html"
 
@@ -77,6 +104,58 @@ class PagedownWidget(forms.Textarea):
         klass = attrs.get('class', '')
         params = dict(value=value, rows=rows, klass=klass)
         return render_to_string(self.TEMPLATE, params)
+
+class GithubIssuePreviewWidget(forms.Textarea):
+    TEMPLATE = "github_issue_preview_widget.html"
+
+    def render(self, name, value, attrs=None):
+        value = value or ''
+        name = name or ''
+        params = dict(value=value, name=name)
+        return render_to_string(self.TEMPLATE, params)
+
+
+class GithubIssueForm(forms.Form):
+    FIELDS = "repo_user repo_name title content".split()
+
+    repo_user = forms.CharField(
+        label="GitHub User or Organization",
+        max_length=200, min_length=2, validators=[english_only, valid_github_user],
+        help_text='E.g. <a href="https://github.com/ialbert">ialbert</a>')
+
+    repo_name = forms.CharField(
+        label="GitHub Repository Name",
+        max_length=200, min_length=1, validators=[english_only, valid_github_repo],
+        help_text='E.g. <a href="https://github.com/ialbert/biostar-central">biostar-central</a>')
+
+    title = forms.CharField(
+        widget=GithubIssuePreviewWidget,
+        label="GitHub Issue Title",
+        max_length=200, min_length=10, validators=[valid_title, english_only])
+
+    content = forms.CharField(
+        validators=[valid_language],
+        widget=GithubIssuePreviewWidget,
+        min_length=80, max_length=15000,
+        label="GitHub Issue comment",
+        help_text="Body of the Question will appear as the first comment in the Issue")
+
+    def __init__(self, *args, **kwargs):
+        super(GithubIssueForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_class = "post-form"
+        self.helper.layout = Layout(
+            Fieldset(
+                'Open GitHub Issue',
+                Field('repo_user'),
+                Field('repo_name'),
+                Field('title'),
+                Field('content'),
+            ),
+            ButtonHolder(
+                Submit('submit', 'Submit')
+            )
+        )
 
 
 class LongForm(forms.Form):
@@ -384,6 +463,176 @@ class EditPost(LoginRequiredMixin, FormView):
         messages.success(request, "Post updated")
 
         return HttpResponseRedirect(post.get_absolute_url())
+
+    def get_success_url(self):
+        return reverse("user_details", kwargs=dict(pk=self.kwargs['pk']))
+
+
+class GithubIssue(LoginRequiredMixin, FormView):
+    """
+    Open or view a GitHub issue 
+    """
+
+    # The template_name attribute must be specified in the calling apps.
+    template_name = "github_issue.html"
+    issue_body_template_name = "github_issue_body.md"
+    form_class = GithubIssueForm
+
+    def get(self, request, *args, **kwargs):
+        pk = int(self.kwargs['pk'])
+        post = Post.objects.get(pk=pk)
+        post = auth.post_permissions(request=request, post=post)
+
+        initial = dict(
+            repo_user=request.GET.get('repo_user'),
+            repo_name=request.GET.get('repo_name'),
+            title=post.title,
+            content=post.content)
+
+        form = self.form_class(initial=initial)
+        if not settings.GITHUB_ISSUE_OPENING:
+            messages.error(request, "GitHub Issue opening is disallowed")
+            return render(request, self.template_name, {'form': form})
+
+        # Handle GitHub authorization callback
+        if "code" in request.GET and "state" in request.GET and request.GET['state'] is not None:
+            if request.user.profile.github_csrf_state != request.GET['state']:
+                # Invalid callback
+                logger.error("Cross-Site Request Forgery attempt. "
+                    "Invalid GitHub authorization callback: {}".format(request.GET))
+                return render(request, self.template_name, {'form': form})
+            else:
+                # Exchange "code" for access token
+                api_req_url = 'https://github.com/login/oauth/access_token'
+                api_req_data =  {
+                        'client_id': settings.GITHUB_APP_CLIENT_ID,
+                        'client_secret': settings.GITHUB_APP_CLIENT_SECRET,
+                        'code': request.GET['code'],
+                        'redirect_uri':
+                            settings.CALLBACK_URL_BASE + '/' +
+                            'p/github/issue/103/?' +
+                            urllib.urlencode({'repo_user': post.github_repo_user, 'repo_name': post.github_repo_name}),
+                        'state': request.user.profile.github_csrf_state}
+
+                resp = requests.post(
+                    api_req_url + '?' + urllib.urlencode(api_req_data),
+                    headers={'Accept': 'application/json'})
+                resp_json = resp.json()
+
+                access_token = None
+                if 'access_token' in resp_json:
+                    access_token = resp_json['access_token']
+                    messages.success(request, "GitHub access granted. Now, please click Submit")
+                else:
+                    logger.error('Failed to get access token from github. '
+                        'Response from {} was {}'.format(api_req_url, resp_json))
+                    messages.error(request, "Failed to get access token from GitHub")
+
+                # Clear "state" from our DB so it cannot be used again
+                request.user.profile.github_csrf_state = None
+                request.user.profile.save()
+
+                request.user.profile.github_access_token = access_token
+                request.user.profile.save()
+
+        # Check and exit if not a valid edit.
+        if not post.is_editable:
+            messages.error(request, "This user may not modify the post")
+            return HttpResponseRedirect(reverse("home"))
+
+        if not form.is_valid():
+            # Invalid form submission.
+            return render(request, self.template_name, {'form': form})
+
+        pre = 'class="preformatted"' in post.content
+        return render(request, self.template_name, {'form': form, 'pre': pre})
+
+    def post(self, request, *args, **kwargs):
+
+        pk = int(self.kwargs['pk'])
+        post = Post.objects.get(pk=pk)
+        post = auth.post_permissions(request=request, post=post)
+
+        form = self.form_class(request.POST)
+
+        if not settings.GITHUB_ISSUE_OPENING:
+            messages.error(request, "GitHub Issue opening is disallowed")
+            return render(request, self.template_name, {'form': form})
+
+        if not form.is_valid():
+            # Invalid form submission.
+            return render(request, self.template_name, {'form': form})
+
+        post.github_repo_user = request.POST.get('repo_user')
+        post.github_repo_name = request.POST.get('repo_name')
+
+        # Get GitHub token
+        if request.user.profile.github_access_token is not None:
+            api_req_url = 'https://api.github.com/applications/{}/tokens/{}'.format(
+                settings.GITHUB_APP_CLIENT_ID,    
+                request.user.profile.github_access_token)
+            resp = requests.get(api_req_url,
+                auth=requests.auth.HTTPBasicAuth(settings.GITHUB_APP_CLIENT_ID, settings.GITHUB_APP_CLIENT_SECRET))
+            resp_json = resp.json()
+
+            # TODO: Do same check on initial GET and display user's profile avatar and name which is in resp_json
+            # see doc https://developer.github.com/v3/oauth_authorizations/#check-an-authorization
+
+            if 'public_repo' in resp_json.get('scopes', []):
+                access_token = request.user.profile.github_access_token
+
+                # Open GitHub Issue
+                api_req_url = 'https://api.github.com/repos/{}/{}/issues'.format(
+                    post.github_repo_user, post.github_repo_name)
+
+
+                issue_body = render(
+                    request, self.issue_body_template_name,
+                    {
+                        'main_body': post.content,
+                        'post_url': settings.CALLBACK_URL_BASE + post.get_absolute_url(),
+                        'author': post.author },
+                    content_type='text/plain')
+
+                resp = requests.post(
+                    api_req_url,
+                    data=json.dumps({
+                        "title": post.title,
+                        "body": issue_body.content}),
+                    headers={'Authorization': 'token ' + access_token})
+                resp_json = resp.json()
+
+                issue_number = resp_json['number']
+
+                post.github_issue_number = issue_number
+                post.save()
+
+                messages.success(request, "GitHub Issue #{} created".format(issue_number))
+
+                return HttpResponseRedirect(post.get_absolute_url())
+
+        #
+        # Redirect user to request GitHub access
+        #
+
+        git_authorize_state = ''.join([random.choice(string.ascii_uppercase + string.digits) for _ in range(20)])
+        git_authorize_state += datetime.isoformat(datetime.now()) 
+
+        request.user.profile.github_csrf_state = git_authorize_state
+        request.user.profile.save()
+
+        authorize_params = {
+            'client_id': settings.GITHUB_APP_CLIENT_ID,
+            'redirect_uri':
+                settings.CALLBACK_URL_BASE + '/' +
+                'p/github/issue/103/?' +
+                urllib.urlencode({'repo_user': post.github_repo_user, 'repo_name': post.github_repo_name}),
+            'scope': 'public_repo',
+            'state': git_authorize_state
+            }
+
+        return redirect('https://github.com/login/oauth/authorize?' + urllib.urlencode(authorize_params))
+
 
     def get_success_url(self):
         return reverse("user_details", kwargs=dict(pk=self.kwargs['pk']))

@@ -5,8 +5,18 @@
     <span class="label label-default add-comment" data-value="{{ post.id }}" id="C{{ post.id }}">ADD {{ label }}</span>
 
     &bull; <a href="{{ post.get_absolute_url }}">link</a>
+    {% if post.github_issue_number %}
+        &bull; <a href="https://github.com/{{post.github_repo_user}}/{{post.github_repo_name}}/issues/{{post.github_issue_number}}"><img src="/static/img/github_tiny.png"> github issue</img></a>
+    {% endif %}
     {% if post.is_editable %}
         &bull; <a href="{% url 'post-edit' post.id %}" id="E{{ post.id }}">edit</a>
+        {% if post.is_toplevel %}
+            {% if GITHUB_ISSUE_OPENING %}
+                {% if not post.github_issue_number %}
+                    &bull; <a href="{% url 'post-github-issue' post.id %}" id="E{{ post.id }}">open github issue</a>
+                {% endif %}
+            {% endif %}
+        {% endif %}
         &bull; <a class="mod-post" data-value="{{ post.id }}" id="M{{ post.id }}">moderate</a>
         {% if post.book_count %} &bull; {{ post.book_count }} bookmark{{ post.book_count|pluralize }}{% endif %}
     {% endif %}

@@ -258,7 +258,7 @@ def post_count_box(post, context='', topic=''):
 @register.inclusion_tag('server_tags/post_actions.html')
 def post_actions(post, user, label="COMMENT"):
     "Renders post actions"
-    return dict(post=post, user=user, label=label)
+    return dict(post=post, user=user, label=label, GITHUB_ISSUE_OPENING=settings.GITHUB_ISSUE_OPENING)
 
 
 @register.inclusion_tag('server_tags/user_link.html')

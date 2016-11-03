@@ -372,7 +372,7 @@ MAX_POSTS_NEW_USER = 5
 MAX_POSTS_TRUSTED_USER = 30
 
 # How many top level posts per day for a new user.
-MAX_TOP_POSTS_NEW_USER = 2
+MAX_TOP_POSTS_NEW_USER = 6
 MAX_TOP_POSTS_TRUSTED_USER = 5
 
 SOCIALACCOUNT_ADAPTER = 'biostar.server.middleware.AutoSignupAdapter'
@@ -510,6 +510,13 @@ RECAPTCHA_PUBLIC_KEY = ""
 RECAPTCHA_PRIVATE_KEY = ""
 RECAPTCHA_USE_SSL = True  # Defaults to False
 NOCAPTCHA = True
+
+# GitHub Issue settings
+# When set synchronizing posts to GitHub Issues will be active.
+GITHUB_ISSUE_OPENING = False  # Set to False to turn-off creating GitHub issues
+GITHUB_APP_CLIENT_ID = 'abc123'  # Register GitHub app for new sites https://github.com/settings/applications/new
+GITHUB_APP_CLIENT_SECRET = 'xyzxyzxyz123123'
+CALLBACK_URL_BASE = 'http://your-site-fully-qualified-domain-name.org'
 
 # Session specific settings.
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'

@@ -218,6 +218,11 @@ class Post(models.Model):
     # What site does the post belong to.
     site = models.ForeignKey(Site, null=True)
 
+    # GitHub Issue association
+    github_repo_user = models.CharField(max_length=100, default="", blank=True)
+    github_repo_name = models.CharField(max_length=100, default="", blank=True)
+    github_issue_number = models.IntegerField(default=0, null=True)
+
     def parse_tags(self):
         return util.split_tags(self.tag_val)
 

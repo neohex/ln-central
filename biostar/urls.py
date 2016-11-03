@@ -7,7 +7,7 @@ admin.autodiscover()
 
 from django.views.generic import TemplateView
 from biostar.server import views, ajax, search, moderate, api, orcid
-from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, external_post_handler
+from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, GithubIssue, external_post_handler
 from biostar.apps.users.views import external_logout, external_login, CaptchaView, DigestManager, unsubscribe
 from biostar.apps.planet.views import BlogPostList
 
@@ -55,6 +55,9 @@ urlpatterns = patterns('',
     # Edit an existing post.
     url(r'^p/edit/(?P<pk>\d+)/$', EditPost.as_view(), name="post-edit"),
 
+    # Open a GitHub issue
+    url(r'^p/github/issue/(?P<pk>\d+)/$', GithubIssue.as_view(), name="post-github-issue"),
+
     # Message display.
     url(r'^local/messages/$', views.MessageList.as_view(), name="user-messages"),
 
@@ -68,6 +71,7 @@ urlpatterns = patterns('',
     url(r'^local/moderate/user/(?P<pk>\d+)/$', moderate.UserModeration.as_view(), name="user-moderation"),
 
     # Full login and logout
+    url(r'^site/github/callback$', external_login, name="login"),
     url(r'^site/login/$', external_login, name="login"),
     url(r'^site/logout/$', external_logout, name="logout"),
     url(r'^accounts/signup/$', CaptchaView.as_view(), name="signup"),
