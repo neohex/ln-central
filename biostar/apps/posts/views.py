@@ -95,6 +95,76 @@ def valid_tag(text):
         raise ValidationError('You have too many tags (5 allowed)')
 
 
+class GitHubAPI(object):
+    @staticmethod
+    def request_access_token(redirect_uri, user_profile):
+        '''
+        Redirect user to request GitHub access
+        - Takes the URI string to which the user will be redirected back after GitHub authorization
+        - Returns the URI string that will be used to form the HTTP redirect to GitHub
+        '''
+        git_authorize_state = ''.join([random.choice(string.ascii_uppercase + string.digits) for _ in range(20)])
+        git_authorize_state += datetime.isoformat(datetime.now()) 
+
+        user_profile.github_csrf_state = git_authorize_state
+        user_profile.save()
+
+        authorize_params = {
+            'client_id': settings.GITHUB_APP_CLIENT_ID,
+            'redirect_uri': redirect_uri,
+            'scope': 'public_repo',
+            'state': git_authorize_state
+            }
+
+        return 'https://github.com/login/oauth/authorize?' + urllib.urlencode(authorize_params)
+
+    @staticmethod
+    def check_access_token(token):
+        api_req_url = 'https://api.github.com/applications/{}/tokens/{}'.format(
+            settings.GITHUB_APP_CLIENT_ID, token)
+        resp = requests.get(api_req_url,
+            auth=requests.auth.HTTPBasicAuth(settings.GITHUB_APP_CLIENT_ID, settings.GITHUB_APP_CLIENT_SECRET))
+        resp_json = resp.json()
+
+        if 'public_repo' in resp_json.get('scopes', []):
+            return True
+
+        return False
+    
+    @staticmethod
+    def open_issue(access_token, repo_user, repo_name, issue_title, issue_body):
+        '''
+        Open GitHub Issue
+        '''
+
+        api_req_url = 'https://api.github.com/repos/{}/{}/issues'.format(repo_user, repo_name)
+
+        resp = requests.post(
+            api_req_url,
+            data=json.dumps({"title": issue_title, "body": issue_body}),
+            headers={'Authorization': 'token ' + access_token})
+
+        resp_json = resp.json()
+
+        return resp_json['number']
+
+    @staticmethod
+    def edit_issue(access_token, issue_number, repo_user, repo_name, issue_title, issue_body):
+        '''
+        Edit GitHub Issue
+        '''
+        api_req_url = 'https://api.github.com/repos/{}/{}/issues/{}'.format(repo_user, repo_name, issue_number)
+
+        resp = requests.patch(
+            api_req_url,
+            data=json.dumps({"title": issue_title, "body": issue_body}),
+            headers={'Authorization': 'token ' + access_token})
+
+        resp_json = resp.json()
+
+        return resp_json['number']
+
+
 class PagedownWidget(forms.Textarea):
     TEMPLATE = "pagedown_widget.html"
 
@@ -462,6 +532,49 @@ class EditPost(LoginRequiredMixin, FormView):
         post.save()
         messages.success(request, "Post updated")
 
+        if settings.GITHUB_ISSUE_OPENING and post.github_issue_number is not None:
+            # Get GitHub token
+            if request.user.profile.github_access_token is not None:
+
+                access_token = request.user.profile.github_access_token
+                if GitHubAPI.check_access_token(token=access_token):
+
+                    issue_body = render(
+                        request,
+                        GithubIssue.issue_body_template_name,
+                        {
+                            'main_body': post.content,
+                            'post_url': settings.CALLBACK_URL_BASE + post.get_absolute_url(),
+                            'author': post.author },
+                        content_type='text/plain')
+
+                    # Edit GitHub Issue
+                    GitHubAPI.edit_issue(
+                        access_token=access_token,
+                        issue_number=post.github_issue_number,
+                        repo_user=post.github_repo_user,
+                        repo_name=post.github_repo_name,
+                        issue_title=post.title,
+                        issue_body=issue_body.content)
+
+                    messages.success(request, "GitHub Issue updated")
+
+                    return HttpResponseRedirect(post.get_absolute_url())
+
+            #
+            # Redirect user to request GitHub access
+            #
+
+            redirect_uri = (
+                    '{}/p/github/issue/{}/?'.format(settings.CALLBACK_URL_BASE, post.id) +
+                    urllib.urlencode({'repo_user': post.github_repo_user, 'repo_name': post.github_repo_name}))
+
+            return redirect(GitHubAPI.request_access_token(
+                redirect_uri=redirect_uri,
+                user_profile=request.user.profile))
+
+        
+
         return HttpResponseRedirect(post.get_absolute_url())
 
     def get_success_url(self):
@@ -470,7 +583,7 @@ class EditPost(LoginRequiredMixin, FormView):
 
 class GithubIssue(LoginRequiredMixin, FormView):
     """
-    Open or view a GitHub issue 
+    Open a GitHub issue 
     """
 
     # The template_name attribute must be specified in the calling apps.
@@ -568,41 +681,30 @@ class GithubIssue(LoginRequiredMixin, FormView):
 
         # Get GitHub token
         if request.user.profile.github_access_token is not None:
-            api_req_url = 'https://api.github.com/applications/{}/tokens/{}'.format(
-                settings.GITHUB_APP_CLIENT_ID,    
-                request.user.profile.github_access_token)
-            resp = requests.get(api_req_url,
-                auth=requests.auth.HTTPBasicAuth(settings.GITHUB_APP_CLIENT_ID, settings.GITHUB_APP_CLIENT_SECRET))
-            resp_json = resp.json()
 
-            # TODO: Do same check on initial GET and display user's profile avatar and name which is in resp_json
+            # TODO: Do same check on initial GET and display user's profile avatar and name
+            # which is in GitHubAPI.check_access_token (see resp_json)
             # see doc https://developer.github.com/v3/oauth_authorizations/#check-an-authorization
 
-            if 'public_repo' in resp_json.get('scopes', []):
-                access_token = request.user.profile.github_access_token
-
-                # Open GitHub Issue
-                api_req_url = 'https://api.github.com/repos/{}/{}/issues'.format(
-                    post.github_repo_user, post.github_repo_name)
-
+            access_token = request.user.profile.github_access_token
+            if GitHubAPI.check_access_token(token=access_token):
 
                 issue_body = render(
-                    request, self.issue_body_template_name,
+                    request,
+                    self.issue_body_template_name,
                     {
                         'main_body': post.content,
                         'post_url': settings.CALLBACK_URL_BASE + post.get_absolute_url(),
                         'author': post.author },
                     content_type='text/plain')
 
-                resp = requests.post(
-                    api_req_url,
-                    data=json.dumps({
-                        "title": post.title,
-                        "body": issue_body.content}),
-                    headers={'Authorization': 'token ' + access_token})
-                resp_json = resp.json()
-
-                issue_number = resp_json['number']
+                # Open GitHub Issue
+                issue_number = GitHubAPI.open_issue(
+                    access_token=access_token,
+                    repo_user=post.github_repo_user,
+                    repo_name=post.github_repo_name,
+                    issue_title=post.title,
+                    issue_body=issue_body.content)
 
                 post.github_issue_number = issue_number
                 post.save()
@@ -615,23 +717,13 @@ class GithubIssue(LoginRequiredMixin, FormView):
         # Redirect user to request GitHub access
         #
 
-        git_authorize_state = ''.join([random.choice(string.ascii_uppercase + string.digits) for _ in range(20)])
-        git_authorize_state += datetime.isoformat(datetime.now()) 
+        redirect_uri = (
+                '{}/p/github/issue/{}/?'.format(settings.CALLBACK_URL_BASE, post.id) +
+                urllib.urlencode({'repo_user': post.github_repo_user, 'repo_name': post.github_repo_name}))
 
-        request.user.profile.github_csrf_state = git_authorize_state
-        request.user.profile.save()
-
-        authorize_params = {
-            'client_id': settings.GITHUB_APP_CLIENT_ID,
-            'redirect_uri':
-                settings.CALLBACK_URL_BASE + '/' +
-                'p/github/issue/103/?' +
-                urllib.urlencode({'repo_user': post.github_repo_user, 'repo_name': post.github_repo_name}),
-            'scope': 'public_repo',
-            'state': git_authorize_state
-            }
-
-        return redirect('https://github.com/login/oauth/authorize?' + urllib.urlencode(authorize_params))
+        return redirect(GitHubAPI.request_access_token(
+            redirect_uri=redirect_uri,
+            user_profile=request.user.profile))
 
 
     def get_success_url(self):
