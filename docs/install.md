@@ -199,6 +199,20 @@ get request to pre-populate a question::
 
     http://localhost:8080/p/new/post/?title=Need+help+with+bwa&tag_val=bwa+samtools&content=What+does+it+do?&category=SNP-Calling
 
+Integration with GitHub Issues
+------------------------------
+
+This enables synchronizing posts to GitHub Issues
+
+1. Register GitHub app for new sites https://github.com/settings/applications/new
+2. In biostar/settings/base.py set:
+
+        GITHUB_ISSUE_OPENING = True
+        GITHUB_APP_CLIENT_ID = 'abc123'  # Register GitHub app for new sites https://github.com/settings/applications/new
+        GITHUB_APP_CLIENT_SECRET = 'xyzxyzxyz123123'
+        CALLBACK_URL_BASE = 'http://your-site-fully-qualified-domain-name.org'
+
+
 Migrating from Biostar 1.X
 --------------------------
 
