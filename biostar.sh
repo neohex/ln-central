@@ -19,7 +19,7 @@ if [ -z "$BIOSTAR_HOSTNAME" ]; then
 fi
 
 if [ -z "$PYTHON" ]; then
-   export PYTHON=python
+   export PYTHON="python -W ignore"
 fi
 
 VERBOSITY=1

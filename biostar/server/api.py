@@ -344,3 +344,8 @@ def days_after_day_zero_to_datetime(days):
         cache.set('day_zero', day_zero, 60*60*24*7)  # Cache valid for a week.
 
     return day_zero + timedelta(days=int(days))
+
+
+
+def to_json_and_back(obj):
+    return json.loads(json.dumps(obj))

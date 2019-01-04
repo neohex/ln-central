@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 
 from ..api import datetime_to_iso
+from ..api import to_json_and_back
 from biostar.apps.posts.models import Post, Vote
 from biostar.apps.users.models import User
 
@@ -33,6 +34,8 @@ class ApiPostTest(TestCase):
 
         # Create a vote.
         self.vote = Vote.objects.create(author=self.user, post=self.post, type=Vote.UP)
+
+        self.maxDiff = None
 
     def test_invalid_post_id(self):
         r = self.client.get(reverse('api-post', kwargs={'id': 1115}))
@@ -71,8 +74,10 @@ class ApiPostTest(TestCase):
             "url": 'http://example.com{}'.format(self.post.get_absolute_url()),
             "view_count": self.post.view_count,
             "vote_count": self.post.vote_count,
-            "xhtml": self.post.content
+            "xhtml": self.post.html
         }
+        expected_post = to_json_and_back(expected_post)
+         
         self.assertDictEqual(content, expected_post)
 
     def test_post(self):
@@ -89,6 +94,9 @@ class ApiPostTest(TestCase):
         self.post.has_accepted = True
         self.post.rank = 5.5
         self.post.save()
+
+        r = self.client.get(reverse('api-post', kwargs={'id': self.post.id}))
+        content = json.loads(r.content)
 
         expected_post = {
             "answer_count": self.post.root.reply_count,
@@ -116,10 +124,8 @@ class ApiPostTest(TestCase):
             "url": 'http://example.com{}'.format(self.post.get_absolute_url()),
             "view_count": self.post.view_count,
             "vote_count": self.post.vote_count,
-            "xhtml": self.post.content
+            "xhtml": self.post.html
         }
-
-        r = self.client.get(reverse('api-post', kwargs={'id': self.post.id}))
-        content = json.loads(r.content)
+        expected_post = to_json_and_back(expected_post)
 
         self.assertDictEqual(content, expected_post)
