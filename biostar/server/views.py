@@ -85,7 +85,7 @@ def apply_sort(request, query):
 
 LATEST = "latest"
 MYPOSTS, MYTAGS, UNANSWERED, FOLLOWING, BOOKMARKS = "myposts mytags open following bookmarks".split()
-POST_TYPES = dict(jobs=Post.JOB, tools=Post.TOOL, tutorials=Post.TUTORIAL,
+POST_TYPES = dict(tools=Post.TOOL, tutorials=Post.TUTORIAL,
                   forum=Post.FORUM, planet=Post.BLOG, pages=Post.PAGE)
 
 # Topics that requires authorization

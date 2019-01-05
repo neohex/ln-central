@@ -24,13 +24,11 @@ START_CATEGORIES = [
 ]
 
 # These should be the most frequent (or special) tags on the site.
-NAVBAR_TAGS = [
-    "RNA-Seq", "ChIP-Seq", "SNP", "Assembly",
-]
+NAVBAR_TAGS = []
 
 # The last categories. These tags have special meaning internally.
 END_CATEGORIES = [
-    "Tutorials", "Tools", "Jobs", "Forum",
+    "Meta",
 ]
 
 # These are the tags that always show up in the tag recommendation dropdown.
@@ -420,7 +418,7 @@ GOOGLE_TRACKER = ""
 GOOGLE_DOMAIN = ""
 
 # The site logo.
-SITE_LOGO = "biostar2.logo.png"
+SITE_LOGO = "ln.support.v2.logo.png"
 
 # Digest title
 DAILY_DIGEST_TITLE = '[biostar daily digest] %s'
