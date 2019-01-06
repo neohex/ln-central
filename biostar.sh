@@ -11,7 +11,7 @@ if [ -z "$JSON_DATA_FIXTURE" ]; then
 fi
 
 if [ -z "$DATABASE_NAME" ]; then
-   export DATABASE_NAME="biostar.db"
+   export DATABASE_NAME="live/biostar.db"
 fi
 
 if [ -z "$BIOSTAR_HOSTNAME" ]; then

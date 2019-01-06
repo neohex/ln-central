@@ -72,7 +72,6 @@ def abspath(*args):
 # Current directory
 __THIS_DIR = os.path.split(__file__)[0]
 __DEFAULT_HOME = abspath(__THIS_DIR, "..", "..")
-__DEFAULT_DATABASE_NAME = 'default.db'
 __DEFAULT_BIOSTAR_ADMIN_NAME = "Biostar Admin"
 __DEFAULT_BIOSTAR_ADMIN_EMAIL = "admin@lvh.me"
 __DEFAULT_SECRET_KEY = 'admin@lvh.me'
@@ -86,7 +85,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 HOME_DIR = get_env("BIOSTAR_HOME", __DEFAULT_HOME)
 LIVE_DIR = abspath(HOME_DIR, 'live')
 
-DATABASE_NAME = abspath(LIVE_DIR, get_env("DATABASE_NAME", __DEFAULT_DATABASE_NAME))
+DATABASE_NAME = get_env("DATABASE_NAME")
 STATIC_DIR = abspath(HOME_DIR, 'biostar', 'static')
 TEMPLATE_DIR = abspath(HOME_DIR, 'biostar', 'server', 'templates')
 
