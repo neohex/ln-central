@@ -149,7 +149,10 @@ class User(AbstractBaseUser):
     @property
     def scaled_score(self):
         "People like to see big scores."
-        return self.score * 10
+        if self.score > 30:
+            return 300
+        else:
+            return self.score * 10
 
     def __unicode__(self):
         return "%s: %s (%s)" % (self.name, self.email, self.id)
