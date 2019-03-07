@@ -93,22 +93,21 @@ def messages_read(user):
 
 
 @register.simple_tag
-def gravatar(user, size=80):
+def avataaar(user, size=80):
     name = user.name
     if user.is_suspended:
         # Removes spammy images for suspended users
         email = 'suspended@biostars.org'
     else:
         email = user.email.encode('utf8')
-    hash = hashlib.md5(email).hexdigest(),
+    hash = hashlib.md5(email).hexdigest()
 
-    gravatar_url = "https://secure.gravatar.com/avatar/%s?" % hash
-    gravatar_url += urllib.urlencode({
-        's': str(size),
-        'd': 'identicon',
-    }
+    avataaars_url = "https://avatars.dicebear.com/v2/avataaars/%s.svg" % hash
+    return """<img  height="{size}"" width="{size}" src="{url}" alt="avatar for %(name)s"/>""".format(
+        url=avataaars_url,
+        name=name,
+        size=size
     )
-    return """<img src="%s" alt="gravatar for %s"/>""" % (gravatar_url, name)
 
 
 def pluralize(value, word):
