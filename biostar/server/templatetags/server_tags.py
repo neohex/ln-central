@@ -12,6 +12,7 @@ from django import template
 from django.core.urlresolvers import reverse
 from biostar import const
 from biostar.server.views import LATEST
+import coolname as coolname_lib
 
 register = template.Library()
 
@@ -108,6 +109,22 @@ def avataaar(user, size=80):
         name=name,
         size=size
     )
+
+@register.simple_tag
+def coolname(user):
+    if user.is_suspended:
+        # Removes spammy images for suspended users
+        email = 'suspended@biostars.org'
+    else:
+        email = user.email.encode('utf8')
+    hash = hashlib.md5(email).digest()
+    
+    NUM_WORDS = 3
+    max_seed = coolname_lib.get_combinations_count(NUM_WORDS)
+    seed = int(hash.encode('hex'), 16) % max_seed
+    name_list = coolname_lib.impl._default._lists[NUM_WORDS][seed]
+    
+    return '-'.join(name_list)
 
 
 def pluralize(value, word):

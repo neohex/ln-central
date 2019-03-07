@@ -1,4 +1,4 @@
-{{user.name}} posted the {{post.get_type_display}}: "{{ post.root.get_title|safe }}":
+User posted the {{post.get_type_display}}: "{{ post.root.get_title|safe }}":
 
 {{post.as_text|safe|truncatewords:150}}
 

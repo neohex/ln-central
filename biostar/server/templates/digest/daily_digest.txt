@@ -2,7 +2,7 @@
 Biostar Daily Digest for {{start}}
 -------------------------------------
 {% if hard_worker %}
-Top posters: {% for user in hard_worker %}{{user.name}} ({{user.total}}), {% endfor %}
+Top posters: {% for user in hard_worker %}{% coolname user %} ({{user.total}}), {% endfor %}
 {% endif %}
 {% if top_posts %}
 Most Viewed New Posts

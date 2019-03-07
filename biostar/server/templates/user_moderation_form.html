@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 <div class="alert alert-warning">
 
-    <h4>Moderate: {{ target.name }}</h4>
+    <h4>Moderate: {% coolname target }}</h4>
 
     {% crispy form %}
 

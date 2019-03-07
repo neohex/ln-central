@@ -5,7 +5,7 @@
 {% load socialaccount %}
 
 {% block page_title %}
-    User: {{ target.name }}
+    User: {% coolname target %}
 {% endblock %}
 
 {% block content %}
@@ -16,7 +16,7 @@
 
             <div class="col-md-12">
                 <h2
-                class="text-center {{ target.get_status_display }}">{{ target.get_type_display }}: {{ target.name }}</h2>
+                class="text-center {{ target.get_status_display }}">{{ target.get_type_display }}: {% coolname target %}</h2>
 
 
             </div>
@@ -178,7 +178,7 @@
 
             {#  Post list goes here #}
             <div class="col-md-12">
-                <h4 class="text-center">Posts by {{ target.name }}</h4>
+                <h4 class="text-center">Posts by {% coolname target %}</h4>
                 {% page_bar %}
             </div>
             <div class="col-md-12">
@@ -196,7 +196,7 @@
             {% cache 500 "award" target.id %}
                 {#  Award list goes here #}
                 <div class="col-md-12">
-                    <h4 class="text-center">Latest awards to {{ target.name }}</h4>
+                    <h4 class="text-center">Latest awards to {% coolname target %}</h4>
                 </div>
                 <div class="col-md-12">
                     <div id="award-list">

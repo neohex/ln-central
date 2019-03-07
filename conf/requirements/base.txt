@@ -41,3 +41,4 @@ six==1.7.2
 sqlparse==0.1.11
 wsgiref==0.1.2
 markdown2==2.3.7
+coolname==1.1.0
