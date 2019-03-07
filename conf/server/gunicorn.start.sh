@@ -2,11 +2,15 @@
 set -ue
 
 # Required environmental variables:
+# * VIRTENV_DIR
 # * PROJECT_DIR
 # * SITE_NAME
 # * SITE_DOMAIN
 # * PG_HOST
 # * PG_PASSWORD
+
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+source $VIRTENV_DIR/bin/activate
 
 # This is required so that the default configuration file works.
 source $PROJECT_DIR/live/deploy.env
