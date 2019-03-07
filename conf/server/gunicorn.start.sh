@@ -1,12 +1,19 @@
 #!/bin/bash
 set -ue
 
+# Required environmental variables:
+# * PROJECT_DIR
+# * SITE_NAME
+# * SITE_DOMAIN
+# * PG_HOST
+# * PG_PASSWORD
+
 # This is required so that the default configuration file works.
-source /home/biostar/biostar-central-ln/live/deploy.env
+source $PROJECT_DIR/live/deploy.env
 
 # Setting the various access logs.
-ACCESS_LOG=/home/biostar/biostar-central-ln/live/logs/gunicorn-access.log
-ERROR_LOG=/home/biostar/biostar-central-ln/live/logs/gunicorn-error.log
+ACCESS_LOG=$PROJECT_DIR/live/logs/gunicorn-access.log
+ERROR_LOG=$PROJECT_DIR/live/logs/gunicorn-error.log
 
 # The user and group the unicorn process will run as.
 NUM_WORKERS=3
