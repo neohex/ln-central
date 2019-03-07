@@ -379,42 +379,8 @@ SOCIALACCOUNT_ADAPTER = 'biostar.server.middleware.AutoSignupAdapter'
 
 # Customize this to match the providers listed in the APPs
 SOCIALACCOUNT_PROVIDERS = {
-
-    # 'facebook': {
-    #    'SCOPE': ['email'],
-    #    'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
-    #    'METHOD': 'oauth2',
-    #    'LOCALE_FUNC': lambda x: 'en_US',
-    #    'PROVIDER_KEY': get_env("FACEBOOK_PROVIDER_KEY"),
-    #    'PROVIDER_SECRET_KEY': get_env("FACEBOOK_PROVIDER_SECRET_KEY"),
-    # },
-
-    'persona': {
-        'REQUEST_PARAMETERS': {'siteName': 'Biostar'}
-    },
-
-    # 'github': {
-    #    'SCOPE': ['email'],
-    #    'PROVIDER_KEY': get_env("GITHUB_PROVIDER_KEY"),
-    #     'PROVIDER_SECRET_KEY': get_env("GITHUB_PROVIDER_SECRET_KEY"),
-    #    },
-
-    # 'google': {
-    #    'SCOPE': ['email', 'https://www.googleapis.com/auth/userinfo.profile'],
-    #    'AUTH_PARAMS': {'access_type': 'online'},
-    #    'PROVIDER_KEY': get_env("GOOGLE_PROVIDER_KEY"),
-    #    'PROVIDER_SECRET_KEY': get_env("GOOGLE_PROVIDER_SECRET_KEY"),
-    # },
-
-    # 'orcid': {
-    #    'PROVIDER_KEY': get_env("ORCID_PROVIDER_KEY"),
-    #    'PROVIDER_SECRET_KEY': get_env("ORCID_PROVIDER_SECRET_KEY"),
-    # },
 }
 
-# The google id will injected as a template variable.
-GOOGLE_TRACKER = ""
-GOOGLE_DOMAIN = ""
 
 # The site logo.
 SITE_LOGO = "ln.support.v2.logo.png"
