@@ -11,5 +11,5 @@
 </div>
 
 <div class="box text-center visible-sm visible-xs">
-    <div class="uname">{% userlink user %} wrote:</div>
+    <div class="uname"><a href="{{ user.get_absolute_url }}">{% avataaar user 40 %}</a>{% userlink user %} wrote:</div>
 </div>
