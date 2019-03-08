@@ -21,3 +21,6 @@ conf/requirements/test*.txt
 
 # Common machine-specific logger files.
 biostar/settings/logger_*.py
+
+# Generated configs
+conf/server/biostar.nginx.conf
