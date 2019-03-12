@@ -46,7 +46,6 @@
                 {% endfor %}
 
                 {#  This is required element to access the token in javascript #}
-                <span id="csrf_token">{% csrf_token %}</span>
 
                 {# Generate the form to post an answer #}
                 <div>
@@ -87,7 +86,6 @@
 
                         <form role="form" id="answer-form" method="post"
                               action="{% url 'new-answer' post.id %}">
-                            {% csrf_token %}
                             {{  form.content }}
                             <input type="submit" name="submit" value="Submit Answer" class="btn btn-primary" id="submit-id-submit">
 

@@ -2,7 +2,6 @@ from django import template
 from django.conf import settings
 from django.template import Context, Template
 from django.template.defaultfilters import stringfilter
-from django.core.context_processors import csrf
 from biostar.apps.posts.models import Post, Tag
 from biostar.apps.messages.models import Message
 import random, hashlib, urllib
@@ -312,7 +311,7 @@ def traverse_comments(request, post, tree):
     def traverse(node):
         data = ['<div class="indent">']
         cont = Context({"post": node, 'user': request.user, 'request': request})
-        cont.update(csrf(request))
+
         html = COMMENT_BODY.render(cont)
         data.append(html)
         for child in tree.get(node.id, []):

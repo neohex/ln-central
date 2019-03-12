@@ -640,13 +640,11 @@ class BadgeList(BaseListMixin):
         return context
 
 
-from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.utils.encoding import smart_text
 import json, StringIO, traceback
 
 
-@csrf_exempt
 def email_handler(request):
     key = request.POST.get("key")
     if key != settings.EMAIL_REPLY_SECRET_KEY:

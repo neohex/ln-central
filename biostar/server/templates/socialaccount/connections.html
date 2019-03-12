@@ -32,7 +32,6 @@
             <h3>Disconnect accounts </h3>
             <p>To disconnect an account select the account from below then click the remove button </p>
             <form method="post" action="{% url 'socialaccount_connections' %}">
-                {% csrf_token %}
 
                 <fieldset>
                     {% if form.non_field_errors %}

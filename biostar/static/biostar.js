@@ -15,22 +15,6 @@ function getCookie(name) {
     return cookieValue;
 }
 
-csrftoken = getCookie('csrftoken');
-
-function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
-
-$.ajaxSetup({
-    crossDomain: false, // obviates need for sameOrigin test
-    beforeSend: function (xhr, settings) {
-        if (!csrfSafeMethod(settings.type)) {
-            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        }
-    }
-});
-
 // Triggered on post moderation.
 function moderate_post(elem) {
     var post_id = elem.attr('data-value')
@@ -66,10 +50,8 @@ function add_comment(elem) {
     var post_id = elem.attr('data-value')
     var container = elem.parent().parent()
 
-    var csrf_html = $('#csrf_token').find("input[name='csrfmiddlewaretoken']").parent().html()
-
     container.after('<div id="comment-row">\
-    <form id="comment-form" role="form" action="/p/new/comment/' + post_id + '/" method="post">' + csrf_html + '\
+    <form id="comment-form" role="form" action="/p/new/comment/' + post_id + '/" method="post"> \
         <div class="form-group">\
         <div class="wmd-panel">\
             <div id="wmd-button-bar-2"></div>\
