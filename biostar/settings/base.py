@@ -254,6 +254,12 @@ TEMPLATE_DIRS = (
 # The user score that halves the chance.
 HALF_LIFE = 30.0
 
+# Avataar server name
+#   To use a centralized third-party server set to "https://avatars.dicebear.com"
+#   Default is to use own avatar server
+__DEFAULT_AVATAR_SERVER_NAME = "/"
+AVATAR_SERVER_NAME = get_env("AVATAR_SERVER_NAME", __DEFAULT_AVATAR_SERVER_NAME)
+
 LOGIN_REDIRECT_URL = "/"
 
 MESSAGE_TAGS = {

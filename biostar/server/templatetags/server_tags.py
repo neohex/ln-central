@@ -85,10 +85,8 @@ def hide_email(value):
     except Exception, exc:
         return value
 
-
 @register.simple_tag
 def avataaar(user, size=80):
-    name = user.name
     if user.is_suspended:
         # Removes spammy images for suspended users
         email = 'suspended@biostars.org'
@@ -96,12 +94,14 @@ def avataaar(user, size=80):
         email = user.email.encode('utf8')
     hash = hashlib.md5(email).hexdigest()
 
-    avataaars_url = "https://avatars.dicebear.com/v2/avataaars/%s.svg" % hash
-    return """<img  height="{size}"" width="{size}" src="{url}" alt="avatar for %(name)s"/>""".format(
+    avataaars_url = settings.AVATAR_SERVER_NAME.rstrip('/') + "/v2/avataaars/%s.svg" % hash
+
+    return """<img  height="{size}"" width="{size}" src="{url}" alt="avatar for {name}"/>""".format(
         url=avataaars_url,
-        name=name,
+        name=coolname(user),
         size=size
     )
+
 
 @register.simple_tag
 def coolname(user):
