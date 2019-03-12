@@ -172,9 +172,7 @@ def stuff():
     "One off tasks go here that just need a quick access to the data"
     from biostar.apps.posts.models import Post
     from biostar.apps.users.models import User, Profile
-    from biostar.const import ALL_MESSAGES
 
-    cond = Q(profile__message_prefs=ALL_MESSAGES)
     cond = Q(profile__tags__name__in=["galaxy"])
     users = User.objects.filter(cond)
 
@@ -213,8 +211,6 @@ def merge_users(fname):
     from biostar.apps.posts.models import Vote
     from biostar.apps.users.models import User
     from biostar.apps.messages.models import Message, MessageBody
-    from allauth.socialaccount.models import SocialAccount
-    from allauth.account.models import EmailAddress
 
     print ("Merging users from %s" % fname)
 
@@ -253,10 +249,6 @@ def merge_users(fname):
         Vote.objects.filter(author__in=aliases).update(author=master)
         Message.objects.filter(user__in=aliases).update(user=master)
         MessageBody.objects.filter(author__in=aliases).update(author=master)
-
-        # Migrate the social accounts
-        SocialAccount.objects.filter(user__in=aliases).update(user=master)
-        EmailAddress.objects.filter(user__in=aliases).update(user=master)
 
         # New score for the master
         score = sum(u.score for u in aliases) + master.score

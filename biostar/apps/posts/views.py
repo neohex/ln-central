@@ -8,16 +8,12 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Fieldset, Div, Submit, ButtonHolder
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpRequest
-from django.contrib import messages
-from . import auth
-from braces.views import LoginRequiredMixin
 from datetime import datetime
 from django.utils.timezone import utc
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from biostar.const import OrderedDict
 from django.core.exceptions import ValidationError
-from django.contrib.auth.decorators import login_required
 import re
 import logging
 
@@ -147,58 +143,7 @@ def parse_tags(category, tag_val):
     pass
 
 
-@login_required
-def external_post_handler(request):
-    "This is used to pre-populate a new form submission"
-    import hmac
-
-    user = request.user
-    home = reverse("home")
-    name = request.REQUEST.get("name")
-
-    if not name:
-        messages.error(request, "Incorrect request. The name parameter is missing")
-        return HttpResponseRedirect(home)
-
-    try:
-        secret = dict(settings.EXTERNAL_AUTH).get(name)
-    except Exception, exc:
-        logger.error(exc)
-        messages.error(request, "Incorrect EXTERNAL_AUTH settings, internal exception")
-        return HttpResponseRedirect(home)
-
-    if not secret:
-        messages.error(request, "Incorrect EXTERNAL_AUTH, no KEY found for this name")
-        return HttpResponseRedirect(home)
-
-    content = request.REQUEST.get("content")
-    submit = request.REQUEST.get("action")
-    digest1 = request.REQUEST.get("digest")
-    digest2 = hmac.new(secret, content).hexdigest()
-
-    if digest1 != digest2:
-        messages.error(request, "digests does not match")
-        return HttpResponseRedirect(home)
-
-    # auto submit the post
-    if submit:
-        post = Post(author=user, type=Post.QUESTION)
-        for field in settings.EXTERNAL_SESSION_FIELDS:
-            setattr(post, field, request.REQUEST.get(field, ''))
-        post.save()
-        post.add_tags(post.tag_val)
-        return HttpResponseRedirect(reverse("post-details", kwargs=dict(pk=post.id)))
-
-    # pre populate the form
-    sess = request.session
-    sess[settings.EXTERNAL_SESSION_KEY] = dict()
-    for field in settings.EXTERNAL_SESSION_FIELDS:
-        sess[settings.EXTERNAL_SESSION_KEY][field] = request.REQUEST.get(field, '')
-
-    return HttpResponseRedirect(reverse("new-post"))
-
-
-class NewPost(LoginRequiredMixin, FormView):
+class NewPost(FormView):
     form_class = LongForm
     template_name = "post_edit.html"
 
@@ -211,13 +156,7 @@ class NewPost(LoginRequiredMixin, FormView):
             if value:
                 initial[key] = value
 
-
-        # Attempt to prefill from external session
-        sess = request.session
-        if settings.EXTERNAL_SESSION_KEY in sess:
-            for field in settings.EXTERNAL_SESSION_FIELDS:
-                initial[field] = sess[settings.EXTERNAL_SESSION_KEY].get(field)
-            del sess[settings.EXTERNAL_SESSION_KEY]
+        # here, there used to be code to pre-fill from external session
 
         form = self.form_class(initial=initial)
         return render(request, self.template_name, {'form': form})
@@ -237,20 +176,21 @@ class NewPost(LoginRequiredMixin, FormView):
         post_type = int(data('post_type'))
         tag_val = data('tag_val')
 
-        post = Post(
-            title=title, content=content, tag_val=tag_val,
-            author=request.user, type=post_type,
-        )
-        post.save()
+        # TODO
+        # post = Post(
+        #     title=title, content=content, tag_val=tag_val,
+        #     author=request.user, type=post_type,
+        # )
+        # post.save()
 
-        # Triggers a new post save.
-        post.add_tags(post.tag_val)
+        # # Triggers a new post save.
+        # post.add_tags(post.tag_val)
 
-        messages.success(request, "%s created" % post.get_type_display())
+        logger.info("%s created (Request: %s)",  post.get_type_display(), request)
         return HttpResponseRedirect(post.get_absolute_url())
 
 
-class NewAnswer(LoginRequiredMixin, FormView):
+class NewAnswer(FormView):
     """
     Creates a new post.
     """
@@ -276,7 +216,7 @@ class NewAnswer(LoginRequiredMixin, FormView):
         try:
             parent = Post.objects.get(pk=pid)
         except ObjectDoesNotExist, exc:
-            messages.error(request, "The post does not exist. Perhaps it was deleted")
+            logger.error("The post does not exist. Perhaps it was deleted request (Request: %s)", request)
             return HttpResponseRedirect("/")
 
         # Validating the form.
@@ -290,18 +230,20 @@ class NewAnswer(LoginRequiredMixin, FormView):
         # Figure out the right type for this new post
         post_type = self.type_map.get(self.post_type)
         # Create a new post.
-        post = Post(
-            title=parent.title, content=data('content'), author=request.user, type=post_type,
-            parent=parent,
-        )
 
-        messages.success(request, "%s created" % post.get_type_display())
-        post.save()
+        # TODO
+        # post = Post(
+        #     title=parent.title, content=data('content'), author=request.user, type=post_type,
+        #     parent=parent,
+        # )
+
+        # logger.info("%s created request (Request: %s)", post.get_type_display(), request)
+        # post.save()
 
         return HttpResponseRedirect(post.get_absolute_url())
 
 
-class EditPost(LoginRequiredMixin, FormView):
+class EditPost(FormView):
     """
     Edits an existing post.
     """
@@ -319,7 +261,7 @@ class EditPost(LoginRequiredMixin, FormView):
 
         # Check and exit if not a valid edit.
         if not post.is_editable:
-            messages.error(request, "This user may not modify the post")
+            logger.error("This user may not modify the post (Request: %s)", request)
             return HttpResponseRedirect(reverse("home"))
 
         initial = dict(title=post.title, content=post.content, post_type=post.type, tag_val=post.tag_val)
@@ -339,12 +281,12 @@ class EditPost(LoginRequiredMixin, FormView):
         # For historical reasons we had posts with iframes
         # these cannot be edited because the content would be lost in the front end
         if "<iframe" in post.content:
-            messages.error(request, "This post is not editable because of an iframe! Contact if you must edit it")
+            logger.error("This post is not editable because of an iframe! Contact if you must edit it (Request: %s)", request)
             return HttpResponseRedirect(post.get_absolute_url())
 
         # Check and exit if not a valid edit.
         if not post.is_editable:
-            messages.error(request, "This user may not modify the post")
+            logger.error("This user may not modify the post (Request: %s)", request)
             return HttpResponseRedirect(post.get_absolute_url())
 
         # Posts with a parent are not toplevel
@@ -372,14 +314,16 @@ class EditPost(LoginRequiredMixin, FormView):
             post.add_tags(post.tag_val)
 
         # Update the last editing user.
-        post.lastedit_user = request.user
 
-        # Only editing by author bumps the post.
-        if request.user == post.author:
-            post.lastedit_date = datetime.utcnow().replace(tzinfo=utc)
+        # TODO
+        # post.lastedit_user = request.user
 
-        post.save()
-        messages.success(request, "Post updated")
+        # # Only editing by author bumps the post.
+        # if request.user == post.author:
+        #     post.lastedit_date = datetime.utcnow().replace(tzinfo=utc)
+        # post.save()
+        
+        logger.info("Post updated (Request: %s)", request)
 
         return HttpResponseRedirect(post.get_absolute_url())
 

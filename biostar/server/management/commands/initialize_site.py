@@ -4,7 +4,6 @@ from django.conf import settings
 import os, logging
 from django.contrib.sites.models import Site
 from django.contrib.flatpages.models import FlatPage
-from allauth.socialaccount.models import SocialApp, providers
 
 from django.core.exceptions import ImproperlyConfigured
 from optparse import make_option
@@ -22,13 +21,12 @@ class Command(BaseCommand):
         from biostar import awards
         init_admin()
         init_domain()
-        init_social_providers()
         init_flatpages()
         awards.init_awards()
 
 def init_flatpages():
     # list for the flatpages
-    names = "faq about help policy api advertise".split()
+    names = "faq about help policy api".split()
     site = Site.objects.get_current()
     for name in names:
         url = "/info/%s/" % name
@@ -83,36 +81,3 @@ def init_domain():
     for path in (settings.EXPORT_DIR, settings.MEDIA_ROOT):
         if not os.path.isdir(path):
             os.mkdir(path)
-
-
-def init_social_providers():
-    # Initialize social login providers.
-
-    for name, data in settings.SOCIALACCOUNT_PROVIDERS.items():
-
-        try:
-            client_id = data.get('PROVIDER_KEY','')
-            secret = data.get('PROVIDER_SECRET_KEY','')
-            site = Site.objects.get(id=settings.SITE_ID)
-
-            # Check that the provider is registered
-            provider = providers.registry.by_id(name)
-
-            # Code duplication since many2many fields cannot be initialized in one step
-            exists = SocialApp.objects.filter(name=name)
-            if not exists:
-                app = SocialApp(
-                    name=name,
-                    client_id=client_id,
-                    provider=name,
-                    secret=secret, key='',
-                )
-                app.save()
-                app.sites.add(site)
-                app.save()
-                logger.info("initializing social provider %s" % name)
-
-        except Exception, exc:
-            raise ImproperlyConfigured("error setting provider %s, %s" % (name, exc))
-
-

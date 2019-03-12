@@ -2,7 +2,6 @@
 {% load cache %}
 {% load server_tags %}
 {% load humanize %}
-{% load socialaccount %}
 
 {% block page_title %}
     {% coolname target %}
@@ -40,14 +39,9 @@
                     {% endif %}
                 </div>
 
-                {% if target.has_ownership %}
-                    <div style="font-size: smaller; padding:0px 0px 20px 20px;">
-                        Your portrait is loaded from <a href="http://www.avataaar.com">avataaar</a> based
-                        on your email. If you don't have a <a href="http://www.avataaar.com">avataaar</a> account
-                        your portait is
-                        an "identicon": an automatically generated, unique image.
-                    </div>
-                {% endif %}
+                <div style="font-size: smaller; padding:0px 0px 20px 20px;">
+                    Your pen name and portrait are based on a salted hash of your public key. 
+                </div>
 
             </div>
 
@@ -133,12 +127,6 @@
                         <dd>{{ target.profile.get_message_prefs_display }}</dd>
 
 
-                        <dt>Log in options:</dt>
-                        <dd>
-                            <a role="button" class="btn btn-info btn-xs" href="{% url 'socialaccount_connections' %}">
-                                Social Login</a>
-                        </dd>
-
                         <dt style="margin-top:5px;">
                             Profile settings:
                         </dt>
@@ -147,15 +135,6 @@
                                href="#">Edit
                                 Your Profile</a>
                         </dd>
-
-                        {% if orcid_profile_url and orcid_id %}
-                            <dt style="margin-top:5px;">
-                                ORCID profile:
-                            </dt>
-                            <dd style="margin-top:5px;">
-                                <a href="{{ orcid_profile_url }}">{{ orcid_id }}</a>
-                            </dd>
-                        {% endif %}
                     {% endif %}
                 </dl>
             </div>

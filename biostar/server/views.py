@@ -5,6 +5,7 @@ from biostar.apps.users.views import EditUser
 import os, random
 from django.core.cache import cache
 from biostar.apps.messages.models import Message
+from django.core.cache import cache
 from biostar.apps.users.models import User
 from biostar.apps.posts.models import Post, Vote, Tag, Subscription, ReplyToken
 from biostar.apps.posts.views import NewPost, NewAnswer, ShortForm
@@ -12,7 +13,6 @@ from biostar.apps.badges.models import Badge, Award
 from biostar.apps.posts.auth import post_permissions
 from biostar.apps.util import html
 
-from django.contrib import messages
 from datetime import datetime, timedelta
 from biostar.const import OrderedDict
 from biostar import const
@@ -53,11 +53,11 @@ class BaseListMixin(ListView):
         limit = self.request.GET.get('limit', const.POST_LIMIT_DEFAULT)
 
         if sort not in const.POST_SORT_MAP:
-            messages.warning(self.request, const.POST_SORT_INVALID_MSG)
+            logger.warning("No sort in POST_SORT_MAP: '%s' '%s'", const.POST_SORT_INVALID_MSG, self.request)
             sort = const.POST_SORT_DEFAULT
 
         if limit not in const.POST_LIMIT_MAP:
-            messages.warning(self.request, const.POST_LIMIT_INVALID_MSG)
+            logger.warning("No limit in POST_SORT_MAP: '%s' '%s'", const.POST_LIMIT_INVALID_MSG, self.request)
             limit = const.POST_LIMIT_DEFAULT
 
         context['sort'] = sort
@@ -94,56 +94,34 @@ AUTH_TOPIC = set((MYPOSTS, MYTAGS, BOOKMARKS, FOLLOWING))
 
 def posts_by_topic(request, topic):
     "Returns a post query that matches a topic"
-    user = request.user
 
     # One letter tags are always uppercase
     topic = Tag.fixcase(topic)
 
-    if topic == MYPOSTS:
-        # Get the posts that the user wrote.
-        return Post.objects.my_posts(target=user, user=user)
-
     if topic == MYTAGS:
         # Get the posts that the user wrote.
-        messages.success(request,
-                         'Posts matching the <b><i class="fa fa-tag"></i> My Tags</b> setting in your user profile')
-        return Post.objects.tag_search(user.profile.my_tags)
+        # TODO: convert My Tags to Tags Search  'Posts matching the <b><i class="fa fa-tag"></i> Tags Search</b> ')
+        #return Post.objects.tag_search(x)
+        pass
 
     if topic == UNANSWERED:
         # Get unanswered posts.
-        return Post.objects.top_level(user).filter(type=Post.QUESTION, reply_count=0)
-
-    if topic == FOLLOWING:
-        # Get that posts that a user follows.
-        messages.success(request, 'Threads that will produce notifications.')
-        return Post.objects.top_level(user).filter(subs__user=user)
-
-    if topic == BOOKMARKS:
-        # Get that posts that a user bookmarked.
-        return Post.objects.my_bookmarks(user)
+        return Post.objects.top_level().filter(type=Post.QUESTION, reply_count=0)
 
     if topic in POST_TYPES:
         # A post type.
-        return Post.objects.top_level(user).filter(type=POST_TYPES[topic])
+        return Post.objects.top_level().filter(type=POST_TYPES[topic])
 
     if topic and topic != LATEST:
         # Any type of topic.
         if topic:
-            messages.info(request,
-                          "Showing: <code>%s</code> &bull; <a href='/'>reset</a>" % topic)
+            # TODO: display what topic is being shown
+            #    "Showing: <code>%s</code> &bull; <a href='/'>reset</a>" % topic)
+            pass
         return Post.objects.tag_search(topic)
 
     # Return latest by default.
-    return Post.objects.top_level(user)
-
-
-def reset_counts(request, label):
-    "Resets counts in the session"
-    label = label.lower()
-    counts = request.session.get(settings.SESSION_KEY, {})
-    if label in counts:
-        counts[label] = ''
-        request.session[settings.SESSION_KEY] = counts
+    return Post.objects.top_level()
 
 
 class PostList(BaseListMixin):
@@ -170,11 +148,6 @@ class PostList(BaseListMixin):
     def get_queryset(self):
         self.topic = self.kwargs.get("topic", "")
 
-        # Catch expired sessions accessing user related information
-        if self.topic in AUTH_TOPIC and self.request.user.is_anonymous():
-            messages.warning(self.request, "Session expired")
-            self.topic = LATEST
-
         query = posts_by_topic(self.request, self.topic)
         query = apply_sort(self.request, query)
 
@@ -184,40 +157,9 @@ class PostList(BaseListMixin):
         return query
 
     def get_context_data(self, **kwargs):
-        session = self.request.session
-
         context = super(PostList, self).get_context_data(**kwargs)
         context['topic'] = self.topic or self.LATEST
 
-        reset_counts(self.request, self.topic)
-
-        return context
-
-
-class MessageList(LoginRequiredMixin, ListView):
-    """
-    This is the base class for any view that produces a list of posts.
-    """
-    model = Message
-    template_name = "message_list.html"
-    context_object_name = "objects"
-    paginate_by = settings.PAGINATE_BY
-    topic = "messages"
-
-    def get_queryset(self):
-        objs = Message.objects.filter(user=self.request.user).select_related("body", "body__author").order_by(
-            '-sent_at')
-        return objs
-
-    def get_context_data(self, **kwargs):
-        user = self.request.user
-        context = super(MessageList, self).get_context_data(**kwargs)
-        people = [m.body.author for m in context[self.context_object_name]]
-        people = filter(lambda u: u.id != user.id, people)
-        context['topic'] = self.topic
-        context['page_title'] = "Messages"
-        context['people'] = people
-        reset_counts(self.request, self.topic)
         return context
 
 
@@ -247,7 +189,7 @@ class VoteList(LoginRequiredMixin, ListView):
     topic = "votes"
 
     def get_queryset(self):
-        objs = Vote.objects.filter(post__author=self.request.user).select_related("author", "post").order_by('-date')
+        objs = Vote.objects.select_related("author", "post").order_by('-date')
         return objs
 
     def get_context_data(self, **kwargs):
@@ -257,7 +199,7 @@ class VoteList(LoginRequiredMixin, ListView):
         context['topic'] = self.topic
         context['page_title'] = "Votes"
         context['people'] = people
-        reset_counts(self.request, self.topic)
+
         return context
 
 
@@ -276,15 +218,15 @@ class UserList(ListView):
         self.limit = self.request.GET.get('limit', const.POST_LIMIT_DEFAULT)
 
         if self.sort not in const.USER_SORT_MAP:
-            messages.warning(self.request, "Warning! Invalid sort order!")
+            logger.warning("Warning! Invalid sort order! %s", self.request)
             self.sort = const.USER_SORT_DEFAULT
 
         if self.limit not in const.POST_LIMIT_MAP:
-            messages.warning(self.request, "Warning! Invalid limit applied!")
+            logger.warning("Warning! Invalid limit applied! %s", self.request)
             self.limit = const.POST_LIMIT_DEFAULT
 
         # Apply the sort on users
-        obj = User.objects.get_users(sort=self.sort, limit=self.limit, q=self.q, user=self.request.user)
+        obj = User.objects.get_users(sort=self.sort, limit=self.limit, q=self.q)
         return obj
 
     def get_context_data(self, **kwargs):
@@ -327,28 +269,18 @@ class UserDetails(BaseDetailMixin):
         context = super(UserDetails, self).get_context_data(**kwargs)
         target = context[self.context_object_name]
         #posts = Post.objects.filter(author=target).defer("content").order_by("-creation_date")
-        posts = Post.objects.my_posts(target=target, user=self.request.user)
+        posts = Post.objects.my_posts(target=target)
         paginator = Paginator(posts, 10)
         try:
             page = int(self.request.GET.get("page", 1))
             page_obj = paginator.page(page)
         except Exception, exc:
-            messages.error(self.request, "Invalid page number")
+            logger.error("Invalid page number: %s", self.request)
             page_obj = paginator.page(1)
         context['page_obj'] = page_obj
         context['posts'] = page_obj.object_list
         awards = Award.objects.filter(user=target).select_related("badge", "user").order_by("-date")
         context['awards'] = awards[:25]
-
-        # Get user's ORCID profile URL.
-        try:
-            social_account = target.socialaccount_set.get(provider__icontains='orcid')
-            context['orcid_profile_url'] = (social_account.extra_data['orcid-profile']
-                                            ['orcid-identifier']['uri'])
-            context['orcid_id'] = (social_account.extra_data['orcid-profile']
-                                            ['orcid-identifier']['path'])
-        except Exception:
-            pass
 
         return context
 
@@ -376,12 +308,10 @@ class PostDetails(DetailView):
         return self.render_to_response(context)
 
     def get_object(self):
-        user = self.request.user
-
         obj = super(PostDetails, self).get_object()
 
         # Raise 404 if a deleted post is viewed by an anonymous user
-        if (obj.status == Post.DELETED) and not self.request.user.is_moderator:
+        if (obj.status == Post.DELETED):
             raise Http404()
 
         # Update the post views.
@@ -391,7 +321,7 @@ class PostDetails(DetailView):
         obj = post_permissions(request=self.request, post=obj)
 
         # This will be piggybacked on the main object.
-        obj.sub = Subscription.get_sub(post=obj, user=user)
+        obj.sub = Subscription.get_sub(post=obj)
 
         # Bail out if not at top level.
         if not obj.is_toplevel:
@@ -399,7 +329,7 @@ class PostDetails(DetailView):
 
         # Populate the object to build a tree that contains all posts in the thread.
         # Answers sorted before comments.
-        thread = [post_permissions(request=self.request, post=post) for post in Post.objects.get_thread(obj, user)]
+        thread = [post_permissions(request=self.request, post=post) for post in Post.objects.get_thread(obj)]
 
         # Do a little preprocessing.
         answers = [p for p in thread if p.type == Post.ANSWER]
@@ -412,19 +342,18 @@ class PostDetails(DetailView):
 
         store = {Vote.UP: set(), Vote.BOOKMARK: set()}
 
-        if user.is_authenticated():
-            pids = [p.id for p in thread]
-            votes = Vote.objects.filter(post_id__in=pids, author=user).values_list("post_id", "type")
+        pids = [p.id for p in thread]
+        votes = Vote.objects.filter(post_id__in=pids).values_list("post_id", "type")
 
-            for post_id, vote_type in votes:
-                store.setdefault(vote_type, set()).add(post_id)
+        for post_id, vote_type in votes:
+            store.setdefault(vote_type, set()).add(post_id)
 
         # Shortcuts to each storage.
         bookmarks = store[Vote.BOOKMARK]
         upvotes = store[Vote.UP]
 
         # Can the current user accept answers
-        can_accept = obj.author == user
+        can_accept = False
 
         def decorate(post):
             post.has_bookmark = post.id in bookmarks
@@ -449,32 +378,6 @@ class PostDetails(DetailView):
         context['request'] = self.request
         context['form'] = ShortForm()
         return context
-
-
-class ChangeSub(LoginRequiredMixin, View):
-    pk, type = 0, 0
-    TYPE_MAP = {"local": const.LOCAL_MESSAGE, "email": const.EMAIL_MESSAGE}
-
-    def get(self, *args, **kwargs):
-        # TODO needs to be done via POST.
-        pk = self.kwargs["pk"]
-        new_type = self.kwargs["type"]
-
-        new_type = self.TYPE_MAP.get(new_type, None)
-
-        user = self.request.user
-        post = Post.objects.get(pk=pk)
-
-        subs = Subscription.objects.filter(post=post, user=user)
-        if new_type is None:
-            subs.delete()
-        else:
-            if subs:
-                subs.update(type=new_type)
-            else:
-                Subscription.objects.create(post=post, user=user, type=new_type)
-
-        return shortcuts.redirect(post.get_absolute_url())
 
 
 class RSS(TemplateView):
@@ -596,13 +499,8 @@ class FlatPageUpdate(UpdateView):
 
     def post(self, *args, **kwargs):
         req = self.request
-        user = req.user
 
-        logger.info("user %s edited %s" % (user, kwargs))
-        if not self.request.user.is_admin:
-            logger.error("user %s access denied on %s" % (user, kwargs))
-            messages.error(req, "Only administrators may edit that page")
-            return HttpResponseRedirect("/")
+        logger.info("edited %s", kwargs)
 
         return super(FlatPageUpdate, self).post(*args, **kwargs)
 
@@ -749,7 +647,7 @@ def post_remap_redirect(request, pid):
         post = Post.objects.get(id=nid)
         return shortcuts.redirect(post.get_absolute_url(), permanent=True)
     except Exception, exc:
-        messages.error(request, "Unable to redirect: %s" % exc)
+        logger.error(request, "Unable to redirect: %s" % exc)
         return shortcuts.redirect("/")
 
 
@@ -757,5 +655,5 @@ def tag_redirect(request, tag):
     try:
         return shortcuts.redirect("/t/%s/" % tag, permanent=True)
     except Exception, exc:
-        messages.error(request, "Unable to redirect: %s" % exc)
+        logger.error("Unable to redirect: %s, '%s'", exc, request)
         return shortcuts.redirect("/")

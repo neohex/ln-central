@@ -52,13 +52,6 @@
 
                     {#  Below we could do an if/else but it is very hard to follow #}
 
-                    {#  Anonymous users. #}
-                    {% if not user.is_authenticated %}
-                        <div class="alert alert-info">
-                            Please <a href="{% url 'login' %}">log in</a> to add an answer.
-                        </div>
-                    {% endif %}
-
                     {#  Closed posts cannot get more answers #}
                     {% if not post.is_open %}
                         <div class="alert alert-warning">

@@ -5,15 +5,6 @@ from django.conf import settings
 from django.db.models import Max, Count
 
 
-def reset_counts(request, label):
-    "Resets counts in the session"
-    label = label.lower()
-    counts = request.session.get(settings.SESSION_KEY, {})
-    if label in counts:
-        counts[label] = ''
-        request.session[settings.SESSION_KEY] = counts
-
-
 class BlogPostList(ListView):
     template_name = "planet/planet_entries.html"
     paginate_by = 25
@@ -39,5 +30,4 @@ class BlogPostList(ListView):
                                             count=Count("blogpost__id")).order_by("-updated_date", "-list_order")
         context['blogs'] = blogs
 
-        reset_counts(self.request, self.topic)
         return context

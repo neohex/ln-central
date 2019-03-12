@@ -32,8 +32,6 @@
         </div>
     </div>
 
-
-
     <div class="col-xs-3 text-center" style="margin-bottom:5px">
         <a role="button" class="btn btn-primary" href="{% url 'user-list' %}">
             <i class="fa fa-heart fa-1x"></i> Community
@@ -68,121 +66,56 @@
             </a>
         </div>
 
-        {% if user.is_authenticated %}
+        <div class="col-md-9 top {% active 'userprofile' topic %}">
 
-            <div class="col-md-9 top {% active 'userprofile' topic %}">
+            <span class="pull-right">
+                <a href="{% url 'flatpage' 'about' %}">about</a> &bull; <a href="{% url 'flatpage' 'faq' %}">faq</a>
+                &bull; <a href="{% url 'rss' %}">rss <i class="fa fa-rss"></i></a>
+            </span>
+        </div>
 
-                <i class="fa fa-user"></i> {% userlink user %} &nbsp;|&nbsp;
-                <a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Logout </a>
+        <div class="col-sm-1 mid {% current request 'user-list' %}">
+            <a href="{% url 'user-list' %}">
+                <div><i class="fa fa-globe"></i>
+                </div>
+                <div>Community</div>
+            </a>
+        </div>
 
-                <span class="pull-right">
-                    <a href="{% url 'flatpage' 'about' %}">about</a> &bull; <a href="{% url 'flatpage' 'faq' %}">faq</a>
-                    &bull; <a href="{% url 'rss' %}">rss <i class="fa fa-rss"></i></a>
-                </span>
-            </div>
+        <div class="col-sm-1 mid {% active 'myposts' topic %}">
+            <a href="{% url 'topic-list' topic='myposts' %}" class="navitem">
+                <div><i class="fa fa-comments"></i></div>
+                <div>My Posts</div>
+            </a>
+        </div>
 
-            <div class="col-sm-1 mid {% current request 'user-list' %}">
-                <a href="{% url 'user-list' %}">
-                    <div><i class="fa fa-globe"></i>
-                    </div>
-                    <div>Community</div>
-                </a>
-            </div>
+        <div class="col-sm-1 mid {% active 'mytags' topic %}">
+            <a href="{% url 'topic-list' topic='mytags' %}" class="navitem">
+                <div><i class="fa fa-tag"></i></div>
+                <div>My Tags</div>
+            </a>
+        </div>
 
-            <div class="col-sm-1 mid {% current request 'user-messages' %}">
-                <a href="{% url 'user-messages' %}">
-                    <div><i class="fa fa-envelope"></i>
-                    </div>
-                    <div>Messages</div>
-                </a>
-                <span class="badge">{% get_count COUNTS 'messages' %}</span>
-            </div>
+        <div class="col-sm-1 mid {% active 'following' topic %}">
+            <a href="{% url 'topic-list' topic='following' %}" class="navitem">
+                <div><i class="fa fa-eye"></i></div>
+                <div>Following</div>
+            </a>
+        </div>
 
-            <div class="col-sm-1 mid {% current request 'user-votes' %}">
+        <div class="col-sm-1 mid {% active 'bookmarks' topic %}">
+            <a href="{% url 'topic-list' topic='bookmarks' %}" class="navitem">
+                <div><i class="fa fa-book"></i></div>
+                <div>Bookmarks</div>
+            </a>
+        </div>
 
-                <a href="{% url 'user-votes' %}" class="navitem">
-                    <div class="navitem">
-                        <div><i class="fa fa-heart"></i></div>
-                        <div> Votes</div>
-                    </div>
-                </a>
-                <span class="badge">{% get_count COUNTS 'votes' %}</span>
-            </div>
+        <div class="col-sm-1 mid newpost pull-right">
+            <a href="{% url 'new-post' %}" class="navitem">
+                <div><i class="fa fa-plus-circle"></i></div>
+                <div>New Post</div>
+            </a>
+        </div>
 
-            <div class="col-sm-1 mid {% active 'myposts' topic %}">
-                <a href="{% url 'topic-list' topic='myposts' %}" class="navitem">
-                    <div><i class="fa fa-comments"></i></div>
-                    <div>My Posts</div>
-                </a>
-            </div>
-
-            <div class="col-sm-1 mid {% active 'mytags' topic %}">
-                <a href="{% url 'topic-list' topic='mytags' %}" class="navitem">
-                    <div><i class="fa fa-tag"></i></div>
-                    <div>My Tags</div>
-                </a>
-            </div>
-
-            <div class="col-sm-1 mid {% active 'following' topic %}">
-                <a href="{% url 'topic-list' topic='following' %}" class="navitem">
-                    <div><i class="fa fa-eye"></i></div>
-                    <div>Following</div>
-                </a>
-            </div>
-
-            <div class="col-sm-1 mid {% active 'bookmarks' topic %}">
-                <a href="{% url 'topic-list' topic='bookmarks' %}" class="navitem">
-                    <div><i class="fa fa-book"></i></div>
-                    <div>Bookmarks</div>
-                </a>
-            </div>
-
-            <div class="col-sm-1 mid newpost pull-right">
-                <a href="{% url 'new-post' %}" class="navitem">
-                    <div><i class="fa fa-plus-circle"></i></div>
-                    <div>New Post</div>
-                </a>
-            </div>
-
-        {% else %}
-
-            <div class="col-md-9 top text-center">
-                {%  include "site_description.html" %}
-                <span class="pull-right">
-                    <a href="{% url 'flatpage' 'about' %}">about</a> &bull; <a href="{% url 'flatpage' 'faq' %}">faq</a>
-                    &bull; <a href="{% url 'rss' %}">rss <i class="fa fa-rss"></i></a>
-                </span>
-            </div>
-
-            <div class="col-md-2 col-md-offset-10 mid {% current request 'user-list' %}">
-                <a href="{% url 'user-list' %}">
-                    <div><i class="fa fa-globe"></i>
-                    </div>
-                    <div>Community</div>
-                </a>
-            </div>
-
-            <div class="col-md-2 mid {% current request 'account_login' %}">
-                <b><a href="{% url 'login' %}">
-                    <div><i class="fa fa-user fa-1x"></i></div>
-                    <div>Log In</div>
-                </a></b>
-            </div>
-
-            <div class="col-md-2 mid {% current request 'account_signup' %}">
-                <b><a href="{% url 'signup' %}">
-                    <div><i class="fa fa-arrow-circle-up fa-1x"></i></div>
-                    <div>Sign Up</div>
-                </a></b>
-            </div>
-
-            <div class="col-md-2 mid newpost">
-                <a href="{% url 'new-post' %}" class="navitem ">
-                    <div><i class="fa fa-plus-circle fa-1x"></i></div>
-                    <div>Add New Post</div>
-                </a>
-            </div>
-
-        {% endif %}
     </div>
 </div>

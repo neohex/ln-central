@@ -6,9 +6,9 @@ from django.contrib import admin
 admin.autodiscover()
 
 from django.views.generic import TemplateView
-from biostar.server import views, ajax, search, moderate, api, orcid
-from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, external_post_handler
-from biostar.apps.users.views import external_logout, external_login, CaptchaView, DigestManager, unsubscribe
+from biostar.server import views, ajax, search, moderate, api
+from biostar.apps.posts.views import NewAnswer, NewPost, EditPost
+from biostar.apps.users.views import DigestManager, unsubscribe
 from biostar.apps.planet.views import BlogPostList
 
 urlpatterns = patterns('',
@@ -40,23 +40,17 @@ urlpatterns = patterns('',
     # Post details.
     url(r'^p/(?P<pk>\d+)/$', views.PostDetails.as_view(), name="post-details"),
 
-    # Change subscription view.
-    url(r'^local/sub/(?P<pk>\d+)/(?P<type>\w+)/$', views.ChangeSub.as_view(), name="change-sub"),
-
     # A separate url for each post type.
     url(r'^p/new/post/$', views.RateLimitedNewPost.as_view(), name="new-post"),
 
-    # A new external post
-    url(r'^p/new/external/post/$', external_post_handler, name="new-external-post"),
-
+    # A new answer
     url(r'^p/new/answer/(?P<pid>\d+)/$', views.RateLimitedNewAnswer.as_view(post_type="answer"), name="new-answer"),
+    
+    # A new comment
     url(r'^p/new/comment/(?P<pid>\d+)/$', views.RateLimitedNewAnswer.as_view(post_type="comment"), name="new-comment"),
 
     # Edit an existing post.
     url(r'^p/edit/(?P<pk>\d+)/$', EditPost.as_view(), name="post-edit"),
-
-    # Message display.
-    url(r'^local/messages/$', views.MessageList.as_view(), name="user-messages"),
 
     # Vote display.
     url(r'^local/votes/$', views.VoteList.as_view(), name="user-votes"),
@@ -66,11 +60,6 @@ urlpatterns = patterns('',
 
     # Produces the moderator panel.
     url(r'^local/moderate/user/(?P<pk>\d+)/$', moderate.UserModeration.as_view(), name="user-moderation"),
-
-    # Full login and logout
-    url(r'^site/login/$', external_login, name="login"),
-    url(r'^site/logout/$', external_logout, name="logout"),
-    url(r'^accounts/signup/$', CaptchaView.as_view(), name="signup"),
 
     # Email handlers
     url(r'^local/email/', views.email_handler, name="email-handler"),
@@ -95,10 +84,6 @@ urlpatterns = patterns('',
     # Vote submission.
     url(r'^x/vote/$', ajax.vote_handler, name="vote-submit"),
 
-    # Social login pages.
-    url(r'^accounts/social/orcid/import/$', orcid.import_bio, name="orcid-import"),
-    (r'^accounts/', include('allauth.urls')),
-
     # Redirecting old posts urls from previous versions of Biostar
     url(r'^post/redirect/(?P<pid>\d+)/$', views.post_redirect),
     url(r'^post/show/(?P<pid>\d+)/$', views.post_redirect),
@@ -115,9 +100,6 @@ urlpatterns = patterns('',
     url(r'^api/stats/day/(?P<day>\d+)/$', api.daily_stats_on_day, name='api-stats-on-day'),
     url(r'^api/stats/date/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/$',
         api.daily_stats_on_date, name='api-stats-on-date'),
-
-    # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
 
      # Local robots.txt.
     url(r'^robots\.txt$', TemplateView.as_view(template_name="robots.txt", content_type='text/plain'), name='robots'),
@@ -155,8 +137,7 @@ urlpatterns += patterns('',
 # This is used only for the debug toolbar
 if settings.DEBUG:
     import debug_toolbar
-    from biostar.apps.users.views import test_login
+
     urlpatterns += patterns('',
         url(r'^__debug__/', include(debug_toolbar.urls)),
-        url(r'^test/login/', test_login),
     )

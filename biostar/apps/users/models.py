@@ -29,7 +29,7 @@ def now():
 
 
 class LocalManager(UserManager):
-    def get_users(self, sort, limit, q, user):
+    def get_users(self, sort, limit, q):
         sort = const.USER_SORT_MAP.get(sort, None)
         days = const.POST_LIMIT_MAP.get(limit, 0)
 
@@ -42,10 +42,8 @@ class LocalManager(UserManager):
             delta = const.now() - timedelta(days=days)
             query = self.filter(profile__last_login__gt=delta)
 
-        if user.is_authenticated() and user.is_moderator:
-            query = query.select_related("profile").order_by(sort)
-        else:
-            query = query.exclude(status=User.BANNED).select_related("profile").order_by(sort)
+
+        query = query.exclude(status=User.BANNED).select_related("profile").order_by(sort)
 
         return query
 
@@ -177,14 +175,6 @@ class Tag(models.Model):
     name = models.TextField(max_length=50, db_index=True)
 
 
-# Default message preferences.
-MESSAGE_PREF_MAP = dict(
-    local=const.LOCAL_MESSAGE, default=const.DEFAULT_MESSAGES,
-    email=const.EMAIL_MESSAGE, all=const.ALL_MESSAGES,
-)
-MESSAGE_PREFS = MESSAGE_PREF_MAP.get(settings.DEFAULT_MESSAGE_PREF, const.LOCAL_MESSAGE)
-
-
 class Profile(models.Model):
     """
     Maintains information that does not always need to be retreived whe a user is accessed.
@@ -225,7 +215,7 @@ class Profile(models.Model):
     info = models.TextField(default="", null=True, blank=True)
 
     # The default notification preferences.
-    message_prefs = models.IntegerField(choices=TYPE_CHOICES, default=MESSAGE_PREFS)
+    message_prefs = models.IntegerField(choices=TYPE_CHOICES, default=const.LOCAL_MESSAGE)
 
     # This stores binary flags on users. Their usage is to
     # allow easy subselection of various subsets of users.

@@ -58,12 +58,13 @@ def get_traffic(minutes=60):
 
 
 def banner_trigger(request, half=settings.HALF_LIFE):
-    user = request.user
-    if user.is_anonymous() or user.profile.opt_in:
-        return True
-    level = pow(e, -LOG2 * user.score/half) + 0.01
-    rand = random()
-    return rand <= level
+    # user = request.user
+    # if user.is_anonymous() or user.profile.opt_in:
+    #     return True
+    # level = pow(e, -LOG2 * user.score/half) + 0.01
+    # rand = random()
+    # return rand <= level
+    return True
 
 def shortcuts(request):
     # These values will be added to each context
@@ -80,7 +81,6 @@ def shortcuts(request):
         "RECENT_USERS": get_recent_users(),
         "RECENT_AWARDS": get_recent_awards(),
         'USE_COMPRESSOR': settings.USE_COMPRESSOR,
-        'COUNTS': request.session.get(settings.SESSION_KEY, {}),
         'SITE_ADMINS': settings.ADMINS,
         'TOP_BANNER': settings.TOP_BANNER,
         'BANNER_TRIGGER': banner_trigger(request),

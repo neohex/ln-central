@@ -54,19 +54,16 @@ admin.site.register(Tag, TagAdmin)
 
 class PostManager(models.Manager):
 
-    def my_bookmarks(self, user):
-        query = self.filter(votes__author=user, votes__type=Vote.BOOKMARK)
+    def my_bookmarks(self):
+        query = self.filter(votes__type=Vote.BOOKMARK)
         query = query.select_related("root", "author", "lastedit_user")
         query = query.prefetch_related("tag_set")
         return query
 
-    def my_posts(self, target, user):
+    def my_posts(self, target):
 
         # Show all posts for moderators or targets
-        if user.is_moderator or user == target:
-            query = self.filter(author=target)
-        else:
-            query = self.filter(author=target).exclude(status=Post.DELETED)
+        query = self.filter(author=target).exclude(status=Post.DELETED)
 
         query = query.select_related("root", "author", "lastedit_user")
         query = query.prefetch_related("tag_set")
@@ -104,23 +101,17 @@ class PostManager(models.Manager):
 
         return query
 
-    def get_thread(self, root, user):
+    def get_thread(self, root):
         # Populate the object to build a tree that contains all posts in the thread.
-        is_moderator = user.is_authenticated() and user.is_moderator
-        if is_moderator:
-            query = self.filter(root=root).select_related("root", "author", "lastedit_user").order_by("type", "-has_accepted", "-vote_count", "creation_date")
-        else:
-            query = self.filter(root=root).exclude(status=Post.DELETED).select_related("root", "author", "lastedit_user").order_by("type", "-has_accepted", "-vote_count", "creation_date")
+        query = self.filter(root=root).exclude(status=Post.DELETED).select_related("root", "author", "lastedit_user") \
+            .order_by("type", "-has_accepted", "-vote_count", "creation_date")
 
         return query
 
-    def top_level(self, user):
-        "Returns posts based on a user type"
-        is_moderator = user.is_authenticated() and user.is_moderator
-        if is_moderator:
-            query = self.filter(type__in=Post.TOP_LEVEL)
-        else:
-            query = self.filter(type__in=Post.TOP_LEVEL).exclude(status=Post.DELETED)
+    def top_level(self):
+        "Returns posts"
+
+        query = self.filter(type__in=Post.TOP_LEVEL).exclude(status=Post.DELETED)
 
         return query.select_related("root", "author", "lastedit_user").prefetch_related("tag_set").defer("content", "html")
 
@@ -524,14 +515,7 @@ class Subscription(models.Model):
 
 
     @staticmethod
-    def get_sub(post, user):
-
-        if user.is_authenticated():
-            try:
-                return Subscription.objects.get(post=post, user=user)
-            except ObjectDoesNotExist, exc:
-                return None
-
+    def get_sub(post):
         return None
 
     @staticmethod

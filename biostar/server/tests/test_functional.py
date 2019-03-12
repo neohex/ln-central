@@ -14,7 +14,6 @@ logging.disable(logging.WARNING)
 user_count = lambda: User.objects.all().count()
 post_count = lambda: Post.objects.all().count()
 subs_count = lambda: Subscription.objects.all().count()
-msg_count = lambda: Message.objects.all().count()
 get_user = lambda x: User.objects.get(email=x)
 
 haystack_logger = logging.getLogger('haystack')
@@ -59,43 +58,6 @@ class UserTest(TestCase):
         # Disable haystack logger, testing will raise errors
         # on the more_like_this field in templates.
         haystack_logger.setLevel(logging.CRITICAL)
-
-        # Sign up then log out each user.
-        for email, passwd in USER_DATA:
-            self.sign_up(email, passwd)
-
-            # Turn off the CAPTCHA settings
-
-
-    def sign_up(self, email, passwd):
-        count = user_count()
-
-        with self.settings(CAPTCHA=False, TRUST_VOTE_COUNT=0):
-            r = self.client.post(reverse("account_signup"), dict(email=email, password1=passwd, password2=passwd),
-                                 follow=True)
-            self.assertContains(r, "My Tags")
-            self.code(r)
-            self.assertEqual(user_count(), count + 1)
-            self.logout()
-
-    def login(self, email, passwd):
-        "Logs in a user"
-        r = self.client.post(reverse("account_login"), dict(login=email, password=passwd), follow=True)
-        self.assertContains(r, "My Tags")
-
-
-    def logout(self):
-        "Logs out the current user."
-        r = self.client.get(reverse("logout"), follow=True)
-        self.assertNotContains(r, "My Tags")
-
-
-    def test_user_login(self):
-        "Test that each user can log in."
-        eq = self.assertEqual
-        for email, passwd in USER_DATA:
-            self.login(email, passwd)
-            self.logout()
 
 
     def create_new_post(self, title, post_type, tag_val):
@@ -164,22 +126,15 @@ class UserTest(TestCase):
 
         # Same user adds a new answer.
         p_count = post_count()
-        m_count = msg_count()
+
         self.create_new_answer(post1)
 
         # No message has been added because it is the same user.
-        self.assertEqual(msg_count(), m_count)
         self.logout()
 
         # A different user adds an answer
         self.login(EMAIL_2, PASSWD_2)
         self.create_new_answer(post1)
-
-        # A message is added for the author of the parent.
-        self.assertEqual(msg_count(), m_count + 1)
-
-        # The user also has a welcome message.
-        self.assertEqual(Message.objects.filter(user__email=EMAIL_1).count(), 2)
 
         # Test voting and that it applies to user and posts
         user1 = get_user(EMAIL_1)
@@ -254,7 +209,7 @@ class SiteTest(SimpleTestCase):
         "Testing page redirects."
 
         # Pages with redirects.
-        names = "login logout new-post user-messages user-votes".split()
+        names = "login logout new-post user-votes".split()
         for name in names:
             r = self.client.get(reverse(name))
             self.code(r, 302)

@@ -87,12 +87,6 @@ def hide_email(value):
 
 
 @register.simple_tag
-def messages_read(user):
-    Message.objects.filter(user=user, unread=True).update(unread=False)
-    return ''
-
-
-@register.simple_tag
 def avataaar(user, size=80):
     name = user.name
     if user.is_suspended:
@@ -280,10 +274,12 @@ def post_actions(post, user, label="COMMENT"):
 def userlink(user):
     "Renders the flair"
     marker = "&bull;"
-    if user.is_admin:
-        marker = '&diams;&diams;'
-    elif user.is_moderator:
-        marker = '&diams;'
+    
+    # if user.is_admin:
+    #     marker = '&diams;&diams;'
+    # elif user.is_moderator:
+    #     marker = '&diams;'
+
     return {'user': user, 'marker': marker}
 
 # this contains the body of each comment
@@ -310,7 +306,7 @@ def traverse_comments(request, post, tree):
 
     def traverse(node):
         data = ['<div class="indent">']
-        cont = Context({"post": node, 'user': request.user, 'request': request})
+        cont = Context({"post": node, 'request': request})
 
         html = COMMENT_BODY.render(cont)
         data.append(html)

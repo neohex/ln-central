@@ -234,9 +234,6 @@ TEMPLATE_LOADERS = (
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'biostar.server.middleware.Visit',
@@ -265,13 +262,9 @@ MESSAGE_TAGS = {
 }
 
 INSTALLED_APPS = [
-    'django.contrib.auth',
     'django.contrib.contenttypes',
 
-    # 'django.contrib.sessions',
-
     'django.contrib.sites',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
 
@@ -281,10 +274,8 @@ INSTALLED_APPS = [
     # Enabling the admin and its documentation.
     'django.contrib.sites',
     'django.contrib.admin',
-    'django.contrib.messages',
     'django.contrib.humanize',
     'django.contrib.flatpages',
-    'django.contrib.sessions',
 
     # Biostar specific apps.
     'biostar.apps.users',
@@ -296,18 +287,6 @@ INSTALLED_APPS = [
 
     # The main Biostar server.
     'biostar.server',
-
-    # Social login handlers.
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.persona',
-    #'allauth.socialaccount.providers.google',
-    #'allauth.socialaccount.providers.github',
-    # 'allauth.socialaccount.providers.facebook',
-    # 'allauth.socialaccount.providers.orcid',
-    # 'allauth.socialaccount.providers.linkedin',
-    # 'allauth.socialaccount.providers.weibo',
 
     # External apps.
     'haystack',
@@ -338,27 +317,15 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.debug",
     "django.core.context_processors.static",
     "django.core.context_processors.request",
-    "django.contrib.auth.context_processors.auth",
-    "django.contrib.messages.context_processors.messages",
-
-    # Social authorization specific context.
-    "allauth.account.context_processors.account",
-    "allauth.socialaccount.context_processors.socialaccount",
 
     # Biostar specific context.
     'biostar.server.context.shortcuts',
 )
 
-AUTHENTICATION_BACKENDS = (
-    "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
-    "biostar.server.middleware.ExternalAuth",
-)
-
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 
 # Should the captcha be shown on the signup page.
-CAPTCHA = True
+CAPTCHA = False
 
 # For how long does a user need to be a member to become trusted.
 TRUST_RANGE_DAYS = 7
@@ -373,12 +340,6 @@ MAX_POSTS_TRUSTED_USER = 30
 # How many top level posts per day for a new user.
 MAX_TOP_POSTS_NEW_USER = 2
 MAX_TOP_POSTS_TRUSTED_USER = 5
-
-SOCIALACCOUNT_ADAPTER = 'biostar.server.middleware.AutoSignupAdapter'
-
-# Customize this to match the providers listed in the APPs
-SOCIALACCOUNT_PROVIDERS = {
-}
 
 
 # The site logo.
@@ -405,10 +366,6 @@ POST_VIEW_MINUTES = 5
 # Default  expiration in seconds.
 CACHE_TIMEOUT = 60
 
-# Should the messages go to email by default
-# Valid values are local, default, email
-DEFAULT_MESSAGE_PREF = "local"
-
 # Django precompressor settings.
 COMPRESS_PRECOMPILERS = (
     ('text/coffeescript', 'coffee --compile --stdio'),
@@ -431,54 +388,13 @@ CACHES = {
 # The celery configuration file
 CELERY_CONFIG = 'biostar.celeryconfig'
 
-# Setting a cookie with email:signed_hash(email)
-# will automatically create accounts
-EXTERNAL_AUTH = [
-    ("foo.bar.com", "ABC"),
-]
-
-# Set these to redirect login to an external site.
-EXTERNAL_LOGIN_URL = None
-EXTERNAL_SIGNUP_URL = None
-EXTERNAL_LOGOUT_URL = None
-EXTERNAL_SESSION_KEY = "EXTERNAL"
-EXTERNAL_SESSION_FIELDS = "title tag_val content".split()
-
 # How far to look for posts for anonymous users.
 COUNT_INTERVAL_WEEKS = 10000
 
-# How frequently do we update the counts for authenticated users.
-SESSION_UPDATE_SECONDS = 10 * 60
-SESSION_COOKIE_NAME = "biostar2"
 
 # The number of posts to show per page.
 PAGINATE_BY = 25
 
-# Used by crispyforms.
-# CRISPY_FAIL_SILENTLY = not DEBUG
-
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_EMAIL_VERIFICATION = "optional"
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "[biostar] "
-ACCOUNT_PASSWORD_MIN_LENGHT = 6
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
-# ACCOUNT_LOGOUT_ON_GET = True
-
-# Google ReCaptcha No-Captcha settings
-# When set the captcha forms will be active.
-RECAPTCHA_PUBLIC_KEY = ""
-RECAPTCHA_PRIVATE_KEY = ""
-RECAPTCHA_USE_SSL = True  # Defaults to False
-NOCAPTCHA = True
-
-# Session specific settings.
-SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
-SESSION_KEY = "session"
 
 # Use a mock email backend for development.
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

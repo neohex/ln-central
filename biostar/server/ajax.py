@@ -42,9 +42,6 @@ class ajax_error_wrapper(object):
             if request.method != 'POST':
                 return ajax_error('POST method must be used.')
 
-            if not request.user.is_authenticated():
-                return ajax_error('You must be logged in to do that')
-
             value = self.f(request)
             return value
         except Exception, exc:
@@ -108,25 +105,26 @@ def perform_vote(post, user, vote_type):
 def vote_handler(request):
     "Handles all voting on posts"
 
+    return ajax_error("Voting is not implemented.")
 
-    user = request.user
-    vote_type = request.POST['vote_type']
-    vote_type = POST_TYPE_MAP[vote_type]
-    post_id = request.POST['post_id']
+    # user = request.user
+    # vote_type = request.POST['vote_type']
+    # vote_type = POST_TYPE_MAP[vote_type]
+    # post_id = request.POST['post_id']
 
-    # Check the post that is voted on.
-    post = Post.objects.get(pk=post_id)
+    # # Check the post that is voted on.
+    # post = Post.objects.get(pk=post_id)
 
-    if post.author == user and vote_type == Vote.UP:
-        return ajax_error("You can't upvote your own post.")
+    # if post.author == user and vote_type == Vote.UP:
+    #     return ajax_error("You can't upvote your own post.")
 
-    #if post.author == user and vote_type == Vote.ACCEPT:
-    #    return ajax_error("You can't accept your own post.")
+    # #if post.author == user and vote_type == Vote.ACCEPT:
+    # #    return ajax_error("You can't accept your own post.")
 
-    if post.root.author != user and vote_type == Vote.ACCEPT:
-        return ajax_error("Only the person asking the question may accept this answer.")
+    # if post.root.author != user and vote_type == Vote.ACCEPT:
+    #     return ajax_error("Only the person asking the question may accept this answer.")
 
-    with transaction.atomic():
-        msg = perform_vote(post=post, user=user, vote_type=vote_type)
+    # with transaction.atomic():
+    #     msg = perform_vote(post=post, user=user, vote_type=vote_type)
 
-    return ajax_success(msg)
+    # return ajax_success(msg)

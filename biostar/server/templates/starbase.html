@@ -78,16 +78,6 @@
     {# Navigation bar for each page. #}
     {% nav_bar user %}
 
-    {% if messages %}
-        <div class="row">
-            <div class="col-md-12 col-sm-offset-0 text-center">
-                {% for message in messages %}
-                    <div class="alert  {{ message.tags }}">{{ message|safe }}</div>
-                {% endfor %}
-            </div>
-        </div>
-    {% endif %}
-
     {#  A little bit of nagging is ok #}
     {#  {% include "nag.html" %} #}
 
