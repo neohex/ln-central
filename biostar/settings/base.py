@@ -350,7 +350,7 @@ DAILY_DIGEST_TITLE = '[biostar daily digest] %s'
 WEEKLY_DIGEST_TITLE = '[biostar weekly digest] %s'
 
 # The default CSS file to load.
-SITE_STYLE_CSS = "biostar.style.less"
+SITE_STYLE_CSS = "biostar.style.v2.less"
 
 # Set it to None if all posts should be accesible via the Latest tab.
 SITE_LATEST_POST_LIMIT = None
