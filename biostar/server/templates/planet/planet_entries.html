@@ -25,20 +25,15 @@
                 <div class="blog-post">
 
                     <div>
-                        <h3><a href="{{ post.link }}">{{ post.title }}</a></h3>
+                        <a href="{{ post.link }}">{{ post.title }}</a>
                     </div>
 
                     <div>
                         <h4>
-                            written {{ post.creation_date|time_ago }}
+                            posted {{ post.creation_date|time_ago }}
                             by <a href="{{ post.blog.link }}">{{ post.blog.title|safe }}</a>
                         </h4>
                     </div>
-
-                    <div>
-                        {{ post.content|truncatewords:250 }}
-                    </div>
-
 
                 </div>
             {% endfor %}

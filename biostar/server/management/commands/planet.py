@@ -112,7 +112,7 @@ def update_entries(count=3):
                 r.title = smart_text(r.title)
                 r.title = r.title.strip()
                 r.title = html.strip_tags(r.title)
-                r.title = r.title.strip()[:30]
+                r.title = r.title.strip()[:280]  # most are tweeter messages, have 280 limit
                 r.description = smart_text(r.description)
                 r.description = html.strip_tags(r.description)
 
