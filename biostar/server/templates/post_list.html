@@ -10,6 +10,26 @@
 
     <div class="row">
         <div class="col-md-9">
+            {% if topic == "Latest" %}
+                <div class="alert alert-info text-center">
+                    Showing <b>Latest</b> posts
+                </div>
+
+            {% elif topic == "Open" %}
+                <div class="alert alert-info text-center">
+                    Showing posts that don't have answers
+                </div>
+
+            {% elif topic == "Meta" %}
+                <div class="alert alert-info text-center">
+                    Showing posts with tag: <b>Meta</b> for discussing questions about <b>{{ SITE_NAME }}</b>
+                </div>
+
+            {% else %}
+                <div class="alert alert-info text-center">
+                    Showing posts with tag: <b>{{ topic }}</b>
+                </div>
+            {% endif %}
 
             {% page_bar_sort_posts %}
 

@@ -113,11 +113,6 @@ def posts_by_topic(request, topic):
         return Post.objects.top_level().filter(type=POST_TYPES[topic])
 
     if topic and topic != LATEST:
-        # Any type of topic.
-        if topic:
-            # TODO: display what topic is being shown
-            #    "Showing: <code>%s</code> &bull; <a href='/'>reset</a>" % topic)
-            pass
         return Post.objects.tag_search(topic)
 
     # Return latest by default.
