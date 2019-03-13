@@ -77,11 +77,10 @@ class PagedownWidget(forms.Textarea):
 class LongForm(forms.Form):
     FIELDS = "title content post_type tag_val".split()
 
-    POST_CHOICES = [(Post.QUESTION, "Question"),
-                    (Post.JOB, "Job Ad"),
-                    (Post.TUTORIAL, "Tutorial"), (Post.TOOL, "Tool"),
-                    (Post.FORUM, "Forum"), (Post.NEWS, "News"),
-                    (Post.BLOG, "Blog"), (Post.PAGE, "Page")]
+    POST_CHOICES = [
+        (Post.QUESTION, "Question"),
+        (Post.META, "Meta (A question/discussion about this website)")
+    ]
 
     title = forms.CharField(
         label="Post Title",

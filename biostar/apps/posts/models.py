@@ -126,7 +126,7 @@ class Post(models.Model):
     STATUS_CHOICES = [(PENDING, "Pending"), (OPEN, "Open"), (CLOSED, "Closed"), (DELETED, "Deleted")]
 
     # Question types. Answers should be listed before comments.
-    QUESTION, ANSWER, JOB, FORUM, PAGE, BLOG, COMMENT, DATA, TUTORIAL, BOARD, TOOL, NEWS = range(12)
+    QUESTION, ANSWER, JOB, FORUM, PAGE, BLOG, COMMENT, DATA, TUTORIAL, BOARD, TOOL, NEWS, META = range(13)
 
     TYPE_CHOICES = [
         (QUESTION, "Question"), (ANSWER, "Answer"), (COMMENT, "Comment"),
