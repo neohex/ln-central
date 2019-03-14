@@ -257,7 +257,6 @@ class Profile(models.Model):
         self.info = bleach.clean(self.info, tags=ALLOWED_TAGS,
                                  attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
 
-
         # Strip whitespace from location string
         self.location = self.location.strip()
 

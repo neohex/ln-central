@@ -19,6 +19,8 @@ import logging
 
 import langdetect
 from django.template.loader import render_to_string
+from biostar.apps import util
+from biostar.apps.users.models import User
 
 def english_only(text):
     try:
@@ -162,6 +164,10 @@ class NewPost(FormView):
 
 
     def post(self, request, *args, **kwargs):
+        '''
+        Authenticated action
+        '''
+
         # Validating the form.
         form = self.form_class(request.POST)
         if not form.is_valid():
@@ -175,15 +181,21 @@ class NewPost(FormView):
         post_type = int(data('post_type'))
         tag_val = data('tag_val')
 
-        # TODO
-        # post = Post(
-        #     title=title, content=content, tag_val=tag_val,
-        #     author=request.user, type=post_type,
-        # )
-        # post.save()
+        # TEMPORARY HACK: create new user
+        user = User()
+        user.email = "%s@xyz2.xyz" % util.make_uuid()
+        user.name = "name"
+        user.score = 0
+        user.save()
+
+        post = Post(
+             title=title, content=content, tag_val=tag_val,
+             author=user, type=post_type,
+        )
+        post.save()
 
         # # Triggers a new post save.
-        # post.add_tags(post.tag_val)
+        post.add_tags(post.tag_val)
 
         logger.info("%s created (Request: %s)",  post.get_type_display(), request)
         return HttpResponseRedirect(post.get_absolute_url())
