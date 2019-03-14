@@ -19,9 +19,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         from biostar import awards
+        init_flatpages()
         init_admin()
         init_domain()
-        init_flatpages()
         awards.init_awards()
 
 def init_flatpages():
