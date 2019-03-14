@@ -295,12 +295,15 @@ INSTALLED_APPS = [
     'biostar.server',
 
     # External apps.
-    'haystack',
-    'crispy_forms',
-    'djcelery',
-    'kombu.transport.django',
-    'south',
-    'captcha',
+    'haystack',  # Modular search for Django
+    'crispy_forms',  # application that lets you easily build, customize and reuse forms
+    'djcelery',  # "queue, execution units, called tasks, are executed concurrently 
+                 # on a single or more worker servers using multiprocessing, Eventlet, 
+                 # or gevent. Tasks can execute asynchronously (in the background) or 
+                 # synchronously (wait until ready)"
+    'kombu.transport.django',  # "transport using the Django database as a message store"
+    'south',  # "consistent, easy-to-use and database-agnostic migrations"
+    'captcha',  # mostly deleted in the De-Cookify commit 19e67656233669db8c386fa69b125571faeaff4e
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
@@ -331,7 +334,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 
 # Should the captcha be shown on the signup page.
-CAPTCHA = False
+CAPTCHA = True
 
 # For how long does a user need to be a member to become trusted.
 TRUST_RANGE_DAYS = 7
