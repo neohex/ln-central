@@ -77,7 +77,7 @@ class PagedownWidget(forms.Textarea):
 
 
 class LongForm(forms.Form):
-    FIELDS = "title content post_type tag_val".split()
+    FIELDS = "title content post_type tag_val wallet_pubkey".split()
 
     POST_CHOICES = [
         (Post.QUESTION, "Question"),
@@ -89,6 +89,11 @@ class LongForm(forms.Form):
         max_length=200, min_length=10, validators=[valid_title, english_only],
         help_text="Descriptive titles promote better answers.")
 
+    wallet_pubkey = forms.CharField(
+        label="wallet_pubkey (temporary hack)",
+        max_length=200, min_length=1,
+        help_text="TODO: Remove this field, this is for testing only")
+
     post_type = forms.ChoiceField(
         label="Post Type",
         choices=POST_CHOICES, help_text="Select a post type: Question, Forum, Job, Blog")
@@ -98,6 +103,7 @@ class LongForm(forms.Form):
         required=True, validators=[valid_tag],
         help_text="Choose one or more tags to match the topic. To create a new tag just type it in and press ENTER.",
     )
+
 
     content = forms.CharField(widget=PagedownWidget, validators=[valid_language],
                               min_length=80, max_length=15000,
@@ -110,6 +116,7 @@ class LongForm(forms.Form):
         self.helper.layout = Layout(
             Fieldset(
                 'Post Form',
+                Field('wallet_pubkey'),
                 Field('title'),
                 Field('post_type'),
                 Field('tag_val'),
@@ -180,6 +187,7 @@ class NewPost(FormView):
         content = data('content')
         post_type = int(data('post_type'))
         tag_val = data('tag_val')
+        wallet_pubkey = data('wallet_pubkey')
 
         # TEMPORARY HACK: create new user
         user = User()
