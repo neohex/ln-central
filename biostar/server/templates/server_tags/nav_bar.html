@@ -16,10 +16,10 @@
 
 <div class="row visible-sm visible-xs">
 
-    <div class="col-xs-3">
+    <div class="col-xs-4">
         <div class="btn-group">
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                {% if topic %} {{ topic }} {% else %} View Posts {% endif %}
+                    View Posts
                 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
@@ -32,30 +32,28 @@
         </div>
     </div>
 
-    <div class="col-xs-3 text-center" style="margin-bottom:5px">
-        <a role="button" class="btn btn-primary" href="{% url 'user-list' %}">
-            <i class="fa fa-heart fa-1x"></i> Community
-        </a>
-    </div>
-
-    <div class="col-xs-3 text-center" style="margin-bottom:5px">
+    <div class="col-xs-4 text-center" style="margin-bottom:5px">
         <a role="button" class="btn btn-primary" href="{% url 'planet' %}"">
             <i class="fa fa-globe fa-1x"></i> Planet
         </a>
     </div>
 
 
-    <div class="col-xs-2 text-center" style="margin-bottom:5px">
+    <div class="col-xs-4 text-center" style="margin-bottom:5px">
         <a role="button" class="btn btn-primary"href="{% url 'tag-list' %}">All &raquo;</a>
     </div>
 
 </div>
 
 
-<div class="row visible-sm visible-xs">
-    <div class="pull-right">
-        <a href="{% url 'new-post' %}" class="navitem">
-            <div><i class="fa fa-plus-circle"></i> New Post</div>
+<div class="top row" style="padding-right:15px">
+    <div class="visible-sm visible-xs pull-right">
+        <a href="{% url 'user-list' %}" class="navitem">
+            <i class="fa fa-heart fa-1x"></i> Community
+        </a>
+
+        <a href="{% url 'new-post' %}" class="navitem" style="margin-left:15px">
+            <i class="fa fa-plus-circle"></i> New Post
         </a>
     </div>
 </div>
@@ -85,7 +83,7 @@
 
         <div class="col-sm-1 mid {% current request 'user-list' %}">
             <a href="{% url 'user-list' %}">
-                <div><i class="fa fa-globe"></i>
+                <div><i class="fa fa-heart"></i>
                 </div>
                 <div>Community</div>
             </a>
