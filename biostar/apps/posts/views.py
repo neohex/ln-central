@@ -81,7 +81,7 @@ class LongForm(forms.Form):
 
     POST_CHOICES = [
         (Post.QUESTION, "Question"),
-        (Post.META, "Meta (A question/discussion about this website)")
+        (Post.META_QUESTION, "Meta (a question/discussion about this website)")
     ]
 
     title = forms.CharField(
