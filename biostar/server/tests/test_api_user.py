@@ -20,7 +20,7 @@ class ApiUserTest(TestCase):
         haystack_logger.setLevel(logging.CRITICAL)
 
         # Create a user.
-        self.user = User.objects.create(email='test@test.com', password='...')
+        self.user = User.objects.create(pubkey='test@test.com')
 
         # Edit date_joined.
         self.user.profile.date_joined = datetime.now() - timedelta(days=12)

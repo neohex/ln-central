@@ -55,7 +55,7 @@ class ApiStatsTest1(TestCase):
 class ApiStatsTest2(TestCase):
     def setUp(self):
         # Create a user and edit the date joined.
-        self.user = User.objects.create(email='test@test.com', password='...')
+        self.user = User.objects.create(pubkey='test@test.com')
         self.user.profile.date_joined = datetime.today() - timedelta(days=3)
         self.user.profile.save()
 
@@ -128,7 +128,7 @@ class ApiStatsTest2(TestCase):
 class ApiStatsTest3(TestCase):
     def setUp(self):
         # Create a user.
-        self.user = User.objects.create(email='test@test.com', password='...')
+        self.user = User.objects.create(pubkey='test@test.com')
         self.user.profile.date_joined = datetime.today() - timedelta(days=4)
         self.user.profile.save()
 

@@ -19,8 +19,8 @@ note_count = lambda: Message.objects.all().count()
 
 class NoteTest(TestCase):
 
-    def test_send_email(self):
-        "Testing email sending"
+    def test_send_pubkey(self):
+        "Testing pubkey sending"
         mail.send_mail('Subject here', 'Here is the message.',
             'from@example.com', ['to@example.com'],
             fail_silently=False)
@@ -34,20 +34,20 @@ class NoteTest(TestCase):
 
         # Create some users
         title = "Test"
-        emails = ["john@this.edu", "jane@this.edu", "bob@this.edu", "alice@this.edu",
+        pubkeys = ["john@this.edu", "jane@this.edu", "bob@this.edu", "alice@this.edu",
                   "bill@this.edu", "jeff@this.edu" ]
 
-        email_count = len(emails)
+        pubkey_count = len(pubkeys)
 
         users, posts, user = [], [], None
         parent = None
-        for email in emails:
+        for pubkey in pubkeys:
             # Create users.
-            user = User.objects.create(email=email)
+            user = User.objects.create(pubkey=pubkey)
             users.append(user)
 
         # A welcome message for each user.
-        eq(note_count(), email_count)
+        eq(note_count(), pubkey_count)
 
         # Create a question.
         first = users[0]
@@ -66,13 +66,13 @@ class NoteTest(TestCase):
         eq(note_count(), 21)
 
         # Every user has one subscription to the main post
-        eq(email_count, Subscription.objects.all().count())
+        eq(pubkey_count, Subscription.objects.all().count())
 
         # Each user has a messages for content posted after
         # they started following the thread.
         for index, user in enumerate(users):
             mesg_c = Message.objects.filter(user=user).count()
-            eq (mesg_c, email_count - index )
+            eq (mesg_c, pubkey_count - index )
 
 
 

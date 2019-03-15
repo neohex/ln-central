@@ -5,12 +5,12 @@ from biostar.apps.users.models import User
 # Create your tests here.
 
 class AwardTest(TestCase):
-    email = "janedoe@site.com"
+    pubkey = "janedoe@site.com"
 
     def setUp(self):
         from biostar import awards
         awards.init_awards()
-        User.objects.create(email=self.email)
+        User.objects.create(pubkey=self.pubkey)
 
     def test_user_badge(self):
         from biostar import awards
@@ -23,7 +23,7 @@ class AwardTest(TestCase):
 
         eq(0, award_count())
 
-        jane = User.objects.get(email=self.email)
+        jane = User.objects.get(pubkey=self.pubkey)
         awards.create_user_award(jane)
 
         # No award for new user.

@@ -22,12 +22,12 @@ X-Received: by 10.58.31.136 with SMTP id a8mr14282876vei.20.1399046277267;
  Fri, 02 May 2014 08:57:57 -0700 (PDT)
 MIME-Version: 1.0
 Received: by 10.58.80.98 with HTTP; Fri, 2 May 2014 08:57:17 -0700 (PDT)
-In-Reply-To: <00000145bda03530-dee6cbaa-a4ab-42de-8f0a-618cb3677990-000000@email.amazonses.com>
-References: <00000145bda03530-dee6cbaa-a4ab-42de-8f0a-618cb3677990-000000@email.amazonses.com>
+In-Reply-To: <00000145bda03530-dee6cbaa-a4ab-42de-8f0a-618cb3677990-000000@pubkey.amazonses.com>
+References: <00000145bda03530-dee6cbaa-a4ab-42de-8f0a-618cb3677990-000000@pubkey.amazonses.com>
 From: Istvan Albert <istvan.albert@gmail.com>
 Date: Fri, 2 May 2014 11:57:17 -0400
 Message-ID: <CALHEkC=S9AsncsB_mu_Xv8_XBQkJKENye57Sb0C+A-8hXAD6Dw@mail.gmail.com>
-Subject: Re: A: Test post to verify email sending
+Subject: Re: A: Test post to verify pubkey sending
 To: reply+6aec751a+code@biostars.io
 Content-Type: multipart/alternative; boundary=047d7b2e49d061879c04f86cd8d2
 
@@ -40,13 +40,13 @@ second reply
 On Fri, May 2, 2014 at 11:49 AM, Biostar Community <
 notifications@biostars.org> wrote:
 
-> Biostar Community posted the Answer: "Test post to verify email sending ":
+> Biostar Community posted the Answer: "Test post to verify pubkey sending ":
 >
 > This response will have a reply-to header for the user
 >
 > ---
 > See the full post at: http://test.biostars.org/p/1/#2
-> Replying to this email will post a comment to the answer above.
+> Replying to this pubkey will post a comment to the answer above.
 >
 
 --047d7b2e49d061879c04f86cd8d2
@@ -60,14 +60,14 @@ pan dir=3D"ltr">&lt;<a href=3D"mailto:notifications@biostars.org" target=3D=
 
 <blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
 x #ccc solid;padding-left:1ex">Biostar Community posted the Answer: &quot;T=
-est post to verify email sending &quot;:<br>
+est post to verify pubkey sending &quot;:<br>
 <br>
 This response will have a reply-to header for the user<br>
 <br>
 ---<br>
 See the full post at: <a href=3D"http://test.biostars.org/p/1/#2" target=3D=
 "_blank">http://test.biostars.org/p/1/#2</a><br>
-Replying to this email will post a comment to the answer above.<br>
+Replying to this pubkey will post a comment to the answer above.<br>
 </blockquote></div><br></div>
 
 --047d7b2e49d061879c04f86cd8d2--

@@ -64,20 +64,18 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'User'},
             'activity': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'badges': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'email': ('django.db.models.fields.EmailField', [], {'unique': 'True', 'max_length': '255', 'db_index': 'True'}),
             'flair': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '15'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'is_admin': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'name': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '255'}),
             'new_messages': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'score': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'site': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sites.Site']", 'null': 'True'}),
             'status': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'type': ('django.db.models.fields.IntegerField', [], {'default': '0'})
+            'type': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'pubkey': ('django.db.models.fields.CharField', [], {'unique': 'False', 'max_length': '255', 'db_index': 'True'})
         }
     }
 

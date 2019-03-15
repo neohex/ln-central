@@ -57,14 +57,13 @@ class User(AbstractBaseUser):
     STATUS_CHOICES = ((NEW_USER, 'New User'), (TRUSTED, 'Trusted'), (SUSPENDED, 'Suspended'), (BANNED, 'Banned'))
 
     # Required by Django.
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'pubkey'
 
     objects = LocalManager()
 
     # Default information on every user.
-    email = models.EmailField(verbose_name='Email', db_index=True, max_length=255, unique=True)
-    name = models.CharField(verbose_name='Name', max_length=255, default="", blank=False)
-
+    pubkey = models.EmailField(verbose_name='LN Identity PubKey', db_index=True, max_length=255, unique=True)
+ 
     # Fields used by the Django admin.
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
@@ -118,12 +117,12 @@ class User(AbstractBaseUser):
         return self.status == User.SUSPENDED or self.status == User.BANNED
 
     def get_full_name(self):
-        # The user is identified by their email address
-        return self.name or self.email
+        # The user is identified by their pubkey address
+        return self.pubkey
 
     def get_short_name(self):
-        # The user is identified by their email address
-        return self.name or self.email
+        # The user is identified by their pubkey address
+        return self.pubkey
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
@@ -138,10 +137,6 @@ class User(AbstractBaseUser):
     def save(self, *args, **kwargs):
         "Actions that need to be performed on every user save."
 
-        if not self.name:
-            # Name should be set.
-            self.name = self.email.split("@")[0]
-
         super(User, self).save(*args, **kwargs)
 
     @property
@@ -153,7 +148,7 @@ class User(AbstractBaseUser):
             return self.score * 10
 
     def __unicode__(self):
-        return "%s: %s (%s)" % (self.name, self.email, self.id)
+        return "%s (%s)" % (self.pubkey, self.id)
 
     def get_absolute_url(self):
         url = reverse("user-details", kwargs=dict(pk=self.id))
@@ -164,8 +159,8 @@ from biostar import const
 
 
 class EmailList(models.Model):
-    "The list of emails that opted in receiving emails"
-    email = models.EmailField(verbose_name='Email', db_index=True, max_length=255, unique=True)
+    "The list of pubkeys that opted in receiving pubkeys"
+    pubkey = models.EmailField(verbose_name='Email', db_index=True, max_length=255, unique=True)
     type = models.IntegerField(default=0)
     active = models.BooleanField(default=True)
     date = models.DateTimeField(auto_created=True)
@@ -269,7 +264,7 @@ class Profile(models.Model):
         super(Profile, self).save(*args, **kwargs)
 
     def __unicode__(self):
-        return "%s" % self.user.name
+        return "%s" % self.user.pubkey
 
     @property
     def filled(self):
@@ -285,82 +280,18 @@ class Profile(models.Model):
             prof.save()
 
 
-class UserCreationForm(forms.ModelForm):
-    """A form for creating new users."""
-    password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
-    password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
-
-    class Meta:
-        model = User
-        fields = ('email', 'name')
-
-    def clean_password2(self):
-        # Check that the two password entries match
-        password1 = self.cleaned_data.get("password1")
-        password2 = self.cleaned_data.get("password2")
-        if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("Passwords don't match")
-        return password2
-
-    def save(self, commit=True):
-        # Save the provided password in hashed format
-        user = super(UserCreationForm, self).save(commit=False)
-        user.set_password(self.cleaned_data["password1"])
-        if commit:
-            user.save()
-        return user
-
-
 class UserChangeForm(forms.ModelForm):
     """A form for updating users."""
-    password = ReadOnlyPasswordHashField()
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'name', 'type', 'is_active', 'is_admin', 'is_staff']
-
-    def clean_password(self):
-        # Regardless of what the user provides, return the initial value.
-        # This is done here, rather than on the field, because the
-        # field does not have access to the initial value
-        return self.initial["password"]
+        fields = ['type', 'is_active', 'is_admin', 'is_staff']
 
 
 class ProfileInline(admin.StackedInline):
     model = Profile
     fields = ["location", "website", "scholar", "twitter_id", "message_prefs", "my_tags", "watched_tags", "info"]
 
-
-class BiostarUserAdmin(UserAdmin):
-    # The forms to add and change user instances
-    form = UserChangeForm
-    add_form = UserCreationForm
-
-    # The fields to be used in displaying the User model.
-    # These override the definitions on the base UserAdmin
-    # that reference specific fields on auth.User.
-    list_display = ('name', 'id', 'email', 'type', 'is_admin', 'is_staff')
-    list_filter = ('is_admin',)
-    fieldsets = (
-        (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('name', 'status', 'type')}),
-        ('Permissions', {'fields': ('is_admin', 'is_staff')}),
-    )
-    # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
-    # overrides get_fieldsets to use this attribute when creating a user.
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'name', 'type', 'password1', 'password2')}
-        ),
-    )
-    search_fields = ('email', 'name',)
-    ordering = ('id', 'name', 'email',)
-    filter_horizontal = ()
-    inlines = [ProfileInline]
-
-# Register in the admin interface.
-admin.site.register(User, BiostarUserAdmin)
 
 # Data signals
 from django.db.models.signals import post_save

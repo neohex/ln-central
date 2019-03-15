@@ -503,7 +503,7 @@ class Subscription(models.Model):
     objects = SubscriptionManager()
 
     def __unicode__(self):
-        return "%s to %s" % (self.user.name, self.post.title)
+        return "%s to %s" % (self.user.pubkey, self.post.title)
 
     def save(self, *args, **kwargs):
 

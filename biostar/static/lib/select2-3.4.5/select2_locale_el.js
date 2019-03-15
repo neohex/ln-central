@@ -1,7 +1,7 @@
 /**
  * Select2 <Language> translation.
  * 
- * Author: Your Name <your@email>
+ * Author: Your Name <your@pubkey>
  */
 (function ($) {
     "use strict";

@@ -53,8 +53,8 @@ located in ``live/custom.py``. Into this new django settings module place the fo
 This line will ensure that all the default variable are loaded from the base module. We
 can now selectively override one or more of these base variables.
 
-By default the emails are printed to the console.
-To use a typical SMTP based email service add the following to your custom settings module so
+By default the pubkeys are printed to the console.
+To use a typical SMTP based pubkey service add the following to your custom settings module so
 that the entire file looks like::
 
     from biostar.settings.base import *
@@ -77,7 +77,7 @@ a slash like so ``live.custom`` find and override the line to look like this::
 In this environment file you may also override other variables. Notably
 find the ``EMAIL_HOST``, ``EMAIL_PORT``, ``EMAIL_USER``, ``EMAIL_PASSWORD`` variables and
 fill in the values that are specific to your internet provider. If you get an
-error sending emails then this information is not set properly.
+error sending pubkeys then this information is not set properly.
 
 To use the new environment to start
 the site by sourcing this script instead of the default one.
@@ -85,11 +85,11 @@ You will need to run this once per terminal::
 
     source live/custom.env
 
-To test that the email was set up correctly::
+To test that the pubkey was set up correctly::
 
-    python manage.py test_email
+    python manage.py test_pubkey
 
-This command will send a test email to the email address listed in ``ADMIN_EMAIL`` in the environment file.
+This command will send a test pubkey to the pubkey address listed in ``ADMIN_EMAIL`` in the environment file.
 
 A typical site initialization would be::
 

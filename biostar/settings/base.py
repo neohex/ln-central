@@ -110,7 +110,7 @@ FLATPAGE_IMPORT_DIR = abspath(HOME_DIR, "import", "pages")
 WHOOSH_INDEX = abspath(LIVE_DIR, "whoosh_index")
 
 # These settings create an admin user.
-# The default password is the SECRET_KEY.
+
 ADMIN_NAME = get_env("BIOSTAR_ADMIN_NAME", __DEFAULT_BIOSTAR_ADMIN_NAME)
 ADMIN_EMAIL = get_env("BIOSTAR_ADMIN_EMAIL", __DEFAULT_BIOSTAR_ADMIN_EMAIL)
 ADMIN_LOCATION = "Anytown, USA"
@@ -297,7 +297,8 @@ INSTALLED_APPS = [
     # External apps.
     'haystack',  # Modular search for Django
     'crispy_forms',  # application that lets you easily build, customize and reuse forms
-    'djcelery',  # "queue, execution units, called tasks, are executed concurrently 
+    'djcelery',  # was used by Biostar for sending emails
+                 # "queue, execution units, called tasks, are executed concurrently 
                  # on a single or more worker servers using multiprocessing, Eventlet, 
                  # or gevent. Tasks can execute asynchronously (in the background) or 
                  # synchronously (wait until ready)"

@@ -19,7 +19,7 @@ class UserTest(TestCase):
         eq = self.assertEqual
 
         # Create a new usr
-        user = User.objects.create(email="foo@bar.com")
+        user = User.objects.create(pubkey="foo@bar.com")
 
         # A user will automatically get a profile
         eq (user.profile.user_id, user.id)

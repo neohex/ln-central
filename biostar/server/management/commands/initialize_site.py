@@ -47,24 +47,7 @@ def init_admin():
     # Add the admin user if it is not present.
     from biostar.apps.users.models import User
 
-    email = settings.ADMIN_EMAIL
     admin = User.objects.filter(id=1)
-    if not admin:
-        admin = User(
-            email=email,
-            is_staff=True,
-            is_admin=True,
-            name=settings.ADMIN_NAME,
-            type=User.ADMIN
-        )
-        admin.set_password(settings.SECRET_KEY)
-        admin.save()
-
-        admin.profile.location = settings.ADMIN_LOCATION
-        admin.profile.save()
-
-        logger.info(
-            "added admin user with email=%s, password=SECRET_KEY, name=%s" % (admin.email, admin.get_full_name()))
 
 def init_domain():
     # Initialize to the current site if it is not present.

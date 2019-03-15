@@ -61,9 +61,6 @@ urlpatterns = patterns('',
     # Produces the moderator panel.
     url(r'^local/moderate/user/(?P<pk>\d+)/$', moderate.UserModeration.as_view(), name="user-moderation"),
 
-    # Email handlers
-    url(r'^local/email/', views.email_handler, name="email-handler"),
-
     # Search the body.
     url(r'^local/search/page/', search.Search.as_view(), name="search-page"),
 

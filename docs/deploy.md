@@ -21,7 +21,7 @@ Then subsequently override the various settings for the current deployment. For 
 
     from biostar.settings.base import *
     SITE_DOMAIN = "mysite.com"
-    SERVER_EMAIL = "myemail@mysite.com"
+    SERVER_EMAIL = "mypubkey@mysite.com"
 
 etc.
 

@@ -28,7 +28,7 @@ The site has been developed by scientists for scientists. It aims to
 address specific needs that scientific communities have.
 
  * Standard Q&A: post questions, answers, comments, user moderation, voting, badges, threaded discussions
- * Email integration: import previous posts from mailing lists, reply to posts via email
+ * Email integration: import previous posts from mailing lists, reply to posts via pubkey
  * RSS Planet: feed aggregation from different sources
  * External authentication: authenticate users with a different web service
 

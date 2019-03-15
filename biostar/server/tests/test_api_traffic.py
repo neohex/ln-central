@@ -53,15 +53,13 @@ class ApiTrafficTest(TestCase):
 
     def create_a_user(self):
         with self.settings(CAPTCHA=False, TRUST_VOTE_COUNT=0):
-            email_address = 'test@test.com'
+            pubkey_address = 'test@test.com'
             self.client.post(reverse("account_signup"),
                              {
-                                 'email': email_address,
-                                 'password1': 'password',
-                                 'password2': 'password',
+                                 'pubkey': pubkey_address,
                                  'follow': True,
                              },)
-        return User.objects.get(email=email_address)
+        return User.objects.get(pubkey=pubkey_address)
 
     @staticmethod
     def create_a_post(user):

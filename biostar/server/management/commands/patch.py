@@ -58,9 +58,6 @@ class Command(BaseCommand):
         if options['stuff']:
             stuff()
 
-        if options['users']:
-            patch_users()
-
         if options['bump']:
             bump()
 
@@ -88,7 +85,7 @@ def export_data(path, limit):
     def serialize_user(user):
         prof = user.profile
         return dict(
-            name=user.name, id=user.id, email=user.email,
+            name=user.name, id=user.id, pubkey=user.pubkey,
             status=user.get_status_display(),
             is_active=user.is_active,
             is_admin=user.is_admin,
@@ -177,7 +174,7 @@ def stuff():
     users = User.objects.filter(cond)
 
     for user in users:
-        print user.id, user.email
+        print user.id, user.pubkey
 
 
 def tagger(pattern, dry):
@@ -219,7 +216,7 @@ def merge_users(fname):
         elems = map(string.strip, elems)
         first, rest = elems[0], elems[1:]
         if first in rest:
-            msg = "master email among aliases: %s" % elems
+            msg = "master pubkey among aliases: %s" % elems
             raise Exception(msg)
         return first, rest
 
@@ -229,8 +226,8 @@ def merge_users(fname):
 
     for key, values in pairs.items():
 
-        master = User.objects.get(email=key)
-        aliases = User.objects.filter(email__in=values).order_by('profile__date_joined')
+        master = User.objects.get(pubkey=key)
+        aliases = User.objects.filter(pubkey__in=values).order_by('profile__date_joined')
 
         if not aliases:
             print("*** no matching aliases for master: %s, aliases: %s" % (
@@ -270,16 +267,6 @@ def merge_users(fname):
         # Delete the users
         aliases.delete()
 
-
-def patch_users():
-    from biostar.apps.users.models import User, Profile
-    from biostar.const import DEFAULT_MESSAGES
-    users = User.objects.all()
-    # users.update(message_prefs=DEFAULT_MESSAGES)
-    for user in users:
-        user.email = "%s@lvh.me" % user.id
-        user.set_password(user.email)
-        user.save()
 
 def bump(pk=None):
     from biostar.apps.posts.models import Post

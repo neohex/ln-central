@@ -19,7 +19,7 @@ recommended installation is via ``virtualenv`` and ``pip``::
 
 Visit ``http://localhost:8080`` to see the site loaded with default settings.
 
-The default admin is ``1@lvh.me`` password ``1@lvh.me``. The default email
+The default admin is ``1@lvh.me`` password ``1@lvh.me``. The default pubkey
 handler will print to the console. You can reset the password
 for any user then copy paste the password reset url into the browser.
 
@@ -48,25 +48,25 @@ List the RSS feeds in a file then::
 Sending Emails
 --------------
 
-By default Biostar can send email via the standard email facilities that Django provides see
-https://docs.djangoproject.com/en/dev/topics/email/
+By default Biostar can send pubkey via the standard pubkey facilities that Django provides see
+https://docs.djangoproject.com/en/dev/topics/pubkey/
 
-Biostar offers a few helper functions that allow emailing via Amazon SES::
+Biostar offers a few helper functions that allow pubkeying via Amazon SES::
 
-    # Amazon SES email settings.
+    # Amazon SES pubkey settings.
     EMAIL_USE_TLS = True
     EMAIL_BACKEND = 'biostar.mailer.SSLEmailBackend'
 
-Note: sending an email blocks the server thread! This means that the server process
-allocated to sending email will stop serving other users while the email is being sent.
+Note: sending an pubkey blocks the server thread! This means that the server process
+allocated to sending pubkey will stop serving other users while the pubkey is being sent.
 For low traffic sites this
 may not be a problem but for higher traffic sites the approach is not feasible.
 
-To address that Biostar also implements a Celery based email backend that queues up and sends
-emails as separate worker processes, independently of the main server. Setting that
+To address that Biostar also implements a Celery based pubkey backend that queues up and sends
+pubkeys as separate worker processes, independently of the main server. Setting that
 up is very simple via the settings::
 
-    # Amazon SES email sent asynchronously.
+    # Amazon SES pubkey sent asynchronously.
     EMAIL_USE_TLS = True
     EMAIL_BACKEND = 'biostar.mailer.CeleryEmailBackend'
     CELERY_EMAIL_BACKEND = 'biostar.mailer.SSLEmailBackend'
@@ -75,42 +75,42 @@ up is very simple via the settings::
 Receiving Emails
 ----------------
 
-Biostar can be set up to receive emails and deposit them into threads. This allows users to use emails
+Biostar can be set up to receive pubkeys and deposit them into threads. This allows users to use pubkeys
 to post to Biostar.
 
-To enable this functionality the site admins need to set up an email system that
+To enable this functionality the site admins need to set up an pubkey system that
 can, when a matching and address can perform a POST action to a predetermined URL.
-For example when delivering email via ``postmaster`` utility
+For example when delivering pubkey via ``postmaster`` utility
 on linux the ``etc/alias`` file would need to contain::
 
-    reply: "| curl -F key='123' -F body='<-' https://www.mybiostar.org/local/email/
+    reply: "| curl -F key='123' -F body='<-' https://www.mybiostar.org/local/pubkey/
 
 The above line will trigger a submit action
-every time that an email is received that matches the address words ``reply``.
+every time that an pubkey is received that matches the address words ``reply``.
 For example: ``reply@server.org``
 
 
-Important: Biostar will send emails as ``reply+1238429283+code@server.org``. The segment between the
+Important: Biostar will send pubkeys as ``reply+1238429283+code@server.org``. The segment between the
 two ``+`` signs is unique to the user and post and are required for the
-post to be inserted in the correct location. The email server
-will have to properly interpret the ``+`` signs and route this email via the ``reply@server.org`` address.
+post to be inserted in the correct location. The pubkey server
+will have to properly interpret the ``+`` signs and route this pubkey via the ``reply@server.org`` address.
 Now the default installations of ``postmaster`` already work this way, and
-it is an internal settings to ``postmaster``. This pattern that routes the email
+it is an internal settings to ``postmaster``. This pattern that routes the pubkey
 must match the ``EMAIL_REPLY_PATTERN`` setting in Biostar.
 
 The ``key=123`` parameter is just an additional measure that
-prevent someone flooding the email service. The value is set via
+prevent someone flooding the pubkey service. The value is set via
 the ``EMAIL_REPLY_SECRET_KEY`` settings.
 
-The default settings that govern the email reply service are the following::
+The default settings that govern the pubkey reply service are the following::
 
     # What address pattern will handle the replies.
     EMAIL_REPLY_PATTERN = "reply+%s+code@biostars.io"
 
-    # The format of the email address that is sent
+    # The format of the pubkey address that is sent
     EMAIL_FROM_PATTERN = u'''"%s on Biostar" <%s>'''
 
-    # The secret key that is required to parse the email
+    # The secret key that is required to parse the pubkey
     EMAIL_REPLY_SECRET_KEY = "abc"
 
     # The subject of the reply goes here

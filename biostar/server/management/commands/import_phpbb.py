@@ -93,8 +93,8 @@ def get_all_users(uname):
     for row in rows:
         uid = int(row[0])
         name = row[7]
-        email = row[12]
-        temp = [uid,name,email]
+        pubkey = row[12]
+        temp = [uid,name,pubkey]
         allusers.append(temp)
 
     f.close()
@@ -108,15 +108,15 @@ def get_user(uid, allusers):
     for row in allusers:
         if row[0] == uid:
             name = row[1]
-            email = row[2]
+            pubkey = row[2]
             found=1
             break
 
     try:
-        user = User.objects.get(email=email)
+        user = User.objects.get(pubkey=pubkey)
         logger.info('Fetched user: %s' % user.name)
     except:
-        user = User(email=email, name=name)
+        user = User(pubkey=pubkey, name=name)
         user.save()
         logger.info('Created user: %s' % user.name)
 

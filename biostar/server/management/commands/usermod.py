@@ -18,11 +18,8 @@ class Command(BaseCommand):
         make_option('-u', dest='uid',
                     help='Select user by id'),
 
-        make_option('-e', dest='email',
-                    help='Select user by email'),
-
-        make_option('-p', dest='passwd',
-                    help='sets a new password for the user'),
+        make_option('-e', dest='pubkey',
+                    help='Select user by pubkey'),
     )
 
     def handle(self, *args, **options):
@@ -30,19 +27,11 @@ class Command(BaseCommand):
         user = None
 
         uid = options['uid']
-        email = options['email']
+        pubkey = options['pubkey']
 
         if uid:
              user = User.objects.get(pk=uid)
-        elif email:
-             user = User.objects.get(email=email)
+        elif pubkey:
+             user = User.objects.get(pubkey=pubkey)
 
-        passwd = options['passwd']
-        if user and passwd:
-            set_passwd(user, passwd)
-
-def set_passwd(user, passwd):
-    logger.info("settings the password for user %s" % user)
-    user.set_password(passwd)
-    user.save()
 

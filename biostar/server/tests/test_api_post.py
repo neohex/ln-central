@@ -20,7 +20,7 @@ class ApiPostTest(TestCase):
         haystack_logger.setLevel(logging.CRITICAL)
 
         # Create a user.
-        self.user = User.objects.create(email='test@test.com', password='...')
+        self.user = User.objects.create(pubkey='test@test.com',)
 
         # Create a post.
         title = "Post 1, title needs to be sufficiently long"

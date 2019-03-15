@@ -102,5 +102,5 @@ def create_user_award(user):
 
             date = user.profile.last_login
             award = Award.objects.create(user=user, badge=badge, date=date, context=context)
-            logger.info("award %s created for %s" % (award.badge.name, user.email))
+            logger.info("award %s created for %s" % (award.badge.name, user.pubkey))
 

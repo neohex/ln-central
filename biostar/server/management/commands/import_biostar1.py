@@ -209,7 +209,7 @@ class Command(BaseCommand):
         log("migrating users from %s" % fname)
         stream = csv.DictReader(file(fname), delimiter=b'\t')
 
-        email_set, uid_seen = set(), set()
+        pubkey_set, uid_seen = set(), set()
 
         users = dict((u.id, u) for u in User.objects.all())
 
@@ -227,7 +227,7 @@ class Command(BaseCommand):
             if uid == 1:
                 continue
 
-            email = get(row, 'email')
+            pubkey = get(row, 'pubkey')
             name = get(row, 'display_name')
             score = get(row, 'score')
             scholar = get(row, 'scholar')
@@ -239,18 +239,10 @@ class Command(BaseCommand):
             last_visited = get(row, 'last_visited')
 
             # Start populating the user.
-            user = User(id=uid, email=email)
-            user.email = email or "%s@xyz.xyz" % uid
-            user.name = name
+            user = User(id=uid, pubkey=pubkey)
+            user.pubkey = "%s@xyz.xyz" % uid
             user.score = score
             user.type = user_type
-
-            # Original email were not required to be unique.
-            if user.email in email_set:
-                user.email = "%s@biostars.org" % uid
-
-            # Adds the email to the seen bucket.
-            email_set.add(user.email)
 
             user.is_active = is_active
             user.save()
@@ -266,19 +258,8 @@ class Command(BaseCommand):
             prof.info = file(about_me_file, 'rt').read()
             prof.save()
 
-            log("migrated user %s:%s" % (user.id, user.email))
+            log("migrated user %s" % user.id)
 
-        if settings.DEBUG:
-            for id in (2, 10,):
-                try:
-                    # We use this during debugging to make it easy to log in as someone else
-                    bot = User.objects.get(id=id)
-                    log(
-                        "updated user %s with email=%s, name=%s, password=SECRET_KEY," % (bot.id, bot.email, bot.name))
-                    bot.set_password(settings.SECRET_KEY)
-                    bot.save()
-                except Exception, exc:
-                    pass
 
         log("migrated %s users" % User.objects.all().count())
 

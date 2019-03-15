@@ -14,7 +14,7 @@ logging.disable(logging.WARNING)
 user_count = lambda: User.objects.all().count()
 post_count = lambda: Post.objects.all().count()
 subs_count = lambda: Subscription.objects.all().count()
-get_user = lambda x: User.objects.get(email=x)
+get_user = lambda x: User.objects.get(pubkey=x)
 
 haystack_logger = logging.getLogger('haystack')
 
@@ -99,20 +99,6 @@ class UserTest(TestCase):
         self.assertTrue(Subscription.objects.get_subs(post).filter(user=post.author).count() == 1)
         return post
 
-    @unittest.skip("2019-01-04 create_new_post does not redirect to a post")
-    def test_user_new_post(self):
-        "Test that each user can create a new post."
-        eq = self.assertEqual
-
-        for email, passwd in USER_DATA:
-            self.login(email, passwd)
-            for title, post_type, tag_val in POST_DATA[:settings.MAX_TOP_POSTS_NEW_USER]:
-                # Create unique titles
-                title = title + email
-                self.create_new_post(title=title, post_type=post_type, tag_val=tag_val)
-                post = Post.objects.get(title=title)
-                self.get_post(post.id)
-            self.logout()
 
     @unittest.skip("2019-01-04 create_new_post does not redirect to a post")
     def test_user_answer(self):
@@ -155,35 +141,6 @@ class UserTest(TestCase):
         user4 = get_user(EMAIL_1)
         self.assertEqual(user1.score + 1, user4.score)
 
-
-    @unittest.skip("2019-01-04 create_new_post does not redirect to a post")
-    def test_stress(self):
-        "Stress test. Render multiple nested posts"
-        emails = ["%s@test.org" % x for x in range(10)]
-        passwd = "1234567"
-        for email in emails:
-            self.sign_up(email, passwd)
-
-
-        with self.settings(TRUST_VOTE_COUNT=0, MAX_TOP_POSTS_TRUSTED_USER=100, MAX_POSTS_TRUSTED_USER=100):
-            top_types = [Post.QUESTION, Post.JOB, Post.FORUM, Post.PAGE]
-            for count in range(5):
-                email = random.choice(emails)
-                post_type = random.choice(top_types)
-                self.login(email, passwd)
-
-                self.create_new_post(title=TITLE_1, post_type=post_type, tag_val=TAG_VAL_1)
-                self.logout()
-
-            for count in range(10):
-                valid_ids = [p.id for p in Post.objects.all()]
-                email = random.choice(emails)
-                self.login(email, passwd)
-                id = random.choice(valid_ids)
-                self.get_post(pk=id)
-                post = Post.objects.get(pk=id)
-                self.create_new_answer(post)
-                self.logout()
 
 
 class SiteTest(SimpleTestCase):

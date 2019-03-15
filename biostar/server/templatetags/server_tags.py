@@ -69,19 +69,19 @@ def on(value):
 
 @register.filter
 def latest(value):
-    "Attempts to hide parts of the email"
+    "Attempts to hide parts of the pubkey"
     print "-" * 10, value
     return value if value else "Latest"
 
 
 @register.filter
-def hide_email(value):
-    "Attempts to hide parts of the email"
+def hide_pubkey(value):
+    "Attempts to hide parts of the pubkey"
     try:
         addr, host = value.split('@')
         hide = '*' * (len(addr) - 1)
-        email = addr[0] + hide + '@' + host
-        return email
+        pubkey = addr[0] + hide + '@' + host
+        return pubkey
     except Exception, exc:
         return value
 
@@ -89,10 +89,10 @@ def hide_email(value):
 def avataaar(user, size=80):
     if user.is_suspended:
         # Removes spammy images for suspended users
-        email = 'suspended@biostars.org'
+        pubkey = 'suspended@biostars.org'
     else:
-        email = user.email.encode('utf8')
-    hash = hashlib.md5(email).hexdigest()
+        pubkey = user.pubkey.encode('utf8')
+    hash = hashlib.md5(pubkey).hexdigest()
 
     avataaars_url = settings.AVATAR_SERVER_NAME.rstrip('/') + "/v2/avataaars/%s.svg" % hash
 
@@ -107,10 +107,10 @@ def avataaar(user, size=80):
 def coolname(user):
     if user.is_suspended:
         # Removes spammy images for suspended users
-        email = 'suspended@biostars.org'
+        pubkey = 'suspended@biostars.org'
     else:
-        email = user.email.encode('utf8')
-    hash = hashlib.md5(email).digest()
+        pubkey = user.pubkey.encode('utf8')
+    hash = hashlib.md5(pubkey).digest()
     
     NUM_WORDS = 3
     max_seed = coolname_lib.get_combinations_count(NUM_WORDS)

@@ -86,17 +86,20 @@ class LongForm(forms.Form):
 
     title = forms.CharField(
         label="Post Title",
+        required=True,
         max_length=200, min_length=10, validators=[valid_title, english_only],
         help_text="Descriptive titles promote better answers.")
 
     wallet_pubkey = forms.CharField(
         label="wallet_pubkey (temporary hack)",
+        required=True,
         max_length=200, min_length=1,
         help_text="TODO: Remove this field, this is for testing only")
 
     post_type = forms.ChoiceField(
         label="Post Type",
-        choices=POST_CHOICES, help_text="Select a post type: Question, Forum, Job, Blog")
+        required=True,
+        choices=POST_CHOICES, help_text="Select a post type: Question, Job Offer, Tutorial, Blog, Meta")
 
     tag_val = forms.CharField(
         label="Post Tags",
@@ -191,8 +194,7 @@ class NewPost(FormView):
 
         # TEMPORARY HACK: create new user
         user = User()
-        user.email = "%s@xyz2.xyz" % util.make_uuid()
-        user.name = "name"
+        user.pubkey = "%s@xyz2.xyz" % util.make_uuid()
         user.score = 0
         user.save()
 

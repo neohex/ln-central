@@ -60,8 +60,8 @@ class PostTest(TestCase):
 
         # Create an admin user and a post.
         title = "Hello Posts!"
-        email = "john@this.edu"
-        jane = User.objects.create(email=email)
+        pubkey = "john@this.edu"
+        jane = User.objects.create(pubkey=pubkey)
         html = "<b>Hello World!</b>"
         post = Post(title=title, author=jane, type=Post.FORUM, content=html)
         post.save()
@@ -93,8 +93,8 @@ class PostTest(TestCase):
 
         # Create an admin user and a post.
         title = "Hello Posts!"
-        email = "john@this.edu"
-        jane = User.objects.create(email=email)
+        pubkey = "john@this.edu"
+        jane = User.objects.create(pubkey=pubkey)
         html = "<b>Hello World!</b>"
         post = Post(title=title, author=jane, type=Post.FORUM, content=html)
         post.save()
@@ -112,8 +112,8 @@ class PostTest(TestCase):
         eq(sub.post, post)
 
         # A new post triggers a message to the author.
-        email = "jane@this.edu"
-        john = User.objects.create(email=email)
+        pubkey = "jane@this.edu"
+        john = User.objects.create(pubkey=pubkey)
         answer = Post(author=john, parent=post, type=Post.ANSWER)
         answer.save()
 
@@ -122,8 +122,8 @@ class PostTest(TestCase):
         eq(answer.type, Post.ANSWER)
 
         # Add comment. The parent will override the post type.
-        email = "bob@this.edu"
-        bob = User.objects.create(email=email)
+        pubkey = "bob@this.edu"
+        bob = User.objects.create(pubkey=pubkey)
         comment = Post(author=bob, type=Post.FORUM, parent=answer)
         comment.save()
 

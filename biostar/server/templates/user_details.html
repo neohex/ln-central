@@ -40,7 +40,7 @@
                 </div>
 
                 <div style="font-size: smaller; padding:0px 0px 20px 20px;">
-                    Your pen name and portrait are generated with the salted hash of your wallet pubkey. 
+                    Pen name and portrait are generated from identity_pubkey of the LN wallet that was used to make actions on this website. 
                 </div>
 
             </div>
@@ -105,9 +105,9 @@
 
                     <dt>Email:</dt>
                     {% if target.has_ownership %}
-                        <dd>{{ target.email }}</dd>
+                        <dd>{{ target.pubkey }}</dd>
                     {% else %}
-                        <dd>{{ target.email|hide_email }}</dd>
+                        <dd>{{ target.pubkey|hide_pubkey }}</dd>
                     {% endif %}
 
 

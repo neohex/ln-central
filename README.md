@@ -55,11 +55,9 @@ Visit `http://www.lvh.me:8080` to see the site loaded with demo data.
 The `www.lvh.me` domain resolves to `127.0.0.1` your local host 
 with a proper domain name. You may just as well use `http://localhost:8080` or `http://127.0.0.1`.
 
-In the demo site the user emails are built from the database ids like so: `1@lvh.me`, `2@lvh.me`.
-The demo user passwords are identical to the emails
-and you may use these to log into your test site as any of the users.
+In the demo site the user pubkeys are built from the database ids like so: `1@lvh.me`, `2@lvh.me`.
 
-The user with the email `1@lvh.me` has staff level permissions and
+The user with the pubkey `1@lvh.me` has staff level permissions and
 can also access the admin interface at `http://www.lvh.me:8080/admin/`.
 
 Enjoy.

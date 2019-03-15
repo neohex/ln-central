@@ -55,7 +55,7 @@ And look for the output for the app ``[server]``, these commands will look like:
         sqlfix
         sitemap
         user_crawl
-        test_email
+        test_pubkey
         test_task
         patch
 
@@ -89,7 +89,7 @@ Frequently used commands::
     # Set the password for a user identified by their userid
     python manage.py usermod -u 2 -p abcde
 
-    # Set the password for a user identified by their email
+    # Set the password for a user identified by their pubkey
     python manage.py usermod -e foo@bar -p abcde
 
     # Rebuild the entire search index
@@ -106,14 +106,14 @@ Frequently used commands::
 
 ### Merging Users
 
-Create a space separated text file that contains the emails in the form::
+Create a space separated text file that contains the pubkeys in the form::
 
-    master_email alias_email1 alias_email2 ...
+    master_pubkey alias_pubkey1 alias_pubkey2 ...
 
 Then run the command::
 
 	python manage.py patch --merge_users yourfile.txt
 
 The command will move all content, votes and accounts associated with users identified by
-the aliases into the master email. It then deletes the alias users. The effect of this
+the aliases into the master pubkey. It then deletes the alias users. The effect of this
 command cannot be reverted other than loading up a backup database dump.
