@@ -30,9 +30,6 @@ class UserEditForm(forms.Form):
     website = forms.URLField(required=False, max_length=100,
                              help_text="The URL to your website (optional)")
 
-    twitter_id = forms.CharField(required=False, max_length=15,
-                                 help_text="Your twitter id (optional)")
-
     scholar = forms.CharField(required=False, max_length=15,
                               help_text="Your Google Scholar ID (optional)")
 
@@ -67,7 +64,6 @@ class UserEditForm(forms.Form):
                     css_class="col-md-offset-3 col-md-6",
                 ),
                 Div(
-                    Div('twitter_id', css_class="col-md-6"),
                     Div('scholar', css_class="col-md-6"),
                     Div('digest_prefs', css_class="col-md-6"),
                     Div('message_prefs', css_class="col-md-6"),
@@ -96,7 +92,7 @@ class EditUser(FormView):
     template_name = ""
     form_class = UserEditForm
     user_fields = "name email".split()
-    prof_fields = "location website info scholar my_tags watched_tags twitter_id message_prefs digest_prefs".split()
+    prof_fields = "location website info scholar my_tags watched_tags message_prefs digest_prefs".split()
 
     def get(self, request, *args, **kwargs):
         target = User.objects.get(pk=self.kwargs['pk'])

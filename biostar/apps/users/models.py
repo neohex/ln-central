@@ -200,9 +200,6 @@ class Profile(models.Model):
     # Google scholar ID
     scholar = models.CharField(default="", max_length=255, blank=True)
 
-    # Twitter ID
-    twitter_id = models.CharField(default="", max_length=255, blank=True)
-
     # This field is used to select content for the user.
     my_tags = models.TextField(default="", max_length=255, blank=True)
 
@@ -234,7 +231,7 @@ class Profile(models.Model):
 
     def clear_data(self):
         "Actions to take when suspending or banning users"
-        self.website = self.twitter_id = self.info = self.location = ''
+        self.website = self.info = self.location = ''
         self.save()
 
     def add_tags(self, text):
@@ -290,7 +287,7 @@ class UserChangeForm(forms.ModelForm):
 
 class ProfileInline(admin.StackedInline):
     model = Profile
-    fields = ["location", "website", "scholar", "twitter_id", "message_prefs", "my_tags", "watched_tags", "info"]
+    fields = ["location", "website", "scholar", "message_prefs", "my_tags", "watched_tags", "info"]
 
 
 # Data signals

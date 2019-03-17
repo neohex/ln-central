@@ -24,11 +24,6 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'users', ['Tag'])
 
-        # Adding field 'Profile.twitter_id'
-        db.add_column(u'users_profile', 'twitter_id',
-                      self.gf('django.db.models.fields.CharField')(default=u'', max_length=255, blank=True),
-                      keep_default=False)
-
         # Adding field 'Profile.watched_tags'
         db.add_column(u'users_profile', 'watched_tags',
                       self.gf('django.db.models.fields.CharField')(default=u'', max_length=100, blank=True),
@@ -50,9 +45,6 @@ class Migration(SchemaMigration):
 
         # Deleting model 'Tag'
         db.delete_table(u'users_tag')
-
-        # Deleting field 'Profile.twitter_id'
-        db.delete_column(u'users_profile', 'twitter_id')
 
         # Deleting field 'Profile.watched_tags'
         db.delete_column(u'users_profile', 'watched_tags')
@@ -88,7 +80,6 @@ class Migration(SchemaMigration):
             'my_tags': ('django.db.models.fields.TextField', [], {'default': "u''", 'max_length': '255', 'blank': 'True'}),
             'scholar': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '255', 'blank': 'True'}),
             'tags': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['users.Tag']", 'symmetrical': 'False', 'blank': 'True'}),
-            'twitter_id': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '255', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['users.User']", 'unique': 'True'}),
             'uuid': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255', 'db_index': 'True'}),
             'watched_tags': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '100', 'blank': 'True'}),
