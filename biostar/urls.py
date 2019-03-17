@@ -52,9 +52,6 @@ urlpatterns = patterns('',
     # Edit an existing post.
     url(r'^p/edit/(?P<pk>\d+)/$', EditPost.as_view(), name="post-edit"),
 
-    # Vote display.
-    url(r'^local/votes/$', views.VoteList.as_view(), name="user-votes"),
-
     # Produces the moderator panel.
     url(r'^local/moderate/post/(?P<pk>\d+)/$', moderate.PostModeration.as_view(), name="post-moderation"),
 
@@ -67,13 +64,8 @@ urlpatterns = patterns('',
     # Search the titles.
     url(r'^local/search/title/', search.search_title, name="search-title"),
 
-    # Digest news manager.
-    url(r'^digest/manage/', DigestManager.as_view() , name="digest_manage"),
-    url(r'^digest/unsubscribe/(?P<uuid>\w+)/', unsubscribe , name="digest_unsubscribe"),
-
-    # Returns suggested tags
+     # Returns suggested tags
     url(r'^local/search/tags/', search.suggest_tags, name="suggest-tags"),
-
 
     # Returns the planet view
     url(r'^planet/$', BlogPostList.as_view(), name="planet"),
@@ -81,24 +73,7 @@ urlpatterns = patterns('',
     # Vote submission.
     url(r'^x/vote/$', ajax.vote_handler, name="vote-submit"),
 
-    # Redirecting old posts urls from previous versions of Biostar
-    url(r'^post/redirect/(?P<pid>\d+)/$', views.post_redirect),
-    url(r'^post/show/(?P<pid>\d+)/$', views.post_redirect),
-    url(r'^post/show/(?P<pid>\d+)/([-\w]+)/$', views.post_redirect),
-    url(r'^questions/(?P<pid>\d+)/$', views.post_remap_redirect),
-    url(r'^questions/(?P<pid>\d+)/([-\w]+)/$', views.post_remap_redirect),
-    url(r'^questions/tagged/(?P<tag>.+)/$',views.tag_redirect),
-
-    # Api.
-    url(r'^api/traffic/$', api.traffic, name='api-traffic'),
-    url(r'^api/user/(?P<id>\d+)/$', api.user_details, name='api-user'),
-    url(r'^api/post/(?P<id>\d+)/$', api.post_details, name='api-post'),
-    url(r'^api/vote/(?P<id>\d+)/$', api.vote_details, name='api-vote'),
-    url(r'^api/stats/day/(?P<day>\d+)/$', api.daily_stats_on_day, name='api-stats-on-day'),
-    url(r'^api/stats/date/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/$',
-        api.daily_stats_on_date, name='api-stats-on-date'),
-
-     # Local robots.txt.
+    # Local robots.txt.
     url(r'^robots\.txt$', TemplateView.as_view(template_name="robots.txt", content_type='text/plain'), name='robots'),
 
 )
