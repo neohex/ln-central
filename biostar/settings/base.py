@@ -360,7 +360,7 @@ DAILY_DIGEST_TITLE = '[biostar daily digest] %s'
 WEEKLY_DIGEST_TITLE = '[biostar weekly digest] %s'
 
 # The default CSS file to load.
-SITE_STYLE_CSS = "biostar.style.v2.less"
+SITE_STYLE_CSS = "biostar.style.v2.css"
 
 # Set it to None if all posts should be accesible via the Latest tab.
 SITE_LATEST_POST_LIMIT = None
@@ -375,12 +375,6 @@ POST_VIEW_MINUTES = 5
 
 # Default  expiration in seconds.
 CACHE_TIMEOUT = 60
-
-# Django precompressor settings.
-COMPRESS_PRECOMPILERS = (
-    ('text/coffeescript', 'coffee --compile --stdio'),
-    ('text/less', 'lessc {infile} {outfile}'),
-)
 
 COMPRESS_OFFLINE_CONTEXT = {
     'STATIC_URL': STATIC_URL,
