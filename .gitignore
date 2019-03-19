@@ -3,7 +3,6 @@
 .DS_Store
 .idea/*
 /import/*
-/live/*
 /conf/*.env
 /docs/_build
 
@@ -24,3 +23,19 @@ biostar/settings/logger_*.py
 
 # Generated configs
 conf/server/biostar.nginx.conf
+
+# virtualenv files
+.Python
+reader-env/lib
+reader-env/bin
+reader-env/djcelery
+reader-env/include
+reader-env/share
+writer-env/lib
+writer-env/bin
+writer-env/include
+writer-env/share
+
+# deployment files
+reader-env/project-basedir/live
+writer-env/project-basedir/live

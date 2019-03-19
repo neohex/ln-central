@@ -1,32 +1,5 @@
 #!/bin/bash
 
-# Set defaults for environment variables.
-
-if [ -z "$DJANGO_SETTINGS_MODULE" ]; then
-    export DJANGO_SETTINGS_MODULE=biostar.settings.base
-fi
-
-if [ -z "$JSON_DATA_FIXTURE" ]; then
-   export JSON_DATA_FIXTURE="import/default-fixture.json.gz"
-fi
-
-if [ -z "$DATABASE_NAME" ]; then
-   export DATABASE_NAME="live/biostar.db"
-fi
-
-if [ -z "$BIOSTAR_HOSTNAME" ]; then
-   export BIOSTAR_HOSTNAME="www.lvh.me:8080"
-fi
-
-if [ -z "$PYTHON" ]; then
-   export PYTHON="python -W ignore"
-fi
-
-VERBOSITY=1
-
-# Stop on errors or missing environment variables.
-set -ue
-
 if [ $# == 0 ]; then
     echo ''
     echo 'Usage:'
@@ -38,6 +11,9 @@ if [ $# == 0 ]; then
     echo "  $ $(basename $0) init import run"
     echo ''
     echo 'Commands:'
+    echo ''
+    echo '  install   - create virtual environment and install the requirements'
+    echo '              install cannot be combined with other commands'
     echo ''
     echo '  init      - initializes the database'
     echo '  run       - runs the development server'
@@ -58,7 +34,50 @@ if [ $# == 0 ]; then
     echo "DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE"
     echo "DATABASE_NAME=$DATABASE_NAME"
     echo ''
+    exit
 fi
+
+if [ "$1" = "install" ]; then
+	virtualenv reader-env -p python2.7
+	cd reader-env
+	. bin/activate
+	pip install --upgrade -r requirements/base.txt
+	exit
+fi
+
+# Active environment
+cd ./reader-env
+VIRTUAL_ENV_DISABLE_PROMPT=1 source ./bin/activate
+cd ./project-basedir
+
+# Set defaults for environment variables.
+
+if [ -z "$DJANGO_SETTINGS_MODULE" ]; then
+    export DJANGO_SETTINGS_MODULE=biostar.settings.base
+fi
+
+if [ -z "$JSON_DATA_FIXTURE" ]; then
+   export JSON_DATA_FIXTURE="./reader-env/django-basedir/import/default-fixture.json.gz"
+fi
+
+if [ -z "$DATABASE_NAME" ]; then
+   export DATABASE_NAME="live/biostar.db"
+fi
+
+if [ -z "$BIOSTAR_HOSTNAME" ]; then
+   export BIOSTAR_HOSTNAME="www.lvh.me:8080"
+fi
+
+if [ -z "$PYTHON" ]; then
+   export PYTHON="python -W ignore"
+fi
+
+
+# after this point stop on errors or missing environment variables.
+set -ue
+
+VERBOSITY=1
+
 
 while (( "$#" )); do
 
@@ -105,6 +124,8 @@ while (( "$#" )); do
 
     if [ "$1" = "init" ]; then
         echo "*** Initializing server on $BIOSTAR_HOSTNAME with $DJANGO_SETTINGS_MODULE"
+	mkdir live
+
         echo "*** Running all tests"
         #$PYTHON manage.py test --noinput -v $VERBOSITY --settings=$DJANGO_SETTINGS_MODULE
         $PYTHON manage.py syncdb -v $VERBOSITY --noinput --settings=$DJANGO_SETTINGS_MODULE

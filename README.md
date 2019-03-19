@@ -6,7 +6,7 @@
 [build-image]: https://travis-ci.org/ialbert/biostar-central.svg?branch=4.0
 [build-url]: https://travis-ci.org/ialbert/biostar-central/builds
 
-BioStar is a [Python][python] and [Django][django] based Q&A software.
+Biostar is a [Python][python] and [Django][django] based Q&A software.
 It is a simple, generic, flexible and extensible Q&A framework.
 
 The site has been developed by **scientists and for scientists**. It aims
@@ -42,10 +42,16 @@ The source for the documentation can be found in  the [docs](./docs) folder.
 
 ### Quick Start
 
-From the biostar source directory:
+Prerequisites:
+* Python 2.7
+* pip2.7 install virtualenv
+* Python 3
+* pip3 install virtualenv
 
-    # Install the requirements.
-    pip install --upgrade -r conf/requirements/base.txt
+From the Biostar source directory:
+
+    # Initialize virtual envrionment and install the requirements.
+    ./biostar.sh install
 
     # Initialize database, import test data, index for searching and run the server.
     ./biostar.sh init import index run
