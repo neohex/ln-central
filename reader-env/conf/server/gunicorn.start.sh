@@ -2,22 +2,42 @@
 set -ue
 
 # Required environmental variables:
-# * VIRTENV_DIR
-# * PROJECT_DIR
 # * SITE_NAME
 # * SITE_DOMAIN
 # * PG_HOST
 # * PG_PASSWORD
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CONF_DIR="$( cd $SCRIPT_DIR/.. && pwd )"
+VIRTENV_DIR="$( cd $SCRIPT_DIR/../.. && pwd )"
+BIOSTAR_HOME="$( cd $VIRTENV_DIR/project-basedir && pwd )"
+
+echo "SCRIPT_DIR : $SCRIPT_DIR"
+echo "CONF_DIR   : $CONF_DIR"
+echo "VIRTENV_DIR: $VIRTENV_DIR"
+echo "BIOSTAR_HOME: $BIOSTAR_HOME"
+
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 source $VIRTENV_DIR/bin/activate
 
-# This is required so that the default configuration file works.
-source $PROJECT_DIR/live/deploy.env
+# The django module to use.
+export DJANGO_SETTINGS_MODULE=deploy
+
+# This will be either the Sqlite or the Postgres database name.
+export DATABASE_NAME="biostar"
+
+# The level of verbosity for django commands.
+export VERBOSITY=1
+
+# The python executable to invoke.
+export PYTHON="python"
+
+# The django manager to run.
+export DJANGO_ADMIN=manage.py
 
 # Setting the various access logs.
-ACCESS_LOG=$PROJECT_DIR/live/logs/gunicorn-access.log
-ERROR_LOG=$PROJECT_DIR/live/logs/gunicorn-error.log
+ACCESS_LOG=$BIOSTAR_HOME/live/logs/gunicorn-access.log
+ERROR_LOG=$BIOSTAR_HOME/live/logs/gunicorn-error.log
 
 # The user and group the unicorn process will run as.
 NUM_WORKERS=3
@@ -40,6 +60,7 @@ NAME="biostar_app"
 
 echo "gunicorn starting with DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE"
 
+cd $BIOSTAR_HOME
 exec $GUNICORN ${DJANGO_WSGI_MODULE}:application \
   --name $NAME \
   --workers $NUM_WORKERS \
