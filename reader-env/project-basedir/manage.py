@@ -21,6 +21,7 @@ def create_live_dir():
 
 if __name__ == "__main__":
     create_live_dir()
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'biostar.settings.debug')
 
     from django.core.management import execute_from_command_line
 
