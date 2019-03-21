@@ -7,15 +7,20 @@ USE_COMPRESSOR = False
 
 SITE_NAME = get_env("SITE_NAME", "Site Name")
 
-DATABASES = {
-    'default': {
-        # To ENGINE 'django.db.backends.XYZ'
-        # add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': DATABASE_NAME,
-        'USER': 'biostar',
-        'PASSWORD': get_env("PG_PASSWORD"),
-        'HOST': get_env("PG_HOST"),
-        'PORT': '5432',
-    }
-}
+with open('/etc/biostar/django-secret') as django_secret:
+    SECRET_KEY = django_secret.read().strip()
+
+with open('/etc/biostar/dbpass') as dbpass:
+    with open('/etc/biostar/dbhost') as dbhost:
+        DATABASES = {
+            'default': {
+                # To ENGINE 'django.db.backends.XYZ'
+                # add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'NAME': DATABASE_NAME,
+                'USER': 'biostar',
+                'PASSWORD': dbpass.read().strip(),
+                'HOST': dbhost.read().strip(),
+                'PORT': '5432',
+            }
+        }

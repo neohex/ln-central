@@ -21,7 +21,7 @@ export VIRTUAL_ENV_DISABLE_PROMPT=1
 source $VIRTENV_DIR/bin/activate
 
 # The django module to use.
-export DJANGO_SETTINGS_MODULE=deploy
+export DJANGO_SETTINGS_MODULE=biostar.settings.deploy
 
 # This will be either the Sqlite or the Postgres database name.
 export DATABASE_NAME="biostar"
