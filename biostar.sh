@@ -12,8 +12,9 @@ if [ $# == 0 ]; then
     echo ''
     echo 'Commands:'
     echo ''
-    echo '  install   - create virtual environment and install the requirements'
-    echo '              install cannot be combined with other commands'
+    echo '  install   - create virtual environments and install dependencies'
+    echo '  uninstall - uninstall all dependencies in the virtual environments'
+    echo '              NOTE: install / uninstall cannot be combined with other commands'
     echo ''
     echo '  init      - initializes the database'
     echo '  run       - runs the development server'
@@ -37,8 +38,15 @@ if [ $# == 0 ]; then
     exit
 fi
 
+
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+
 if [ "$1" = "install" ]; then
-	virtualenv reader-env -p python2.7
+	set -ue  # stop on errors or missing environment variables.
+
+	echo ""
+	echo "==================== Installing reader-env ===================="
+	virtualenv reader-env -p /usr/bin/python2.7
 	(
 		cd reader-env
 		. bin/activate
@@ -46,16 +54,41 @@ if [ "$1" = "install" ]; then
 		deactivate
 	)
 
-	virtualenv writer-env -p python3
+	echo ""
+	echo "==================== Installing writer-env ===================="
+	virtualenv writer-env -p /usr/bin/python3
 	(
 		cd writer-env
 		. bin/activate
-		pip install --upgrade -r requirements/base.txt
+		pip install --upgrade -r requirements.txt
 		deactivate
 	)
 
 	exit
 fi
+
+if [ "$1" = "uninstall" ]; then
+	set -ue  # stop on errors or missing environment variables.
+
+	echo ""
+	echo "==================== Uninstalling reader-env ===================="
+	(
+		cd reader-env
+		. bin/activate
+		pip freeze | xargs pip uninstall -y
+	)
+
+	echo ""
+	echo "==================== Uninstalling writer-env ===================="
+	(
+		cd writer-env
+		. bin/activate
+		pip freeze | xargs pip uninstall -y
+	)
+
+	exit
+fi
+
 
 # Active environment
 cd ./reader-env
