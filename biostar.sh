@@ -39,9 +39,21 @@ fi
 
 if [ "$1" = "install" ]; then
 	virtualenv reader-env -p python2.7
-	cd reader-env
-	. bin/activate
-	pip install --upgrade -r requirements/base.txt
+	(
+		cd reader-env
+		. bin/activate
+		pip install --upgrade -r requirements/base.txt
+		deactivate
+	)
+
+	virtualenv writer-env -p python3
+	(
+		cd writer-env
+		. bin/activate
+		pip install --upgrade -r requirements/base.txt
+		deactivate
+	)
+
 	exit
 fi
 
