@@ -74,7 +74,7 @@ def user_details(request, id):
     days_ago = (datetime.now().date() - user.profile.date_joined.date()).days
     data = {
         'id': user.id,
-        'name': user.name,
+        'name': user.pubkey,
         'date_joined': datetime_to_iso(user.profile.date_joined),
         'last_login': datetime_to_iso(user.profile.last_login),
         'joined_days_ago': days_ago,
@@ -105,7 +105,7 @@ def post_details(request, id):
         'lastedit_date': datetime_to_iso(post.lastedit_date),
         'lastedit_user_id': post.lastedit_user.id,
         'author_id': post.author.id,
-        'author': post.author.name,
+        'author': post.author.pubkey,
         'status': post.get_status_display(),
         'status_id': post.status,
         'thread_score': post.thread_score,
@@ -143,7 +143,7 @@ def vote_details(request, id):
     data = {
         'id': vote.id,
         'author_id': vote.author.id,
-        'author': vote.author.name,
+        'author': vote.author.pubkey,
         'post_id': vote.post.id,
         'type': vote.get_type_display(),
         'type_id': vote.type,

@@ -398,7 +398,7 @@ class ReplyToken(models.Model):
 class ReplyTokenAdmin(admin.ModelAdmin):
     list_display = ('user', 'post', 'token', 'date')
     ordering = ['-date']
-    search_fields = ('post__title', 'user__name')
+    search_fields = ['post__title']
 
 admin.site.register(ReplyToken, ReplyTokenAdmin)
 
@@ -445,7 +445,7 @@ class PostAdmin(admin.ModelAdmin):
         ('Attributes', {'fields': ('type', 'status', 'sticky',)}),
         ('Content', {'fields': ('content', )}),
     )
-    search_fields = ('title', 'author__name')
+    search_fields = ['title']
 
 admin.site.register(Post, PostAdmin)
 
@@ -475,7 +475,7 @@ class Vote(models.Model):
 class VoteAdmin(admin.ModelAdmin):
     list_display = ('author', 'post', 'type', 'date')
     ordering = ['-date']
-    search_fields = ('post__title', 'author__name')
+    search_fields = ['post__title']
 
 
 admin.site.register(Vote, VoteAdmin)
@@ -539,14 +539,7 @@ class Subscription(models.Model):
         Post.objects.filter(pk=instance.post.root_id).update(subs_count=F('subs_count') - 1)
 
 
-
-# Admin interface for subscriptions
-class SubscriptionAdmin(admin.ModelAdmin):
-    search_fields = ('user__name', 'user__email')
-    list_select_related = ["user", "post"]
-
-
-admin.site.register(Subscription, SubscriptionAdmin)
+admin.site.register(Subscription)
 
 # Data signals
 from django.db.models.signals import post_save, post_delete, m2m_changed

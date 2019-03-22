@@ -11,7 +11,6 @@ class Migration(SchemaMigration):
         # Adding model 'Data'
         db.create_table(u'posts_data', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=80)),
             ('post', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['posts.Post'])),
             ('file', self.gf('django.db.models.fields.files.FileField')(max_length=100)),
             ('size', self.gf('django.db.models.fields.IntegerField')()),

@@ -114,11 +114,11 @@ def get_user(uid, allusers):
 
     try:
         user = User.objects.get(pubkey=pubkey)
-        logger.info('Fetched user: %s' % user.name)
+        logger.info('Fetched user: %s' % user.pubkey)
     except:
-        user = User(pubkey=pubkey, name=name)
+        user = User(pubkey=pubkey)
         user.save()
-        logger.info('Created user: %s' % user.name)
+        logger.info('Created user: %s' % user.pubkey)
 
     return user 
 

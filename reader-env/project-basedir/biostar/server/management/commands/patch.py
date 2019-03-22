@@ -85,7 +85,7 @@ def export_data(path, limit):
     def serialize_user(user):
         prof = user.profile
         return dict(
-            name=user.name, id=user.id, pubkey=user.pubkey,
+            id=user.id, pubkey=user.pubkey,
             status=user.get_status_display(),
             new_messages=user.new_messages,
             score=user.score,

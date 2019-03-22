@@ -39,7 +39,7 @@ def crawl_awards():
 
     for pk  in ids:
         user = User.objects.get(pk=pk)
-        #logger.info("%s: %s" % (user.id, user.name))
+        logger.info("%s: %s" % (user.id, user.pubkey))
         create_user_award.delay(user=user)
 
 

@@ -35,7 +35,6 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Data'},
             'file': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '80'}),
             'post': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['posts.Post']"}),
             'size': ('django.db.models.fields.IntegerField', [], {})
         },

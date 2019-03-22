@@ -80,7 +80,7 @@ def parse_html(text):
             patt3 = USER_RE.search(href)
             if patt3:
                 uid = patt3.group("uid")
-                attrs['_text'] = User.objects.get(id=uid).name
+                attrs['_text'] = User.objects.get(id=uid).pubkey
 
         except Exception, exc:
             logger.error(exc)

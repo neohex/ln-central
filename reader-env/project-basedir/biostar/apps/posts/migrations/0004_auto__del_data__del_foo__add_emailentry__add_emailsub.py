@@ -37,7 +37,6 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Adding model 'Data'
         db.create_table(u'posts_data', (
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=80)),
             ('file', self.gf('django.db.models.fields.files.FileField')(max_length=100)),
             ('post', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['posts.Post'])),
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -155,7 +154,6 @@ class Migration(SchemaMigration):
             'flair': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '15'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'name': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '255'}),
             'new_messages': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'score': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'site': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sites.Site']", 'null': 'True'}),

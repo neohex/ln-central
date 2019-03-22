@@ -6,7 +6,6 @@ from __future__ import print_function, unicode_literals, absolute_import, divisi
 import logging, datetime
 from django.db import models
 from django.conf import settings
-from django.contrib import admin
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.core import mail
@@ -79,18 +78,3 @@ class Message(models.Model):
         from_email = from_email or settings.DEFAULT_FROM_EMAIL
         data = (self.body.subject, self.body.text, settings.DEFAULT_FROM_EMAIL, recipient_list)
         return data
-
-# Admin interface to Message and MessageBody.
-class MessageBodyAdmin(admin.ModelAdmin):
-    search_fields = ('sender__name', 'sender__email', 'recipient__name', 'recipient__email', 'subject')
-    list_select_related = ["sender", "post"]
-
-# Admin interface to MessageBody
-class MessageAdmin(admin.ModelAdmin):
-    search_fields = ('recipient__name', 'recipient__email', 'recipient__name', 'recipient__email', 'subject')
-    list_select_related = ["user", "post"]
-
-#admin.site.register(Message, MessageAdmin)
-admin.site.register(MessageBody, MessageBodyAdmin)
-
-

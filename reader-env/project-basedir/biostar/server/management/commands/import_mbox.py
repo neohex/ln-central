@@ -291,13 +291,14 @@ def parse_mboxx(filename, limit=None, tag_val=''):
     roots = {}
 
     for b in rows:
+        print(b)
         datefmt = b.date.strftime('%Y-%m-%d')
         logger.info("*** %s parsing %s " % (datefmt, b.subj))
 
         if b.email not in users:
 
-            logger.info("--- creating user name:%s, email:%s" % (b.name, b.email))
-            u = User(email=b.email, name=b.name)
+            logger.info("--- creating user %s" % (b.pubkey))
+            u = User(pubkey=b.pubkey)
             if not DRY_RUN:
                 u.save()
                 u.profile.date_joined = b.date

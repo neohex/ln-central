@@ -100,12 +100,12 @@ def render_digest(days, text_tmpl, html_tmpl, send, options, limit=10, verbosity
                     html_content = html_body % extras
                     subject = options['subject']
                     
-                    msg = EmailMultiAlternatives(subject, text_content, from_email, [user.email])
+                    msg = EmailMultiAlternatives(subject, text_content, from_email, [user.pubkey])
                     msg.attach_alternative(html_content, "text/html")
                     msg.send()
                     time.sleep(0.3) # Throttle on Amazon.
                 except Exception, exc:
-                    logger.error('error %s sending email to %s' % (exc, user.email))
+                    logger.error('error %s sending email to %s' % (exc, user.pubkey))
 
 
 class Command(BaseCommand):
