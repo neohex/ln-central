@@ -6,15 +6,14 @@ if [ $# == 0 ]; then
     echo ''
     echo "  $ $(basename $0) <command>"
     echo ''
-    echo 'Multiple commands may be used on the same line:'
-    echo ''
-    echo "  $ $(basename $0) init import run"
-    echo ''
     echo 'Commands:'
     echo ''
-    echo '  install   - create virtual environments and install dependencies'
-    echo '  uninstall - uninstall all dependencies in the virtual environments'
-    echo '              NOTE: install / uninstall cannot be combined with other commands'
+    echo '  install     - create virtual environments and install dependencies'
+    echo '  uninstall   - uninstall all dependencies in the virtual environments'
+    echo '  writer-dev  - invoke manage.py for writer with dev settings'
+    echo '  writer-prod - invoke manage.py for writer with prod settings'
+    echo ''
+    echo 'Deprecated commands (NOTE: multiple commands may be used on the same line):'
     echo ''
     echo '  init      - initializes the database'
     echo '  run       - runs the development server'
@@ -93,6 +92,29 @@ if [ "$1" = "uninstall" ]; then
 
 	exit
 fi
+
+if [ "$1" = "writer-dev" ]; then
+	set -ue  # stop on errors or missing environment variables.
+	shift
+	(
+		cd writer-env
+		. bin/activate
+		DJANGO_SETTINGS_MODULE=biostar_writer.settings.dev ./project-basedir/manage.py $@
+	)
+	exit
+fi
+
+if [ "$1" = "writer-prod" ]; then
+	set -ue  # stop on errors or missing environment variables.
+	shift
+	(
+		cd writer-env
+		. bin/activate
+		DJANGO_SETTINGS_MODULE=biostar_writer.settings.prod ./project-basedir/manage.py $@
+	)
+	exit
+fi
+
 
 
 # Active environment
