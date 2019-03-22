@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.sites.models import Site
+from datetime import datetime
 
 
 def now():
@@ -42,4 +43,4 @@ class User(models.Model):
     site = models.ForeignKey(Site, null=True, on_delete=models.CASCADE)
 
     # The last visit by the user.
-    last_login = models.DateTimeField()
+    last_login = models.DateTimeField(default=datetime.now)
