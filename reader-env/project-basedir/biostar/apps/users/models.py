@@ -6,7 +6,6 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, UserManager
 from django.utils.timezone import utc
 from biostar.apps import util
 import bleach
@@ -28,7 +27,7 @@ def now():
     return datetime.utcnow().replace(tzinfo=utc)
 
 
-class LocalManager(UserManager):
+class LocalManager(models.Manager):
     def get_users(self, sort, limit, q):
         sort = const.USER_SORT_MAP.get(sort, None)
         days = const.POST_LIMIT_MAP.get(limit, 0)
@@ -47,8 +46,7 @@ class LocalManager(UserManager):
 
         return query
 
-
-class User(AbstractBaseUser):
+class User(models.Model):
     # Class level constants.
     USER, MODERATOR, ADMIN, BLOG = range(4)
     TYPE_CHOICES = [(USER, "User"), (MODERATOR, "Moderator"), (ADMIN, "Admin"), (BLOG, "Blog")]
@@ -56,9 +54,8 @@ class User(AbstractBaseUser):
     NEW_USER, TRUSTED, SUSPENDED, BANNED = range(4)
     STATUS_CHOICES = ((NEW_USER, 'New User'), (TRUSTED, 'Trusted'), (SUSPENDED, 'Suspended'), (BANNED, 'Banned'))
 
-    # Required by Django.
+    REQUIRED_FIELDS = []
     USERNAME_FIELD = 'pubkey'
-
     objects = LocalManager()
 
     # Default information on every user.
@@ -93,20 +90,16 @@ class User(AbstractBaseUser):
     # The site this users belongs to.
     site = models.ForeignKey(Site, null=True)
 
+    # The last visit by the user.
+    last_login = models.DateTimeField()
+
     @property
     def is_moderator(self):
-        if self.is_authenticated():
-            return self.type == User.MODERATOR or self.type == User.ADMIN
-        else:
-            return False
+        return self.type == User.MODERATOR or self.type == User.ADMIN
 
     @property
     def is_administrator(self):
-        # The site administrator is different from the Django admin.
-        if self.is_authenticated():
-            return self.type == User.ADMIN
-        else:
-            return False
+        return self.type == User.ADMIN
 
     @property
     def is_trusted(self):
@@ -148,7 +141,7 @@ class User(AbstractBaseUser):
             return self.score * 10
 
     def __unicode__(self):
-        return "%s (%s)" % (self.pubkey, self.id)
+        return "%s (id=%s, last_login: %s)" % (self.pubkey, self.id, self.last_login)
 
     def get_absolute_url(self):
         url = reverse("user-details", kwargs=dict(pk=self.id))

@@ -20,7 +20,7 @@ import logging
 import langdetect
 from django.template.loader import render_to_string
 from biostar.apps import util
-from biostar.apps.users.models import User
+from biostar.apps.users.models import User, now
 
 def english_only(text):
     try:
@@ -196,6 +196,9 @@ class NewPost(FormView):
         user = User()
         user.pubkey = "%s@xyz2.xyz" % util.make_uuid()
         user.score = 0
+        user.last_login = now()
+        user.date_joined = user.last_login
+        print("%r" % user)
         user.save()
 
         post = Post(

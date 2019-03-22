@@ -38,6 +38,11 @@ if [ $# == 0 ]; then
     exit
 fi
 
+set -ue  # stop on errors or missing environment variables.
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $SCRIPT_DIR
+echo $SCRIPT_DIR
+set +ue
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 
@@ -102,7 +107,7 @@ if [ -z "$DJANGO_SETTINGS_MODULE" ]; then
 fi
 
 if [ -z "$JSON_DATA_FIXTURE" ]; then
-   export JSON_DATA_FIXTURE="./reader-env/django-basedir/import/default-fixture.json.gz"
+   export JSON_DATA_FIXTURE="./import/default-fixture.json.gz"
 fi
 
 if [ -z "$DATABASE_NAME" ]; then

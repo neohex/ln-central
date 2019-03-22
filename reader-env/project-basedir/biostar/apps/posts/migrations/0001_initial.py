@@ -185,7 +185,6 @@ class Migration(SchemaMigration):
             'is_admin': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'name': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '255'}),
             'new_messages': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'score': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'site': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sites.Site']", 'null': 'True'}),
