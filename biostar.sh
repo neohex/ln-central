@@ -50,7 +50,7 @@ if [ "$1" = "install" ]; then
 	(
 		cd reader-env
 		. bin/activate
-		pip install --upgrade -r requirements/base.txt
+		pip install --upgrade -r requirements.txt
 		deactivate
 	)
 
@@ -123,48 +123,65 @@ set -ue
 
 VERBOSITY=1
 
+unknown_argument=0
 
 while (( "$#" )); do
 
     if [ "$1" = "delete" ]; then
         echo "*** Deleting the sqlite database"
         $PYTHON manage.py delete_database --settings=$DJANGO_SETTINGS_MODULE
+	shift
+	continue
     fi
 
     if [ "$1" = "pg_drop" ]; then
         echo "*** Dropping the $DATABASE_NAME=$DATABASE_NAME!"
         dropdb -i $DATABASE_NAME
+	shift
+	continue
     fi
 
     if [ "$1" = "pg_create" ]; then
         # creates the PG database
         echo "*** Creating postgresql database DATABASE_NAME=$DATABASE_NAME"
         createdb $DATABASE_NAME -E utf8 --template template0
+	shift
+	continue
     fi
 
     if [ "$1" = "pg_import" ]; then
         echo "*** Importing into DATABASE_NAME=$DATABASE_NAME"
         gunzip -c $2 | psql $DATABASE_NAME
+	shift
+	continue
     fi
 
     if [ "$1" = "pg_dump" ]; then
         echo "*** Dumping the $DATABASE_NAME database."
         $PYTHON manage.py biostar_pg_dump -v $VERBOSITY --settings=$DJANGO_SETTINGS_MODULE
+	shift
+	continue
     fi
 
     if [ "$1" = "run" ]; then
         echo "*** Run the development server with $DJANGO_SETTINGS_MODULE and DATABASE_NAME=$DATABASE_NAME"
         $PYTHON manage.py runserver $BIOSTAR_HOSTNAME --settings=$DJANGO_SETTINGS_MODULE
+	shift
+	continue
     fi
 
-	if [ "$1" = "waitress" ]; then
+    if [ "$1" = "waitress" ]; then
         echo "*** Run a waitress server with $DJANGO_SETTINGS_MODULE and DATABASE_NAME=$DATABASE_NAME"
         waitress-serve --port=8080 --call biostar.wsgi:white
+	shift
+	continue
     fi
 
-   	if [ "$1" = "testdeploy" ]; then
+    if [ "$1" = "testdeploy" ]; then
         echo "*** deploys to the test site"
         fab -f conf/fabs/fabfile.py test_site pull restart
+	shift
+	continue
     fi
 
     if [ "$1" = "init" ]; then
@@ -179,46 +196,67 @@ while (( "$#" )); do
         $PYTHON manage.py initialize_site --settings=$DJANGO_SETTINGS_MODULE
 
         $PYTHON manage.py collectstatic -v $VERBOSITY --noinput --settings=$DJANGO_SETTINGS_MODULE
-
+	shift
+	continue
     fi
 
     # Produce the environment variables recognized by Biostar.
     if [ "$1" = "test" ]; then
         echo "*** Running all tests"
         $PYTHON manage.py test --noinput --failfast -v $VERBOSITY --settings=$DJANGO_SETTINGS_MODULE
+	shift
+	continue
     fi
 
     # Produce the environment variables recognized by Biostar.
     if [ "$1" = "env" ]; then
         $PYTHON -m biostar.settings.base
+	shift
+	continue
     fi
 
     if [ "$1" = "import" ]; then
         echo "*** Importing json data from $JSON_DATA_FIXTURE"
         $PYTHON manage.py loaddata $JSON_DATA_FIXTURE --settings=$DJANGO_SETTINGS_MODULE
+	shift
+	continue
     fi
 
     if [ "$1" = "dump" ]; then
         echo "*** Dumping json data into $JSON_DATA_FIXTURE"
         $PYTHON manage.py dumpdata users posts messages badges planet --settings=$DJANGO_SETTINGS_MODULE | gzip > $JSON_DATA_FIXTURE
+	shift
+	continue
     fi
 
     if [ "$1" = "index" ]; then
         echo "*** Indexing site content"
         $PYTHON manage.py rebuild_index --noinput --settings=$DJANGO_SETTINGS_MODULE
+	shift
+	continue
     fi
 
     if [ "$1" = "update_index" ]; then
         echo "*** Updating site index"
         $PYTHON manage.py update_index --age 1 --settings=$DJANGO_SETTINGS_MODULE
+	shift
+	continue
     fi
 
     if [ "$1" = "import_biostar1" ]; then
         echo "*** Migrating from Biostar 1"
         echo "*** BIOSTAR_MIGRATE_DIR=$BIOSTAR_MIGRATE_DIR"
         $PYTHON manage.py import_biostar1 -u -p -x
+	shift
+	continue
     fi
 
+    echo "ERROR: invalid argument $1"
+    unknown_argument=1
+    shift
 
-shift
 done
+
+if [ "$unknown_argument" = "1" ]; then
+    echo "ERROR: some arguments were invalid"
+fi
