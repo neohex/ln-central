@@ -60,11 +60,6 @@ class User(models.Model):
 
     # Default information on every user.
     pubkey = models.CharField(verbose_name='LN Identity PubKey', db_index=True, max_length=255, unique=True)
- 
-    # Fields used by the Django admin.
-    is_active = models.BooleanField(default=True)
-    is_admin = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=False)
 
     # This designates a user types and with that permissions.
     type = models.IntegerField(choices=TYPE_CHOICES, default=USER)
@@ -275,7 +270,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['type', 'is_active', 'is_admin', 'is_staff']
+        fields = ['type']
 
 
 class ProfileInline(admin.StackedInline):
@@ -301,7 +296,7 @@ def user_create_messages(sender, instance, created, *args, **kwargs):
     if created:
         # Create a welcome message to a user
         # We do this so that tests pass, there is no admin user there
-        authors = User.objects.filter(is_admin=True) or [user]
+        authors = [user]
         author = authors[0]
 
         title = "Welcome!"

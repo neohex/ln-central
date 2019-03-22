@@ -40,3 +40,6 @@ class User(models.Model):
 
     # The site this users belongs to.
     site = models.ForeignKey(Site, null=True, on_delete=models.CASCADE)
+
+    # The last visit by the user.
+    last_login = models.DateTimeField()

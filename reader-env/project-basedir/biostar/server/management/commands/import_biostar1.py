@@ -233,7 +233,7 @@ class Command(BaseCommand):
             scholar = get(row, 'scholar')
             location = get(row, 'location')
             website = get(row, 'website')
-            is_active = get(row, 'status') == "Active"
+
             user_type = USER_TYPE_MAP[get(row, 'type')]
             date_joined = get(row, 'date_joined')
             last_visited = get(row, 'last_visited')
@@ -243,8 +243,6 @@ class Command(BaseCommand):
             user.pubkey = "%s@xyz.xyz" % uid
             user.score = score
             user.type = user_type
-
-            user.is_active = is_active
             user.save()
 
             # Populate the profile

@@ -274,11 +274,6 @@ def post_actions(post, user, label="COMMENT"):
 def userlink(user):
     "Renders the flair"
     marker = "&bull;"
-    
-    # if user.is_admin:
-    #     marker = '&diams;&diams;'
-    # elif user.is_moderator:
-    #     marker = '&diams;'
 
     return {'user': user, 'marker': marker}
 

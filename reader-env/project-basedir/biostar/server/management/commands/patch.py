@@ -87,9 +87,6 @@ def export_data(path, limit):
         return dict(
             name=user.name, id=user.id, pubkey=user.pubkey,
             status=user.get_status_display(),
-            is_active=user.is_active,
-            is_admin=user.is_admin,
-            is_staff=user.is_staff,
             new_messages=user.new_messages,
             score=user.score,
             date_joined=prof.date_joined.isoformat(),

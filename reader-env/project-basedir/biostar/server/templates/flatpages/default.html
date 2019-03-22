@@ -54,10 +54,4 @@
     </div>
 
 
-    {% if user.is_admin %}
-        Administrator access:
-        <a role="button" class="btn btn-primary"
-           href="{% url 'flatpage-update' flatpage.id %}">Edit {{ flatpage.title }}</a>
-    {% endif %}
-
 {% endblock %}
