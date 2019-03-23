@@ -6,10 +6,12 @@ import errno
 def create_live_dir():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     LIVE_DIR = '{}/live'.format(BASE_DIR)
+    LOGS_DIR = '{}/live/logs'.format(BASE_DIR)
     LIVE_DIR_ACCESS_RIGHTS = 0o755
 
     try:
         os.mkdir(LIVE_DIR, LIVE_DIR_ACCESS_RIGHTS)
+        os.mkdir(LOGS_DIR, LIVE_DIR_ACCESS_RIGHTS)
     except OSError as e:
         if e.errno == errno.EEXIST:
             pass
