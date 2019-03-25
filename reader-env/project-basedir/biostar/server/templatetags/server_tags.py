@@ -6,6 +6,7 @@ from biostar.apps.posts.models import Post, Tag
 from biostar.apps.messages.models import Message
 import random, hashlib, urllib
 from datetime import datetime, timedelta
+import dateutil.parser
 from django.utils.timezone import utc
 from django import template
 from django.core.urlresolvers import reverse
@@ -130,8 +131,12 @@ def pluralize(value, word):
 @register.filter
 def time_ago(date):
     # Rare bug. TODO: Need to investigate why this can happen.
-    if not date:
+    if not date or date == '*** MISSING ***':
         return ''
+
+    if not isinstance(date, datetime):
+        date = dateutil.parser.parse(date)
+
     delta = const.now() - date
     if delta < timedelta(minutes=1):
         return 'just now'

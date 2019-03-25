@@ -52,7 +52,6 @@ class Migration(SchemaMigration):
             'location': ('django.db.models.fields.CharField', [], {'default': "u' '", 'max_length': '255', 'blank': 'True'}),
             'message_prefs': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'my_tags': ('django.db.models.fields.TextField', [], {'default': "u''", 'max_length': '255', 'blank': 'True'}),
-            'scholar': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '255', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['users.User']", 'unique': 'True'}),
             'uuid': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255', 'db_index': 'True'}),
             'website': ('django.db.models.fields.URLField', [], {'default': "u''", 'max_length': '255', 'blank': 'True'})

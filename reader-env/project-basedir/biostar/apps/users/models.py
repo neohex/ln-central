@@ -185,9 +185,6 @@ class Profile(models.Model):
     # User provided website.
     website = models.URLField(default="", max_length=255, blank=True)
 
-    # Google scholar ID
-    scholar = models.CharField(default="", max_length=255, blank=True)
-
     # This field is used to select content for the user.
     my_tags = models.TextField(default="", max_length=255, blank=True)
 
@@ -275,7 +272,7 @@ class UserChangeForm(forms.ModelForm):
 
 class ProfileInline(admin.StackedInline):
     model = Profile
-    fields = ["location", "website", "scholar", "message_prefs", "my_tags", "watched_tags", "info"]
+    fields = ["location", "website", "message_prefs", "my_tags", "watched_tags", "info"]
 
 
 # Data signals

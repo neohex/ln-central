@@ -30,9 +30,6 @@ class UserEditForm(forms.Form):
     website = forms.URLField(required=False, max_length=100,
                              help_text="The URL to your website (optional)")
 
-    scholar = forms.CharField(required=False, max_length=15,
-                              help_text="Your Google Scholar ID (optional)")
-
     my_tags = forms.CharField(max_length=100, required=False,
                               help_text="Post with tags listed here will show up in the My Tags tab. Use a comma to separate tags. Add a <code>!</code> to remove a tag. Example: <code>galaxy, bed, solid!</code> (optional)")
 
@@ -64,7 +61,6 @@ class UserEditForm(forms.Form):
                     css_class="col-md-offset-3 col-md-6",
                 ),
                 Div(
-                    Div('scholar', css_class="col-md-6"),
                     Div('digest_prefs', css_class="col-md-6"),
                     Div('message_prefs', css_class="col-md-6"),
                     css_class="col-md-12",
@@ -92,7 +88,7 @@ class EditUser(FormView):
     template_name = ""
     form_class = UserEditForm
     user_fields = "name email".split()
-    prof_fields = "location website info scholar my_tags watched_tags message_prefs digest_prefs".split()
+    prof_fields = "location website info my_tags watched_tags message_prefs digest_prefs".split()
 
     def get(self, request, *args, **kwargs):
         target = User.objects.get(pk=self.kwargs['pk'])

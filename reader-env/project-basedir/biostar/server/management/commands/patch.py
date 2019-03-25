@@ -94,7 +94,6 @@ def export_data(path, limit):
             type=user.get_type_display(),
             location=prof.location,
             website=prof.website,
-            scholar=prof.scholar,
             info=prof.info,
             my_tags=prof.my_tags,
             watched_tags=prof.watched_tags,

@@ -230,7 +230,6 @@ class Command(BaseCommand):
             pubkey = get(row, 'pubkey')
             name = get(row, 'display_name')
             score = get(row, 'score')
-            scholar = get(row, 'scholar')
             location = get(row, 'location')
             website = get(row, 'website')
 
@@ -248,7 +247,6 @@ class Command(BaseCommand):
             # Populate the profile
             prof = user.profile
             prof.website = website
-            prof.scholar = scholar
             prof.location = location
             prof.date_joined = localize_time(date_joined)
             prof.last_login = localize_time(last_visited)

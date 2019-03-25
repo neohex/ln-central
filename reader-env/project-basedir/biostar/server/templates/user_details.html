@@ -73,18 +73,6 @@
                     {% endif %}
 
 
-
-                    {% if target.profile.scholar %}
-                        <dt>Scholar ID:</dt>
-                        <dd>
-                            <a rel="nofollow"
-                               href="http://scholar.google.com/citations?user={{ target.profile.scholar }}">Google
-                                Scholar Page</a>
-                        </dd>
-                    {% endif %}
-
-
-
                     <dt>Last seen:</dt>
                     <dd>{{ target.profile.last_login|naturaltime }}</dd>
 
