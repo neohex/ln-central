@@ -23,9 +23,9 @@ BASE_DIR = (
     )
 )
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
-
+SECURE_CONTENT_TYPE_NOSNIFF = True  # https://docs.djangoproject.com/en/2.1/ref/middleware/#x-content-type-options
+SECURE_BROWSER_XSS_FILTER = True  # https://docs.djangoproject.com/en/2.1/ref/middleware/#x-xss-protection-1-mode-block
+X_FRAME_OPTIONS = 'DENY'  # https://docs.djangoproject.com/en/2.1/ref/clickjacking/
 
 # Application definition
 
