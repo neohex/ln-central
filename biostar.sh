@@ -50,7 +50,7 @@ if [ "$1" = "install" ]; then
 
 	echo ""
 	echo "==================== Installing reader-env ===================="
-	virtualenv reader-env -p /usr/bin/python2.7
+	virtualenv reader-env -p python2.7
 	(
 		cd reader-env
 		. bin/activate
@@ -60,7 +60,7 @@ if [ "$1" = "install" ]; then
 
 	echo ""
 	echo "==================== Installing writer-env ===================="
-	virtualenv writer-env -p /usr/bin/python3
+	virtualenv writer-env -p python3
 	(
 		cd writer-env
 		. bin/activate
