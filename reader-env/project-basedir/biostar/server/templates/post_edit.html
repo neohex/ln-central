@@ -24,12 +24,36 @@
 
 {% block content %}
 
+{% if nodes_list|length > 0 %}
     <div class="row">
+        <h2 class="col-md-4 col-xs-4" style="text-align: right;">
+            LN Nodes available:
+        </h2>
+        <div class="col-md-6 col-xs-6" style="padding: 2em">
+            <ul>
+                {% for node in nodes_list %}
+                    <li>{{ node }}</li>
+                {% endfor %}
+            </ul>
 
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <br>
             {% crispy form %}
         </div>
     </div>
+
+{% else %}
+    <div>
+        <h2>Sorry, no LN Nodes are currently available</h2>
+        <p>Please try again later. If the problem persists please contact the site owners.</p>
+    </div>
+{% endif %}
+
+
+
 
 {% endblock %}

@@ -22,6 +22,8 @@ from django.template.loader import render_to_string
 from biostar.apps import util
 from biostar.apps.users.models import User, now
 
+import requests
+
 def english_only(text):
     try:
         text.decode('ascii')
@@ -159,6 +161,10 @@ class NewPost(FormView):
     template_name = "post_edit.html"
 
     def get(self, request, *args, **kwargs):
+        # Get LN Nodes list
+        response = requests.get('http://127.0.0.1:8000/ln/list.json')
+        nodes_list = [n['identity_pubkey'] for n in response.json()]
+
         initial = dict()
 
         # Attempt to prefill from GET parameters
@@ -168,9 +174,13 @@ class NewPost(FormView):
                 initial[key] = value
 
         # here, there used to be code to pre-fill from external session
-
         form = self.form_class(initial=initial)
-        return render(request, self.template_name, {'form': form})
+        context = {
+            'form': form,
+            'nodes_list': nodes_list
+        }
+
+        return render(request, self.template_name, context)
 
 
     def post(self, request, *args, **kwargs):
