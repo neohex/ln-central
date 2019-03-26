@@ -16,8 +16,8 @@ Get sourcecode, setup virtualenv local directories, and install requierments::
 
 ## Start writer
 
-	# Initialize local db
-    	./biostar.sh writer-dev migrate
+	# Initialize local db	
+	./biostar.sh writer-dev migrate
 
 	# Create admin user
 	./biostar.sh writer-dev createsuperuser --email admin@example.com --username admin
@@ -25,12 +25,12 @@ Get sourcecode, setup virtualenv local directories, and install requierments::
 	# Start writer (backend)
 	./biostar.sh writer-dev runserver
 
-Visit ``http://localhost:8000`` to explore the backend API
+Visit http://localhost:8000 to explore the backend API
 
 ## Start reader
 
 	# Initialize local db and run webserver
-	biostar.sh init run
+	./biostar.sh init run
 
 
-Visit ``http://localhost:8080`` to see the site.
+Visit http://localhost:8080 to see the site
