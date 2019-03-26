@@ -162,8 +162,13 @@ class NewPost(FormView):
 
     def get(self, request, *args, **kwargs):
         # Get LN Nodes list
-        response = requests.get('http://127.0.0.1:8000/ln/list.json')
-        nodes_list = [n['identity_pubkey'] for n in response.json()]
+        try:
+            response = requests.get('http://127.0.0.1:8000/ln/list.json')
+        except requests.exceptions.ConnectionError as e:
+            logger.exception(e)
+            nodes_list = []
+        else:
+            nodes_list = [n['identity_pubkey'] for n in response.json()]
 
         initial = dict()
 
