@@ -29,8 +29,11 @@ Visit http://localhost:8000 to explore the backend API
 
 ## Start reader
 
-	# Initialize local db and run webserver
-	./biostar.sh init run
+	# Initialize local db 
+	./biostar.sh init
+	
+	# Run webserver
+	AVATAR_SERVER_NAME=https://ln.support ./biostar.sh run
 
 
 Visit http://localhost:8080 to see the site
