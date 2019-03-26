@@ -17,7 +17,7 @@ class User(models.Model):
     STATUS_CHOICES = ((NEW_USER, 'New User'), (TRUSTED, 'Trusted'), (SUSPENDED, 'Suspended'), (BANNED, 'Banned'))
 
     # Default information on every user.
-    pubkey = models.CharField(verbose_name='LN Identity PubKey', db_index=True, max_length=255, unique=True)
+    pubkey = models.CharField(verbose_name='LN Identity Pubkey', db_index=True, max_length=255, unique=True)
 
     # This designates a user types and with that permissions.
     type = models.IntegerField(choices=TYPE_CHOICES, default=USER)

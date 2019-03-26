@@ -1,0 +1,27 @@
+# Install
+
+Requierments:
+	* `python2.7`
+	* `pip2.7`
+	* `python3`
+	* `pip3`
+	* `virtualenv`
+
+Get sourcecode, setup virtualenv local directories, and install requierments::
+
+	git clone https://github.com/alevchuk/biostar-central-ln.git
+	cd biostar-central-ln
+	./bistar.sh install
+
+## Getting started
+
+	# Initialize local db
+    	./biostar.sh writer-dev migrate
+
+	# Create admin user
+	./biostar.sh writer-dev createsuperuser --email admin@example.com --username admin
+
+	# Start writer (backend)
+	./biostar.sh writer-dev runserver
+
+Visit ``http://localhost:8080`` to see the site loaded with default settings.

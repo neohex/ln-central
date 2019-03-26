@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     # built-in
     'django.contrib.contenttypes',
     'django.contrib.auth',  # required by REST framework
+    'django.contrib.sessions',  # required for auth
     'django.contrib.staticfiles',
     'django.contrib.sites',
 
@@ -57,6 +58,10 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'django.contrib.sessions.middleware.SessionMiddleware',  # required for auth
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # required for auth
+    'django.middleware.csrf.CsrfViewMiddleware',  # useful, enabled by sessions
 ]
 
 ROOT_URLCONF = 'biostar_writer.urls'
@@ -70,6 +75,8 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+
+                'django.contrib.auth.context_processors.auth',  # required for auth
             ],
         },
     },

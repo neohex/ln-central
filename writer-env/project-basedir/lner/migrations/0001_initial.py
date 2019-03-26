@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='LightningNode',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('identity_pubkey', models.CharField(db_index=True, max_length=255, unique=True, verbose_name='LN Identity PubKey')),
+                ('identity_pubkey', models.CharField(db_index=True, max_length=255, unique=True, verbose_name='LN Identity Pubkey')),
             ],
         ),
     ]

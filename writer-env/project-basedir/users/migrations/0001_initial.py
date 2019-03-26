@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             name='User',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('pubkey', models.CharField(db_index=True, max_length=255, unique=True, verbose_name='LN Identity PubKey')),
+                ('pubkey', models.CharField(db_index=True, max_length=255, unique=True, verbose_name='LN Identity Pubkey')),
                 ('type', models.IntegerField(choices=[(0, 'User'), (1, 'Moderator'), (2, 'Admin'), (3, 'Blog')], default=0)),
                 ('status', models.IntegerField(choices=[(0, 'New User'), (1, 'Trusted'), (2, 'Suspended'), (3, 'Banned')], default=0)),
                 ('new_messages', models.IntegerField(default=0)),
