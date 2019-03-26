@@ -168,7 +168,14 @@ class NewPost(FormView):
             logger.exception(e)
             nodes_list = []
         else:
-            nodes_list = [n['identity_pubkey'] for n in response.json()]
+            try:
+                nodes_list = [n['identity_pubkey'] for n in response.json()]
+            except ValueError:
+                logger.error("Got non-json from API server: {}".format(response))
+                nodes_list = []
+	    except KeyError:
+                logger.error("Got invalid schema from API server: {}".format(response))
+                nodes_list = []
 
         initial = dict()
 
