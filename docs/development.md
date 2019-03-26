@@ -1,11 +1,12 @@
 # Install
 
 Requierments:
-	* `python2.7`
-	* `pip2.7`
-	* `python3`
-	* `pip3`
-	* `virtualenv`
+
+  * `python2.7`
+  * `pip2.7`
+  * `python3`
+  * `pip3`
+  * `virtualenv`
 
 Get sourcecode, setup virtualenv local directories, and install requierments::
 
@@ -13,7 +14,7 @@ Get sourcecode, setup virtualenv local directories, and install requierments::
 	cd biostar-central-ln
 	./bistar.sh install
 
-## Getting started
+## Start writer
 
 	# Initialize local db
     	./biostar.sh writer-dev migrate
@@ -24,4 +25,12 @@ Get sourcecode, setup virtualenv local directories, and install requierments::
 	# Start writer (backend)
 	./biostar.sh writer-dev runserver
 
-Visit ``http://localhost:8080`` to see the site loaded with default settings.
+Visit ``http://localhost:8000`` to explore the backend API
+
+## Start reader
+
+	# Initialize local db and run webserver
+	biostar.sh init run
+
+
+Visit ``http://localhost:8080`` to see the site.
