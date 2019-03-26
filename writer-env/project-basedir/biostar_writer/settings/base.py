@@ -30,11 +30,28 @@ X_FRAME_OPTIONS = 'DENY'  # https://docs.djangoproject.com/en/2.1/ref/clickjacki
 # Application definition
 
 INSTALLED_APPS = [
+    # built-in
     'django.contrib.contenttypes',
+    'django.contrib.auth',  # required by REST framework
     'django.contrib.staticfiles',
     'django.contrib.sites',
+
+    # third-party
+    'rest_framework',
+    'rest_framework.authtoken',
+
+    # project
     'users',
+    'lner'
 ]
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

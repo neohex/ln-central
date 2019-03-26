@@ -99,7 +99,8 @@ if [ "$1" = "writer-dev" ]; then
 	(
 		cd writer-env
 		. bin/activate
-		DJANGO_SETTINGS_MODULE=biostar_writer.settings.dev ./project-basedir/manage.py $@
+		cd project-basedir
+		DJANGO_SETTINGS_MODULE=biostar_writer.settings.dev ./manage.py $@
 	)
 	exit
 fi
@@ -110,7 +111,8 @@ if [ "$1" = "writer-prod" ]; then
 	(
 		cd writer-env
 		. bin/activate
-		DJANGO_SETTINGS_MODULE=biostar_writer.settings.prod ./project-basedir/manage.py $@
+		cd project-basedir
+		DJANGO_SETTINGS_MODULE=biostar_writer.settings.prod ./manage.py $@
 	)
 	exit
 fi
