@@ -31,3 +31,11 @@ with open('/etc/biostar/dbpass') as dbpass:
                 'PORT': '5432',
             }
         }
+
+INSTALLED_APPS += ["rest_framework.authtoken"]
+
+REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = REST_FRAMEWORK.get('DEFAULT_AUTHENTICATION_CLASSES', [])
+REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ["rest_framework.authentication.TokenAuthentication"]
+
+REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = REST_FRAMEWORK.get('DEFAULT_PERMISSION_CLASSES', [])
+REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] += ["rest_framework.permissions.IsAuthenticated"]

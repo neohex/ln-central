@@ -120,6 +120,7 @@ ADMINS = (
 
 # Get the secret key from the environment.
 SECRET_KEY = get_env("SECRET_KEY", __DEFAULT_SECRET_KEY)
+WRITER_AUTH_TOKEN = None
 
 MANAGERS = ADMINS
 

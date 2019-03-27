@@ -24,3 +24,6 @@ with open('/etc/biostar/dbpass') as dbpass:
                 'PORT': '5432',
             }
         }
+
+with open('/etc/biostar/writer-auth-token') as writer_auth_token:
+    WRITER_AUTH_TOKEN = writer_auth_token.read().strip()

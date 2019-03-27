@@ -155,6 +155,11 @@ class NewPost(FormView):
 
     def get(self, request, *args, **kwargs):
         # Get LN Nodes list
+        if settings.WRITER_AUTH_TOKEN is not None:
+            headers = {'Authorization': 'Token {}'.format(settings.WRITER_AUTH_TOKEN)}
+        else:
+            headers = {}
+
         try:
             response = requests.get('http://127.0.0.1:8000/ln/list.json')
         except requests.exceptions.ConnectionError as e:
@@ -164,11 +169,19 @@ class NewPost(FormView):
             try:
                 nodes_list = [n['identity_pubkey'] for n in response.json()]
             except ValueError:
-                logger.error("Got non-json from API server: {}".format(response))
-                nodes_list = []
-	    except KeyError:
-                logger.error("Got invalid schema from API server: {}".format(response))
-                nodes_list = []
+                logger.error("Got non-json from API server: {} status_code={} response_text={}".format(
+                        response.reason, response.status_code, response.text)
+                    )
+            except KeyError:
+                    logger.error("Got invalid schema from API server: {} status_code={} response_text={}".format(
+                        response.reason, response.status_code, response.text)
+                    )
+                    nodes_list = []
+            except TypeError:
+                    logger.error("Got invalid response from API server: {} status_code={} response_text={}".format(
+                        response.reason, response.status_code, response.text)
+                    )
+                    nodes_list = []
 
         initial = dict()
 
