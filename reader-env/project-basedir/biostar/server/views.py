@@ -390,20 +390,17 @@ class PostPreviewView(TemplateView):
 
         context = super(PostPreviewView, self).get_context_data(**kwargs)
 
-        # de-serialize memo
-        encoded = context["memo"]
-        json_str = zlib.decompress(binascii.a2b_base64(encoded))
-        memo = json.loads(json_str)
+        memo = util.deserialize_memo(context["memo"])
 
         post_preview = PostPreview()
         post_preview.title = memo["title"]
         post_preview.status = Post.OPEN
-        post_preview.type = memo["type"]
+        post_preview.type = memo["post_type"]
         post_preview.content = memo["content"]
         post_preview.html = util.html.parse_html(memo["content"])
+        post_preview.tag_val = memo["tag_val"]
         post_preview.tag_value = util.split_tags(memo["tag_val"])
         post_preview.date = datetime.utcfromtimestamp(memo["unixtime"]).replace(tzinfo=utc)
-        print(post_preview.date)
 
         context['post'] = post_preview
 

@@ -384,16 +384,16 @@ class Post(models.Model):
 class PostPreview(models.Model):
     objects = []
 
-    title = models.CharField(max_length=200, null=False)
+    title = models.CharField(max_length=200, null=False, blank=False)
 
     # The type of the post: question, answer, comment.
-    type = models.IntegerField(choices=Post.TYPE_CHOICES, db_index=True)
+    type = models.IntegerField(choices=Post.TYPE_CHOICES, null=False, blank=False)
 
     # This is the HTML that the user enters.
-    content = models.TextField(default='')
+    content = models.TextField(default='', null=False, blank=False)
 
     # The tag value is the canonical form of the post's tags
-    tag_val = models.CharField(max_length=100, default="", blank=True)
+    tag_val = models.CharField(max_length=100, null=False, blank=False)
 
     date = models.DateTimeField()
 
@@ -401,22 +401,27 @@ class PostPreview(models.Model):
     def is_toplevel(self):
         return self.type in Post.TOP_LEVEL
 
-    def get_absolute_url(self):
-
-        # serialize memo
+    def to_serialized_memo(self):
         assert self.date.tzinfo == utc, "date must be in UTC"
-        
-        json_str = json.dumps(dict(
-            type=self.type,
-            title=self.title,
-            content=self.content,
-            tag_val=self.tag_val,
-            unixtime=int((self.date - datetime.datetime(1970,1,1).replace(tzinfo=utc)).total_seconds())
-        ))
-        memo = binascii.b2a_base64(zlib.compress(json_str)).rstrip("\n")
+        return util.serialize_memo(
+            dict(
+                title=self.title,
+                post_type=self.type,
+                tag_val=self.tag_val,
+                content=self.content,
+                unixtime=int((self.date - datetime.datetime(1970,1,1).replace(tzinfo=utc)).total_seconds())
+            )
+        )
 
-        url = reverse("post-preview", kwargs=dict(memo=memo))
+    def get_absolute_url(self):
+        url = reverse("post-preview", kwargs=dict(memo=self.to_serialized_memo()))
         return url if self.is_toplevel else "%s#%s" % (url, self.id)
+
+    def get_edit_url(self):
+        url = reverse("post-preview-edit", kwargs=dict(memo=self.to_serialized_memo()))
+        return url if self.is_toplevel else "%s#%s" % (url, self.id)
+
+
 
 
 class ReplyToken(models.Model):

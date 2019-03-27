@@ -172,11 +172,16 @@ class NewPost(FormView):
 
         initial = dict()
 
-        # Attempt to prefill from GET parameters
-        for key in "title tag_val content".split():
-            value = request.GET.get(key)
-            if value:
-                initial[key] = value
+        if "memo" in kwargs:
+            memo = util.deserialize_memo(kwargs["memo"])
+            for key in "title post_type tag_val content".split():
+                initial[key] = memo[key]
+        else:
+            # Attempt to prefill from GET parameters
+            for key in "title post_type tag_val content".split():
+                value = request.GET.get(key)
+                if value:
+                    initial[key] = value
 
         # here, there used to be code to pre-fill from external session
         form = self.form_class(initial=initial)
@@ -226,6 +231,7 @@ class NewPost(FormView):
         # # # Triggers a new post save.
         # post.add_tags(post.tag_val)
 
+
         post_preview = PostPreview(
               title=data('title'),
               content=data('content'),
@@ -253,6 +259,7 @@ class NewAnswer(FormView):
         pid = int(self.kwargs['pid'])
         # form_class = ShortForm if pid else LongForm
         form = self.form_class(initial=initial)
+
         return render(request, self.template_name, {'form': form})
 
     def post(self, request, *args, **kwargs):
@@ -276,6 +283,7 @@ class NewAnswer(FormView):
 
         # Figure out the right type for this new post
         post_type = self.type_map.get(self.post_type)
+
         # Create a new post.
 
         # TODO

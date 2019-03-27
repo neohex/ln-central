@@ -255,9 +255,9 @@ def post_body(context, post, user, tree):
     return dict(post=post, user=user, tree=tree, request=context['request'])
 
 @register.inclusion_tag('server_tags/post_preview_body.html', takes_context=True)
-def post_preview_body(context, post):
+def post_preview_body(context, post_preview):
     "Renders the post preview body"
-    return dict(post=post, request=context['request'])
+    return dict(post=post_preview, edit_url=post_preview.get_edit_url(), request=context['request'])
 
 
 @register.inclusion_tag('server_tags/search_bar.html', takes_context=True)

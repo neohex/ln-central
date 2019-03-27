@@ -43,6 +43,9 @@ urlpatterns = patterns('',
     # Post preview
     url(r'^p/preview/post/(?P<memo>[\w\/\+\=]+)/$', views.PostPreviewView.as_view(), name="post-preview"),
 
+    # Post preview edit
+    url(r'^p/preview/edit/(?P<memo>[\w\/\+\=]+)/$', views.RateLimitedNewPost.as_view(), name="post-preview-edit"),
+
     # A separate url for each post type.
     url(r'^p/new/post/$', views.RateLimitedNewPost.as_view(), name="new-post"),
 

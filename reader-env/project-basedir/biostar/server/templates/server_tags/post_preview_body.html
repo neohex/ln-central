@@ -1,9 +1,17 @@
 {% load server_tags %}
 
+<div>
+    <div style="background: #5bbad5; color: #ffffff; text-align: center; padding: 0.5em">
+    Preview
+    </div>
+
+    <div>Payment is required to publish this question</div>
+    <div>Amount required: <b>1 sat</b></div>
+</div>
+
+
 <div class="post-body {{ post.get_status_display }} clearfix">
 
-
-    {% include "banners/leaderboard.html" %}
     <div class="title" >{{ post.get_type_display }}: <span itemprop="name">{{ post.title }}</span></div>
 
 
@@ -43,14 +51,13 @@
                 {% if post.is_toplevel %}
                     <div class="tags clearfix" style="margin-bottom:0.5em;">
                         {% for tag in post.tag_value %}
-                            <a class="tag" href="/t/{{ tag }}/">{{ tag }}</a>
+                            <span class="tag">{{ tag }}</span>
                         {% endfor %}
-
-                    &bull; 0 views
-
+                        &bull;
+                        0 views
                     </div>
                 {% endif %}
-
+                <a href="{{ edit_url|safe }}">edit</a>
             </div>
 
         </div>

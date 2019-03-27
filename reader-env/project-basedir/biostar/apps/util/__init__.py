@@ -1,6 +1,33 @@
 import random, hashlib, json, base64, hmac
+import binascii
+import zlib
 from django.utils.timezone import utc
 from datetime import datetime
+
+
+def serialize_memo(simple_obj):
+    '''
+    Lightning payment needs to encode website actions inside the
+    invoice description field.
+
+    Requirements:
+    - simple_obj must be convertible to json
+    
+    TODO: check for serialized version not to exceed 600 bytes
+    leaving some room as the final limit is 639 bytes.
+    See https://blockfuse.io/blog/lightning-network-invoices/
+    '''
+    json_str = json.dumps(simple_obj)
+    return binascii.b2a_base64(zlib.compress(json_str)).rstrip("\n")
+
+
+def deserialize_memo(memo):
+    '''
+    Inverse of serialize_memo
+    '''
+    json_str = zlib.decompress(binascii.a2b_base64(memo))
+    return json.loads(json_str)
+
 
 def now():
     return datetime.utcnow().replace(tzinfo=utc)
