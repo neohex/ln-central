@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 OPEN, CLOSE_OFFTOPIC, CLOSE_SPAM, DELETE, \
     DUPLICATE, MOVE_TO_COMMENT, MOVE_TO_ANSWER, CROSSPOST, TOGGLE_ACCEPT, BUMP_POST = map(str, range(10))
 
-from biostar.apps.util import now
+import biostar.apps.util
 
 POST_LIMIT_ERROR_MSG = '''
 <p><b>Sorry!</b> Your posting limit of (%s) posts per six hours has been reached.</p>
@@ -56,7 +56,7 @@ def user_exceeds_limits(request, top_level=False):
     """
 
     # user = request.user
-    # since = now() - timedelta(hours=6)
+    # since = util.now() - timedelta(hours=6)
 
     # # Check the user's credentials.
     # user = update_user_status(user)
@@ -207,8 +207,7 @@ class PostModeration(LoginRequiredMixin, FormView):
             return response
 
         if action == (BUMP_POST):
-            now = datetime.utcnow().replace(tzinfo=utc)
-            Post.objects.filter(id=post.id).update(lastedit_date=now)
+            Post.objects.filter(id=post.id).update(lastedit_date=util.now())
             logger.info("Post bumped  (Request: %s)", request)
             return response
 

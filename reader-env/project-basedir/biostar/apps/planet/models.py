@@ -7,12 +7,11 @@ from django.contrib import admin
 
 logger = logging.getLogger(__name__)
 
-def now():
-    return datetime.datetime.utcnow().replace(tzinfo=utc)
 
 def abspath(*args):
     """Generates absolute paths"""
     return os.path.abspath(os.path.join(*args))
+
 
 # Create your models here.
 
@@ -91,7 +90,7 @@ class BlogPost(models.Model):
 
         if not self.id:
             # Set the date to current time if missing.
-            self.insert_date = self.insert_date or now()
+            self.insert_date = self.insert_date or util.now()
 
         super(BlogPost, self).save(*args, **kwargs)
 

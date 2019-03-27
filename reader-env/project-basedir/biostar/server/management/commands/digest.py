@@ -4,12 +4,11 @@ import logging, string, time
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.core.mail import send_mail
-from biostar.const import now
 from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 from optparse import make_option
-from biostar.apps.util import html
+from biostar.apps import util
 from django.contrib.sites.models import Site
 from django.db.models import Count
 from django.core.urlresolvers import reverse
@@ -22,7 +21,7 @@ def render_digest(days, text_tmpl, html_tmpl, send, options, limit=10, verbosity
 
     site = site = Site.objects.get_current()
 
-    start = (now() - timedelta(days=days))
+    start = (util.now() - timedelta(days=days))
 
     # Posts created since the start date.
     top_posts = Post.objects.filter(status=Post.OPEN, type__in=Post.TOP_LEVEL,
@@ -66,9 +65,9 @@ def render_digest(days, text_tmpl, html_tmpl, send, options, limit=10, verbosity
     text_body = html_body = ''
 
     if text_tmpl:
-        text_body = html.render(text_tmpl, **params)
+        text_body = util.html.render(text_tmpl, **params)
     if html_tmpl:
-        html_body = html.render(html_tmpl, **params)
+        html_body = util.html.render(html_tmpl, **params)
 
     if verbosity > 0:
         extras = dict(

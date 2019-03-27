@@ -5,6 +5,7 @@ from django.core.cache import cache
 from biostar.apps.users.models import User
 from biostar.apps.posts.models import Post, Vote, PostView
 from biostar.apps.badges.models import Award
+from biostar.apps import util
 
 from datetime import timedelta
 from math import pow, e, log
@@ -46,7 +47,7 @@ def get_traffic(minutes=60):
     global TRAFFIC_KEY
     traffic = cache.get(TRAFFIC_KEY)
     if not traffic:
-        recent = const.now() - timedelta(minutes=minutes)
+        recent = util.now() - timedelta(minutes=minutes)
         try:
             traffic = PostView.objects.filter(date__gt=recent).distinct('ip').count()
         except NotImplementedError, exc:

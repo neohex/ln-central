@@ -42,17 +42,17 @@ def traffic(request):
     """
     Traffic as post views in the last 60 min.
     """
-    now = datetime.now()
-    start = now-timedelta(minutes=60)
+    now_freeze = datetime.now()
+    start = now_freeze - timedelta(minutes=60)
     try:
-        post_views = PostView.objects.filter(date__gt=start).exclude(date__gt=now).distinct(
+        post_views = PostView.objects.filter(date__gt=start).exclude(date__gt=now_freeze).distinct(
             'ip').count()
     except NotImplementedError:
-        post_views = PostView.objects.filter(date__gt=start).exclude(date__gt=now).count()
+        post_views = PostView.objects.filter(date__gt=start).exclude(date__gt=now_freeze).count()
 
     data = {
-        'date': datetime_to_iso(now),
-        'timestamp': datetime_to_unix(now),
+        'date': datetime_to_iso(now_freeze),
+        'timestamp': datetime_to_unix(now_freeze),
         'post_views_last_60_min': post_views,
     }
     return data

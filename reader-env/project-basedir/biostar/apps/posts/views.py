@@ -1,7 +1,7 @@
 # Create your views here.
 from django.shortcuts import render_to_response
 from django.views.generic import TemplateView, DetailView, ListView, FormView, UpdateView
-from .models import Post
+from .models import Post, PostPreview
 from django import forms
 from django.core.urlresolvers import reverse
 from crispy_forms.helper import FormHelper
@@ -20,7 +20,7 @@ import logging
 import langdetect
 from django.template.loader import render_to_string
 from biostar.apps import util
-from biostar.apps.users.models import User, now
+from biostar.apps.users.models import User
 
 import requests
 
@@ -79,7 +79,7 @@ class PagedownWidget(forms.Textarea):
 
 
 class LongForm(forms.Form):
-    FIELDS = "title content post_type tag_val wallet_pubkey".split()
+    FIELDS = "title content post_type tag_val".split()
 
     POST_CHOICES = [
         (Post.QUESTION, "Question"),
@@ -91,12 +91,6 @@ class LongForm(forms.Form):
         required=True,
         max_length=200, min_length=10, validators=[valid_title, english_only],
         help_text="Descriptive titles promote better answers.")
-
-    wallet_pubkey = forms.CharField(
-        label="wallet_pubkey (temporary hack)",
-        required=True,
-        max_length=200, min_length=1,
-        help_text="TODO: Remove this field, this is for testing only")
 
     post_type = forms.ChoiceField(
         label="Post Type",
@@ -121,14 +115,13 @@ class LongForm(forms.Form):
         self.helper.layout = Layout(
             Fieldset(
                 'Post Form',
-                Field('wallet_pubkey'),
                 Field('title'),
                 Field('post_type'),
                 Field('tag_val'),
                 Field('content'),
             ),
             ButtonHolder(
-                Submit('submit', 'Submit')
+                Submit('submit', 'Preview')
             )
         )
 
@@ -147,7 +140,7 @@ class ShortForm(forms.Form):
                 'content',
             ),
             ButtonHolder(
-                Submit('submit', 'Submit')
+                Submit('submit', 'Preview')
             )
         )
 
@@ -208,32 +201,40 @@ class NewPost(FormView):
         # Valid forms start here.
         data = form.cleaned_data.get
 
-        title = data('title')
-        content = data('content')
-        post_type = int(data('post_type'))
-        tag_val = data('tag_val')
-        wallet_pubkey = data('wallet_pubkey')
+        # title = data('title')
+        # content = data('content')
+        # post_type = int(data('post_type'))
+        # tag_val = data('tag_val')
 
-        # TEMPORARY HACK: create new user
-        user = User()
-        user.pubkey = "%s@xyz2.xyz" % util.make_uuid()
-        user.score = 0
-        user.last_login = now()
-        user.date_joined = user.last_login
-        print("%r" % user)
-        user.save()
+        # context = {
+        #     'post': form,
+        #     'nodes_list': ["A"]
+        # }
 
-        post = Post(
-             title=title, content=content, tag_val=tag_val,
-             author=user, type=post_type,
+        #return render(request, "post_preview.html", context)
+
+        # # TEMPORARY HACK: create new user
+        # user = User()
+        # user.pubkey = "%s@xyz2.xyz" % util.make_uuid()
+        # user.score = 0
+        # user.last_login = now()
+        # user.date_joined = user.last_login
+        # print("%r" % user)
+        # user.save()
+        # post.save()
+
+        # # # Triggers a new post save.
+        # post.add_tags(post.tag_val)
+
+        post_preview = PostPreview(
+              title=data('title'),
+              content=data('content'),
+              tag_val=data('tag_val'),
+              type=int(data('post_type')),
+              date=util.now()
         )
-        post.save()
 
-        # # Triggers a new post save.
-        post.add_tags(post.tag_val)
-
-        logger.info("%s created (Request: %s)",  post.get_type_display(), request)
-        return HttpResponseRedirect(post.get_absolute_url())
+        return HttpResponseRedirect(post_preview.get_absolute_url())
 
 
 class NewAnswer(FormView):

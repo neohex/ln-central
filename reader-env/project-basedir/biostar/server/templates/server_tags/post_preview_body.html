@@ -1,0 +1,61 @@
+{% load server_tags %}
+
+<div class="post-body {{ post.get_status_display }} clearfix">
+
+
+    {% include "banners/leaderboard.html" %}
+    <div class="title" >{{ post.get_type_display }}: <span itemprop="name">{{ post.title }}</span></div>
+
+
+    <div class="post vote-box visible-lg visible-md" >
+        <div class="vote mark tip" data-toggle="tooltip" data-placement="top"
+             data-type="vote" title="Upvote!">
+            <i class="fa fa-thumbs-o-up fa-2x"></i></div>
+
+        <div class="count" itemprop="voteCount">0</div>
+
+        <div class="vote mark tip" data-toggle="tooltip" data-placement="top"
+             data-type="bookmark" title="Bookmark!">
+            <i class="fa fa-book fa-2x"></i>
+        </div>
+
+    </div>
+
+    <div>
+        <a name="{{ post.id }}"></a>
+        {# The body of the post #}
+        <div class="content" >
+
+            <div class="col-xs-3 col-md-2 box pull-right text-center visible-lg visible-md">
+                    <div>Avatar not yet known</div>
+                    <div class="ago">{{ post.date|time_ago }} by</div>
+                    <div class="uname">Pen name not yet known</div>
+            </div>
+
+            <div class="box text-center visible-sm visible-xs">
+                <div class="uname">Pen name not yet known:</div>
+            </div>
+
+            <span itemprop="text">{{ post.html|safe }}</span>
+
+
+            <div class="clearfix">
+                {% if post.is_toplevel %}
+                    <div class="tags clearfix" style="margin-bottom:0.5em;">
+                        {% for tag in post.tag_value %}
+                            <a class="tag" href="/t/{{ tag }}/">{{ tag }}</a>
+                        {% endfor %}
+
+                    &bull; 0 views
+
+                    </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+

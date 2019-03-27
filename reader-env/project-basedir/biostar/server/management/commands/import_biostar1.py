@@ -13,7 +13,7 @@ from django.utils import timezone, encoding
 from django.db import transaction
 from itertools import *
 from django.db.models import signals
-from biostar.const import now
+
 
 def path_join(*args):
     return os.path.abspath(os.path.join(*args))

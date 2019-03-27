@@ -15,11 +15,11 @@ from biostar import const
 from biostar.apps.util import html
 from biostar.apps import util
 # HTML sanitization parameters.
+import json
+import binascii
+import zlib
 
 logger = logging.getLogger(__name__)
-
-def now():
-    return datetime.datetime.utcnow().replace(tzinfo=utc)
 
 class Tag(models.Model):
     name = models.TextField(max_length=50, db_index=True)
@@ -246,7 +246,7 @@ class Post(models.Model):
 
     @property
     def age_in_days(self):
-        delta = const.now() - self.creation_date
+        delta = util.now() - self.creation_date
         return delta.days
 
     def update_reply_count(self):
@@ -298,7 +298,7 @@ class Post(models.Model):
             self.title = self.parent.title if self.parent else self.title
             self.lastedit_user = self.author
             self.status = self.status or Post.PENDING
-            self.creation_date = self.creation_date or now()
+            self.creation_date = self.creation_date or util.now()
             self.lastedit_date = self.creation_date
 
             # Set the timestamps on the parent
@@ -338,12 +338,12 @@ class Post(models.Model):
         ip2 = '' if ip2.lower() == 'localhost' else ip2
         ip = ip1 or ip2 or '0.0.0.0'
 
-        now = const.now()
-        since = now - datetime.timedelta(minutes=minutes)
+	now_freeze = util.now()
+        since = now_freeze - datetime.timedelta(minutes=minutes)
 
         # One view per time interval from each IP address.
         if not PostView.objects.filter(ip=ip, post=post, date__gt=since):
-            PostView.objects.create(ip=ip, post=post, date=now)
+            PostView.objects.create(ip=ip, post=post, date=now_freeze)
             Post.objects.filter(id=post.id).update(view_count=F('view_count') + 1)
         return post
 
@@ -378,6 +378,45 @@ class Post(models.Model):
                     Post.objects.filter(id=instance.root.id).update(reply_count=F("reply_count") + 1)
 
             instance.save()
+
+
+
+class PostPreview(models.Model):
+    objects = []
+
+    title = models.CharField(max_length=200, null=False)
+
+    # The type of the post: question, answer, comment.
+    type = models.IntegerField(choices=Post.TYPE_CHOICES, db_index=True)
+
+    # This is the HTML that the user enters.
+    content = models.TextField(default='')
+
+    # The tag value is the canonical form of the post's tags
+    tag_val = models.CharField(max_length=100, default="", blank=True)
+
+    date = models.DateTimeField()
+
+    @property
+    def is_toplevel(self):
+        return self.type in Post.TOP_LEVEL
+
+    def get_absolute_url(self):
+
+        # serialize memo
+        assert self.date.tzinfo == utc, "date must be in UTC"
+        
+        json_str = json.dumps(dict(
+            type=self.type,
+            title=self.title,
+            content=self.content,
+            tag_val=self.tag_val,
+            unixtime=int((self.date - datetime.datetime(1970,1,1).replace(tzinfo=utc)).total_seconds())
+        ))
+        memo = binascii.b2a_base64(zlib.compress(json_str)).rstrip("\n")
+
+        url = reverse("post-preview", kwargs=dict(memo=memo))
+        return url if self.is_toplevel else "%s#%s" % (url, self.id)
 
 
 class ReplyToken(models.Model):
@@ -509,7 +548,7 @@ class Subscription(models.Model):
 
         if not self.id:
             # Set the date to current time if missing.
-            self.date = self.date or const.now()
+            self.date = self.date or util.now()
 
         super(Subscription, self).save(*args, **kwargs)
 
@@ -528,7 +567,7 @@ class Subscription(models.Model):
             if sub_type == const.DEFAULT_MESSAGES:
                 sub_type = const.EMAIL_MESSAGE if instance.is_toplevel else const.LOCAL_MESSAGE
             sub = Subscription(post=root, user=user, type=sub_type)
-            sub.date = datetime.datetime.utcnow().replace(tzinfo=utc)
+            sub.date = util.now()
             sub.save()
             # Increase the subscription count of the root.
             Post.objects.filter(pk=root.id).update(subs_count=F('subs_count') + 1)

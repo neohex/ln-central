@@ -267,7 +267,7 @@ def bump(pk=None):
     from biostar.apps.posts.models import Post
     from biostar.apps.users.models import User
 
-    from biostar.const import now
+    from biostar.apps import util
 
     if not pk:
         query = Post.objects.filter(type=Post.QUESTION, status=Post.OPEN)
@@ -275,7 +275,7 @@ def bump(pk=None):
         value = random.random()
 
         if value > 0.5:
-            since = now() - timedelta(weeks=10)
+            since = util.now() - timedelta(weeks=10)
             query = query.filter(reply_count=0, creation_date__gt=since)
 
         query = query.values_list("id")
@@ -291,6 +291,6 @@ def bump(pk=None):
     if not post.is_toplevel:
         logger.warning("post is not at toplevel")
 
-    post.lastedit_date = now()
+    post.lastedit_date = util.now()
     post.lastedit_user = community
     post.save()

@@ -23,10 +23,6 @@ ALLOWED_ATTRIBUTES.update(settings.ALLOWED_ATTRIBUTES)
 logger = logging.getLogger(__name__)
 
 
-def now():
-    return datetime.utcnow().replace(tzinfo=utc)
-
-
 class LocalManager(models.Manager):
     def get_users(self, sort, limit, q):
         sort = const.USER_SORT_MAP.get(sort, None)
@@ -38,13 +34,14 @@ class LocalManager(models.Manager):
             query = self
 
         if days:
-            delta = const.now() - timedelta(days=days)
+            delta = util.now() - timedelta(days=days)
             query = self.filter(profile__last_login__gt=delta)
 
 
         query = query.exclude(status=User.BANNED).select_related("profile").order_by(sort)
 
         return query
+
 
 class User(models.Model):
     # Class level constants.
@@ -240,7 +237,7 @@ class Profile(models.Model):
         if not self.id:
             # This runs only once upon object creation.
             self.uuid = util.make_uuid()
-            self.date_joined = self.date_joined or now()
+            self.date_joined = self.date_joined or util.now()
             self.last_login = self.date_joined
 
         super(Profile, self).save(*args, **kwargs)
@@ -287,7 +284,6 @@ def user_create_messages(sender, instance, created, *args, **kwargs):
     "The actions to undertake when creating a new post"
     from biostar.apps.messages.models import Message, MessageBody
     from biostar.apps.util import html
-    from biostar.const import now
 
     user = instance
     if created:
@@ -299,7 +295,7 @@ def user_create_messages(sender, instance, created, *args, **kwargs):
         title = "Welcome!"
         content = html.render(name=NEW_USER_WELCOME_TEMPLATE, user=user)
         body = MessageBody.objects.create(author=author, subject=title,
-                                          text=content, sent_at=now())
+                                          text=content, sent_at=util.now())
         message = Message(user=user, body=body, sent_at=body.sent_at)
         message.save()
 

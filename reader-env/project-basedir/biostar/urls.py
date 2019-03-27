@@ -40,6 +40,9 @@ urlpatterns = patterns('',
     # Post details.
     url(r'^p/(?P<pk>\d+)/$', views.PostDetails.as_view(), name="post-details"),
 
+    # Post preview
+    url(r'^p/preview/post/(?P<memo>[\w\/\+\=]+)/$', views.PostPreviewView.as_view(), name="post-preview"),
+
     # A separate url for each post type.
     url(r'^p/new/post/$', views.RateLimitedNewPost.as_view(), name="new-post"),
 

@@ -7,7 +7,7 @@ from django.core.cache import cache
 from biostar.apps.messages.models import Message
 from django.core.cache import cache
 from biostar.apps.users.models import User
-from biostar.apps.posts.models import Post, Vote, Tag, Subscription, ReplyToken
+from biostar.apps.posts.models import Post, PostPreview, Vote, Tag, Subscription, ReplyToken
 from biostar.apps.posts.views import NewPost, NewAnswer, ShortForm
 from biostar.apps.badges.models import Badge, Award
 from biostar.apps.posts.auth import post_permissions
@@ -28,6 +28,13 @@ from django.http import Http404
 import markdown, pyzmail
 from biostar.apps.util.email_reply_parser import EmailReplyParser
 from django.core.urlresolvers import reverse
+
+from biostar.apps import util
+from django.utils.timezone import utc
+
+import json
+import binascii
+import zlib
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +85,7 @@ def apply_sort(request, query):
     limit = request.GET.get('limit', const.POST_LIMIT_DEFAULT)
     days = const.POST_LIMIT_MAP.get(limit, 0)
     if days:
-        delta = const.now() - timedelta(days=days)
+        delta = util.now() - timedelta(days=days)
         query = query.filter(lastedit_date__gt=delta)
     return query
 
@@ -373,6 +380,35 @@ class PostDetails(DetailView):
         context['form'] = ShortForm()
         return context
 
+class PostPreviewView(TemplateView):
+    """
+    """
+
+    template_name = "post_preview.html"
+
+    def get_context_data(self, **kwargs):
+
+        context = super(PostPreviewView, self).get_context_data(**kwargs)
+
+        # de-serialize memo
+        encoded = context["memo"]
+        json_str = zlib.decompress(binascii.a2b_base64(encoded))
+        memo = json.loads(json_str)
+
+        post_preview = PostPreview()
+        post_preview.title = memo["title"]
+        post_preview.status = Post.OPEN
+        post_preview.type = memo["type"]
+        post_preview.content = memo["content"]
+        post_preview.html = util.html.parse_html(memo["content"])
+        post_preview.tag_value = util.split_tags(memo["tag_val"])
+        post_preview.date = datetime.utcfromtimestamp(memo["unixtime"]).replace(tzinfo=utc)
+        print(post_preview.date)
+
+        context['post'] = post_preview
+
+        return context
+
 
 class RSS(TemplateView):
     template_name = "rss_info.html"
@@ -591,7 +627,7 @@ def email_handler(request):
             text = markdown.markdown(text)
 
             # Rate-limit sanity check, potentially a runaway process
-            since = const.now() - timedelta(days=1)
+            since = util.now() - timedelta(days=1)
             if Post.objects.filter(author=author, creation_date__gt=since).count() > settings.MAX_POSTS_TRUSTED_USER:
                 raise Exception("too many posts created %s" % author.id)
 

@@ -11,6 +11,7 @@ from django.utils.timezone import utc
 from django import template
 from django.core.urlresolvers import reverse
 from biostar import const
+from biostar.apps import util
 from biostar.server.views import LATEST
 import coolname as coolname_lib
 
@@ -137,7 +138,7 @@ def time_ago(date):
     if not isinstance(date, datetime):
         date = dateutil.parser.parse(date)
 
-    delta = const.now() - date
+    delta = util.now() - date
     if delta < timedelta(minutes=1):
         return 'just now'
     elif delta < timedelta(hours=1):
@@ -252,6 +253,11 @@ def page_bar_sort_users(context):
 def post_body(context, post, user, tree):
     "Renders the post body"
     return dict(post=post, user=user, tree=tree, request=context['request'])
+
+@register.inclusion_tag('server_tags/post_preview_body.html', takes_context=True)
+def post_preview_body(context, post):
+    "Renders the post preview body"
+    return dict(post=post, request=context['request'])
 
 
 @register.inclusion_tag('server_tags/search_bar.html', takes_context=True)

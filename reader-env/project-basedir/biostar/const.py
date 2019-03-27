@@ -71,8 +71,3 @@ POST_LIMIT_DEFAULT = POST_LIMIT_FIELDS[0]
 
 POST_LIMIT_INVALID_MSG = "Invalid limit parameter received"
 
-
-def now():
-    return datetime.utcnow().replace(tzinfo=utc)
-
-

@@ -6,12 +6,12 @@ from biostar.apps.posts.models import Post
 from biostar.apps.users.models import User
 from biostar.apps.messages.models import Message
 from biostar.apps.planet.models import BlogPost
+from biostar.apps import util
 
 from django.conf import settings
 from django.contrib.sites.models import Site
 from datetime import datetime, timedelta
 import bleach
-from biostar import const
 
 SITE = Site.objects.get(id=settings.SITE_ID)
 SITE_NAME = settings.SITE_NAME
@@ -84,7 +84,7 @@ class LatestFeed(PostBase):
 
     def items(self):
         # Delay posts hours.
-        delay_time = const.now() - timedelta(hours=2)
+        delay_time = util.now() - timedelta(hours=2)
         posts = Post.objects.filter(type__in=Post.TOP_LEVEL, status=Post.OPEN, creation_date__lt=delay_time).exclude(type=Post.BLOG).order_by('-creation_date')
         return posts[:FEED_COUNT]
 

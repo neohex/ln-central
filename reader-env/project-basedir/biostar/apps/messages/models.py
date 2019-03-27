@@ -9,11 +9,10 @@ from django.conf import settings
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.core import mail
+from biostar.apps import util
 
 logger = logging.getLogger(__name__)
 
-def now():
-    return datetime.datetime.utcnow().replace(tzinfo=utc)
 
 class MessageManager(models.Manager):
 
@@ -24,6 +23,7 @@ class MessageManager(models.Manager):
     def outbox_for(self, user):
         "Returns all messages that were sent by the given user."
         return self.filter(sender=user)
+
 
 # A message body is information sent to users.
 class MessageBody(models.Model):
@@ -45,7 +45,7 @@ class MessageBody(models.Model):
 
     def save(self, **kwargs):
         self.subject = self.subject[:self.MAX_SIZE]
-        self.sent_at= self.sent_at or now()
+        self.sent_at= self.sent_at or util.now()
         super(MessageBody, self).save(**kwargs)
 
 

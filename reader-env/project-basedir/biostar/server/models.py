@@ -13,6 +13,7 @@ from biostar.apps.messages.models import Message, MessageBody
 from biostar.apps.badges.models import Award
 
 from biostar.apps.util import html, make_uuid
+from biostar.apps import util
 
 from django.core import mail
 from django.conf import settings
@@ -75,7 +76,7 @@ def post_create_messages(sender, instance, created, *args, **kwargs):
                 # collect to a bulk email if the subscription is by email:
                 if sub.type in (EMAIL_MESSAGE, ALL_MESSAGES):
                     try:
-                        token = ReplyToken(user=sub.user, post=post, token=make_uuid(8), date=now())
+                        token = ReplyToken(user=sub.user, post=post, token=make_uuid(8), date=util.now())
                         from_email = settings.EMAIL_FROM_PATTERN % (author.pubkey, settings.DEFAULT_FROM_EMAIL)
                         from_email = from_email.encode("utf-8")
                         reply_to = settings.EMAIL_REPLY_PATTERN % token.token
