@@ -10,6 +10,8 @@ if [ $# == 0 ]; then
     echo ''
     echo '  install     - create virtual environments and install dependencies'
     echo '  uninstall   - uninstall all dependencies in the virtual environments'
+    echo '  reader-dev  - invoke manage.py for reader with dev settings'
+    echo '  reader-prod - invoke manage.py for reader with prod settings'
     echo '  writer-dev  - invoke manage.py for writer with dev settings'
     echo '  writer-prod - invoke manage.py for writer with prod settings'
     echo ''
@@ -92,6 +94,37 @@ if [ "$1" = "uninstall" ]; then
 
 	exit
 fi
+
+
+if [ "$1" = "reader-prod" ]; then
+	set -ue  # stop on errors or missing environment variables.
+	shift
+	(
+		cd reader-env
+		. bin/activate
+		cd project-basedir
+		. ./conf/deploy.env
+		cd live
+		../manage.py $@
+	)
+	exit
+fi
+
+
+if [ "$1" = "reader-dev" ]; then
+	set -ue  # stop on errors or missing environment variables.
+	shift
+	(
+		cd reader-env
+		. bin/activate
+		cd project-basedir
+		. ./conf/defaults.env
+		cd live
+		../manage.py $@
+	)
+	exit
+fi
+
 
 if [ "$1" = "writer-dev" ]; then
 	set -ue  # stop on errors or missing environment variables.
