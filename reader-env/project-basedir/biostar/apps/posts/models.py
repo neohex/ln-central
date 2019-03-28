@@ -397,11 +397,13 @@ class PostPreview(models.Model):
 
     date = models.DateTimeField()
 
+    memo = models.CharField(max_length=100, null=True, blank=False)
+
     @property
     def is_toplevel(self):
         return self.type in Post.TOP_LEVEL
 
-    def to_serialized_memo(self):
+    def serialize_memo(self):
         assert self.date.tzinfo == utc, "date must be in UTC"
         return util.serialize_memo(
             dict(
@@ -413,14 +415,17 @@ class PostPreview(models.Model):
             )
         )
 
-    def get_absolute_url(self):
-        url = reverse("post-preview", kwargs=dict(memo=self.to_serialized_memo()))
+    def get_absolute_url(self, memo):
+        url = reverse("post-preview", kwargs=dict(memo=memo))
         return url if self.is_toplevel else "%s#%s" % (url, self.id)
 
-    def get_edit_url(self):
-        url = reverse("post-preview-edit", kwargs=dict(memo=self.to_serialized_memo()))
+    def get_edit_url(self, memo):
+        url = reverse("post-preview-edit", kwargs=dict(memo=memo))
         return url if self.is_toplevel else "%s#%s" % (url, self.id)
 
+    def get_publish_url(self, memo):
+        url = reverse("post-publish", kwargs=dict(memo=memo))
+        return url if self.is_toplevel else "%s#%s" % (url, self.id)
 
 
 

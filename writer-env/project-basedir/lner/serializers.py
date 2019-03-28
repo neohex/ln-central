@@ -1,7 +1,15 @@
 from rest_framework import serializers
 from .models import LightningNode
+from .models import LightningInvoice
+
 
 class LightningNodeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = LightningNode
         fields = ['identity_pubkey']
+
+
+class LightningInvoiceSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = LightningInvoice
+        fields = ['pay_req']

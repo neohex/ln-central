@@ -20,9 +20,9 @@ import logging
 import langdetect
 from django.template.loader import render_to_string
 from biostar.apps import util
+from biostar.apps.util import ln
 from biostar.apps.users.models import User
 
-import requests
 
 def english_only(text):
     try:
@@ -154,35 +154,7 @@ class NewPost(FormView):
     template_name = "post_edit.html"
 
     def get(self, request, *args, **kwargs):
-        # Get LN Nodes list
-        if settings.WRITER_AUTH_TOKEN is not None:
-            headers = {'Authorization': 'Token {}'.format(settings.WRITER_AUTH_TOKEN)}
-        else:
-            headers = {}
-
-        try:
-            response = requests.get('http://127.0.0.1:8000/ln/list.json')
-        except requests.exceptions.ConnectionError as e:
-            logger.exception(e)
-            nodes_list = []
-        else:
-            try:
-                nodes_list = [n['identity_pubkey'] for n in response.json()]
-            except ValueError:
-                logger.error("Got non-json from API server: {} status_code={} response_text={}".format(
-                        response.reason, response.status_code, response.text)
-                    )
-            except KeyError:
-                    logger.error("Got invalid schema from API server: {} status_code={} response_text={}".format(
-                        response.reason, response.status_code, response.text)
-                    )
-                    nodes_list = []
-            except TypeError:
-                    logger.error("Got invalid response from API server: {} status_code={} response_text={}".format(
-                        response.reason, response.status_code, response.text)
-                    )
-                    nodes_list = []
-
+       
         initial = dict()
 
         if "memo" in kwargs:
@@ -200,7 +172,7 @@ class NewPost(FormView):
         form = self.form_class(initial=initial)
         context = {
             'form': form,
-            'nodes_list': nodes_list
+            'nodes_list': ln.get_nodes_list()   # Get LN Nodes list
         }
 
         return render(request, self.template_name, context)
@@ -253,7 +225,7 @@ class NewPost(FormView):
               date=util.now()
         )
 
-        return HttpResponseRedirect(post_preview.get_absolute_url())
+        return HttpResponseRedirect(post_preview.get_absolute_url(memo=post_preview.serialize_memo()))
 
 
 class NewAnswer(FormView):

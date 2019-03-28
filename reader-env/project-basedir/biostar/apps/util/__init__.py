@@ -1,8 +1,8 @@
 import random, hashlib, json, base64, hmac
 import binascii
 import zlib
-from django.utils.timezone import utc
 from datetime import datetime
+from django.utils.timezone import utc
 
 
 def serialize_memo(simple_obj):

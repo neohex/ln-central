@@ -28,6 +28,11 @@ urlpatterns = patterns('',
     # Topic listing.
     url(r'^t/(?P<topic>.+)/$', views.PostList.as_view(), name="topic-list"),
 
+
+    # ==============================
+    # User
+    # ============================== 
+
     # The list of users.
     url(r'^user/list/$', views.UserList.as_view(), name="user-list"),
 
@@ -37,14 +42,22 @@ urlpatterns = patterns('',
     # User details.
     url(r'^u/edit/(?P<pk>\d+)/$', views.EditUser.as_view(), name="user-edit"),
 
+
+    # ==============================
+    # Post
+    # ============================== 
+
     # Post details.
     url(r'^p/(?P<pk>\d+)/$', views.PostDetails.as_view(), name="post-details"),
 
-    # Post preview
-    url(r'^p/preview/post/(?P<memo>[\w\/\+\=]+)/$', views.PostPreviewView.as_view(), name="post-preview"),
-
     # Post preview edit
-    url(r'^p/preview/edit/(?P<memo>[\w\/\+\=]+)/$', views.RateLimitedNewPost.as_view(), name="post-preview-edit"),
+    url(r'^p/edit/preview/(?P<memo>[\w\/\+\=]+)/$', views.RateLimitedNewPost.as_view(), name="post-preview-edit"),
+
+    # Post publish
+    url(r'^p/publish/preview/(?P<memo>[\w\/\+\=]+)/$', views.PostPublishView.as_view(), name="post-publish"),
+
+    # Post preview
+    url(r'^p/new/preview/(?P<memo>[\w\/\+\=]+)/$', views.PostPreviewView.as_view(), name="post-preview"),
 
     # A separate url for each post type.
     url(r'^p/new/post/$', views.RateLimitedNewPost.as_view(), name="new-post"),
@@ -58,11 +71,21 @@ urlpatterns = patterns('',
     # Edit an existing post.
     url(r'^p/edit/(?P<pk>\d+)/$', EditPost.as_view(), name="post-edit"),
 
+
+    # ==============================
+    # Moderator
+    # ==============================
+
     # Produces the moderator panel.
     url(r'^local/moderate/post/(?P<pk>\d+)/$', moderate.PostModeration.as_view(), name="post-moderation"),
 
     # Produces the moderator panel.
     url(r'^local/moderate/user/(?P<pk>\d+)/$', moderate.UserModeration.as_view(), name="user-moderation"),
+
+
+    # ==============================
+    # Search, Planet, Vote
+    # ==============================
 
     # Search the body.
     url(r'^local/search/page/', search.Search.as_view(), name="search-page"),

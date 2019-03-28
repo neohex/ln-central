@@ -1,0 +1,53 @@
+{% extends "starbase.html" %}
+{% load server_tags %}
+{% load cache %}
+{% load more_like_this %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block page_title %}
+    {{ post.title }}
+{% endblock %}
+
+{% block extras %}
+
+    <script type="text/javascript"
+            src="{% static "lib/pagedown/Markdown.Converter.js" %}"></script>
+    <script type="text/javascript"
+            src="{% static "lib/pagedown/Markdown.Sanitizer.js" %}"></script>
+    <script type="text/javascript"
+            src="{% static "lib/pagedown/Markdown.Editor.js" %}"></script>
+
+    {#  Markdown editor style #}
+    <link rel="stylesheet" href={% static "lib/pagedown/markdown.css" %}>
+
+{% endblock %}
+
+{% block content %}
+
+
+
+{% if nodes_list|length > 0 %}
+    <div class="row">
+        <h2 class="col-md-4 col-xs-4" style="text-align: right;">
+            LN Nodes available:
+        </h2>
+        <div class="col-md-6 col-xs-6" style="padding: 2em">
+            <ul>
+                {% for node in nodes_list %}
+                    <li>{{ node }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <pre>{{ memo }}</pre>
+{% else %}
+    <div>
+        <h2>Sorry, no LN Nodes are currently available</h2>
+        <p>Please try again later. If the problem persists please contact the site owners.</p>
+    </div>
+{% endif %}
+
+
+{% endblock %}

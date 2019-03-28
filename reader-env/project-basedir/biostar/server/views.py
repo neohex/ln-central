@@ -11,7 +11,9 @@ from biostar.apps.posts.models import Post, PostPreview, Vote, Tag, Subscription
 from biostar.apps.posts.views import NewPost, NewAnswer, ShortForm
 from biostar.apps.badges.models import Badge, Award
 from biostar.apps.posts.auth import post_permissions
+from biostar.apps import util
 from biostar.apps.util import html
+from biostar.apps.util import ln
 
 from datetime import datetime, timedelta
 from biostar.const import OrderedDict
@@ -28,13 +30,8 @@ from django.http import Http404
 import markdown, pyzmail
 from biostar.apps.util.email_reply_parser import EmailReplyParser
 from django.core.urlresolvers import reverse
-
-from biostar.apps import util
 from django.utils.timezone import utc
 
-import json
-import binascii
-import zlib
 
 logger = logging.getLogger(__name__)
 
@@ -403,6 +400,22 @@ class PostPreviewView(TemplateView):
         post_preview.date = datetime.utcfromtimestamp(memo["unixtime"]).replace(tzinfo=utc)
 
         context['post'] = post_preview
+        context['publish_url'] = post_preview.get_publish_url(context["memo"])
+
+        return context
+
+class PostPublishView(TemplateView):
+    """
+    """
+
+    template_name = "post_publish.html"
+
+    def get_context_data(self, **kwargs):
+
+        context = super(PostPublishView, self).get_context_data(**kwargs)
+
+        context['nodes_list'] = ln.get_nodes_list() 
+        context['invoice'] = ln.add_invoice(context["memo"]) 
 
         return context
 

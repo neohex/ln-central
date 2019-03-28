@@ -36,6 +36,10 @@
                     {% post_preview_body post %}
                 </span>
             </div>
+
+            <br />
+            <a class="btn btn-primary" href="{{ publish_url|safe }}">publish</a>
+
         </div>
         <div class="col-xs-12 col-md-3 sidebar">
             {% cache 600 "similar" post.id %}

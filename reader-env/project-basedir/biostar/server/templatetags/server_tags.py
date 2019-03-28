@@ -257,8 +257,12 @@ def post_body(context, post, user, tree):
 @register.inclusion_tag('server_tags/post_preview_body.html', takes_context=True)
 def post_preview_body(context, post_preview):
     "Renders the post preview body"
-    return dict(post=post_preview, edit_url=post_preview.get_edit_url(), request=context['request'])
-
+    memo = post_preview.serialize_memo()
+    return dict(
+        post=post_preview,
+        edit_url=post_preview.get_edit_url(memo),
+        publish_url=post_preview.get_publish_url(memo),
+        request=context['request'])
 
 @register.inclusion_tag('server_tags/search_bar.html', takes_context=True)
 def search_bar(context):
