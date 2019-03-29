@@ -1,5 +1,40 @@
 ## Deploy
 
+## Install lncli
+
+LND `lncli` is requiered to connect to your lightning nodes which generate invoices and recive payments.
+
+1. Create a lightning account
+
+```
+adduser lightning`
+```
+
+2. Build Go
+
+Follow instrutions under https://github.com/alevchuk/minibank/blob/master/go/
+
+3. Bulid LND
+
+Change into lightning account
+```
+sudo su -l lightning
+```
+
+If you haven't done so already, modify `~/.profile` to include:
+```
+export GOROOT=/usr/lib/go-1.11
+export GOPATH=~/gocode
+export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+```
+
+Follow https://github.com/lightningnetwork/lnd/blob/master/docs/INSTALL.md#installing-lnd
+
+`make` will need about 1GB of RAM
+
+
+# Archive ----
+
 ### Getting started
 
 Thanks to the modular structure of its design Biostar is able to integrate with
