@@ -17,14 +17,19 @@ from django.urls import path
 
 from django.conf.urls import url, include
 from rest_framework import routers
+from rest_framework.urlpatterns import format_suffix_patterns
 import lner.views
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
 router.register(r'ln/list', lner.views.LightningNodeViewSet)
-router.register(r'ln/addinvoice', lner.views.LightningInvoiceViewSet)
+
 
 urlpatterns = [
+	path('ln/addinvoice/', lner.views.LightningInvoiceList.as_view()),
+]
+
+urlpatterns = format_suffix_patterns(urlpatterns) + [
 	url(r'^', include(router.urls)),
 	path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]

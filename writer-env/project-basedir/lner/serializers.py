@@ -12,4 +12,4 @@ class LightningNodeSerializer(serializers.HyperlinkedModelSerializer):
 class LightningInvoiceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = LightningInvoice
-        fields = ['pay_req']
+        fields = ['r_hash', 'pay_req', 'add_index']
