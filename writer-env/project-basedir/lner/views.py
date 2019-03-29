@@ -70,11 +70,11 @@ class LightningInvoiceList(APIView):
     List all snippets, or create a new snippet.
     """
 
-    LNCLI_BIN = "~lightning/gocode/bin/lncli"
+    LNCLI_BIN = "/home/lightning/gocode/bin/lncli"
 
     def addinvoice(self, memo):
     	cmd = [
-    		LightningInvoicetList.LNCLI_BIN,
+                self.LNCLI_BIN,
     		"--macaroonpath", "/etc/biostar/invoice.macaroon",
     		"--tlscertpath", "/etc/biostar/tls.cert",
     		"--rpcserver", "ec2-34-217-175-162.us-west-2.compute.amazonaws.com:10009",
@@ -92,7 +92,7 @@ class LightningInvoiceList(APIView):
         #         "add_index": 11
         #      }
         # ]
-        invoice = [json.loads(self.addinvoice(request.GET["memo"]))]  # deserialize      
+        invoice = [self.addinvoice(request.GET["memo"])]
         serializer = LightningInvoiceSerializer(invoice, many=True)  # re-serialize
 
         return Response(serializer.data)

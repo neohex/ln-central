@@ -9,13 +9,13 @@ logger = logging.getLogger(__name__)
 class LNUtilError(Exception):
     pass
         
-def call_endpoint(path, args=[]):
+def call_endpoint(path, args=""):
     if settings.WRITER_AUTH_TOKEN is not None:
         headers = {'Authorization': 'Token {}'.format(settings.WRITER_AUTH_TOKEN)}
     else:
         headers = {}
 
-    full_path = 'http://127.0.0.1:8000/{}.json'.format(path)
+    full_path = 'http://127.0.0.1:8000/{}.json?{}'.format(path, args)
     try:
         return requests.get(full_path)
 
@@ -32,8 +32,8 @@ def check_expected_key(response, expected_key, is_list=True):
             response.json()[expected_key]
 
     except ValueError:
-        error_msg = "Got non-json from API server: {} status_code={} response_text={}".format(
-            response.reason, response.status_code, response.text
+        error_msg = "Got non-json from API server: {} status_code={}".format(
+            response.reason, response.status_code
         )
       
         logger.error(error_msg)
@@ -68,7 +68,7 @@ def get_nodes_list():
 
 
 def add_invoice(memo):
-    response = call_endpoint('ln/addinvoice', args=[memo])
+    response = call_endpoint('ln/addinvoice', args="memo={}".format(memo))
 
     check_expected_key(response, "pay_req")
         
