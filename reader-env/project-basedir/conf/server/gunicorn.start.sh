@@ -9,8 +9,8 @@ set -ue
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CONF_DIR="$( cd $SCRIPT_DIR/.. && pwd )"
-VIRTENV_DIR="$( cd $SCRIPT_DIR/../.. && pwd )"
-BIOSTAR_HOME="$( cd $VIRTENV_DIR/project-basedir && pwd )"
+BIOSTAR_HOME="$( cd $CONF_DIR/.. && pwd )"
+VIRTENV_DIR="$( cd $BIOSTAR_HOME/.. && pwd )"
 
 echo "SCRIPT_DIR : $SCRIPT_DIR"
 echo "CONF_DIR   : $CONF_DIR"
