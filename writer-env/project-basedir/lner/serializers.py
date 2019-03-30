@@ -6,7 +6,7 @@ from .models import LightningInvoice
 class LightningNodeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = LightningNode
-        fields = ['identity_pubkey']
+        fields = ['identity_pubkey', 'rpcserver']
 
 
 class LightningInvoiceSerializer(serializers.HyperlinkedModelSerializer):
