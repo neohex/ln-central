@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.http import Http404
+from django.conf import settings
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -83,16 +85,16 @@ class LightningInvoiceList(APIView):
     	return run(cmd)
 
     def get(self, request, format=None):
+        if settings.MOCK_LN_CLIENT:
+            invoice = [
+                {
+                    "r_hash": "48452417b7d351bdf1ce493521ffbc07157c68fd9340ba2aeead0c29899fa4b4",
+                    "pay_req": "lnbc3u1pwfapdepp5fpzjg9ah6dgmmuwwfy6jrlauqu2hc68ajdqt52hw45xznzvl5j6qdqydp5scqzysdhdt9dngs8vw5532tcwnjvazn75cevfzz5r4drla8uvqlkt5u63nu5lrsa4s2q4rwmfe93yt7gavhrv3aq8rx3u842spdkwzhzketgsqv9zemq",
+                    "add_index": 11
+                 }
+            ]
+        else:
+            invoice = [self.addinvoice(request.GET["memo"])]
 
-        # # Example:
-        # invoice = [
-        #     {
-        #         "r_hash": "48452417b7d351bdf1ce493521ffbc07157c68fd9340ba2aeead0c29899fa4b4",
-        #         "pay_req": "lnbc3u1pwfapdepp5fpzjg9ah6dgmmuwwfy6jrlauqu2hc68ajdqt52hw45xznzvl5j6qdqydp5scqzysdhdt9dngs8vw5532tcwnjvazn75cevfzz5r4drla8uvqlkt5u63nu5lrsa4s2q4rwmfe93yt7gavhrv3aq8rx3u842spdkwzhzketgsqv9zemq",
-        #         "add_index": 11
-        #      }
-        # ]
-        invoice = [self.addinvoice(request.GET["memo"])]
         serializer = LightningInvoiceSerializer(invoice, many=True)  # re-serialize
-
         return Response(serializer.data)

@@ -27,3 +27,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
 }
+
+# biostar-ln specific config
+MOCK_LN_CLIENT = True
