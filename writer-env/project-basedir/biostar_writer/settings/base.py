@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # third-party
     'rest_framework',
     'rest_framework.authtoken',
+    'background_task',
 
     # project
     'users',

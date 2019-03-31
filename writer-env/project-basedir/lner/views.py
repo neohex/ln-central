@@ -13,6 +13,7 @@ from .models import LightningNode
 from .models import LightningInvoice
 from .serializers import LightningNodeSerializer
 from .serializers import LightningInvoiceSerializer
+from background_task import background
 
 import time
 import datetime
