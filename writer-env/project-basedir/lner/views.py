@@ -13,7 +13,7 @@ from .models import LightningNode
 from .models import LightningInvoice
 from .serializers import LightningNodeSerializer
 from .serializers import LightningInvoiceSerializer
-from background_task import background
+from common import util
 
 import time
 import datetime
@@ -22,42 +22,7 @@ import subprocess
 
 
 class RunCommandException(Exception):
-	pass
-		
-
-def log(msg):
-	timestamp = datetime.datetime.now()
-	timestamp = timestamp.strftime("%Y-%m-%d %H:%M:%S")
-	msg = "{} {}".format(timestamp, msg)
-	print(msg)
-
-
-def run(cmd, timeout=5, try_num=3, run_try_sleep=1):
-	log("Running command: {}".format(cmd))
-	accumulated_timeout = 0
-	for _ in range(try_num):
-		try_start = time.time()
-		try:
-			raw = subprocess.check_output(
-			       cmd,
-			       timeout=timeout
-			    ).decode("utf-8")
-			break
-		except Exception as e:
-		    print(e)
-		    print("Sleeping for {} seconds".format(run_try_sleep))
-		    time.sleep(run_try_sleep)
-
-		try_duration = time.time() - try_start
-		accumulated_timeout += try_duration
-
-		if accumulated_timeout > timeout:
-		    raise RunCommandException("Run command {} timeout after {} seconds".format(cmd, accumulated_timeout))
-
-	else:
-		raise RunCommandException("Failed command: {}".format(cmd))
-
-	return json.loads(raw)
+    pass
 
 
 class LightningNodeViewSet(viewsets.ModelViewSet):
@@ -83,7 +48,7 @@ class LightningInvoiceList(APIView):
     		"--rpcserver", "ec2-34-217-175-162.us-west-2.compute.amazonaws.com:10009",
     		"addinvoice", "--memo", memo, "--amt", "300"
     	]
-    	return run(cmd)
+    	return util.run(cmd)
 
     def get(self, request, format=None):
         if settings.MOCK_LN_CLIENT:
