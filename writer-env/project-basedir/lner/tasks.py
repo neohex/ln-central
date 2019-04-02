@@ -1,14 +1,9 @@
 import logging
 
 from background_task import background
+from common import util
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
-ch.setFormatter(formatter)
-logger.addHandler(ch)
+logger = util.logger()
 
 @background(queue='queue-1', remove_existing_tasks=True)
 def hello():
