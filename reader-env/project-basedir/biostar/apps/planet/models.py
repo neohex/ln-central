@@ -4,6 +4,7 @@ import os, urllib, logging, feedparser, datetime
 from django.core.urlresolvers import reverse
 from django.utils.timezone import utc
 from django.contrib import admin
+from biostar.apps import util
 
 logger = logging.getLogger(__name__)
 

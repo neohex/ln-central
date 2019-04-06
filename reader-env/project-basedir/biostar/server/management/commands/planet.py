@@ -124,10 +124,12 @@ def update_entries(count=3):
                 body = html.clean(r.description)[:5000]
                 content = html.strip_tags(body)
                 try:
-                    post = BlogPost.objects.create(title=r.title, blog=blog, uid=r.id, content=content, html=body, creation_date=date, link=r.link)
-                except Exception, exc:
+                    logger.info("adding title {}, content {}, html {}".format(len(r.title), len(content), len(body)))
+                    post = BlogPost.objects.create(title=r.title[:200], blog=blog, uid=r.id, content=content, html=body, creation_date=date, link=r.link)
+                except Exception as e:
                     logger.error(r.title)
-                    logger.error("database error %s" % exc)
+                    logger.exception(e)
+                    raise
                 else:
                     logger.info("added: %s" % post.title)
 
