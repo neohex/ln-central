@@ -405,7 +405,7 @@ class PostPreview(models.Model):
 
     def serialize_memo(self):
         assert self.date.tzinfo == utc, "date must be in UTC"
-        return util.serialize_memo(
+        memo = util.serialize_memo(
             dict(
                 title=self.title,
                 post_type=self.type,
@@ -414,6 +414,7 @@ class PostPreview(models.Model):
                 unixtime=int((self.date - datetime.datetime(1970,1,1).replace(tzinfo=utc)).total_seconds())
             )
         )
+        return memo
 
     def get_absolute_url(self, memo):
         url = reverse("post-preview", kwargs=dict(memo=memo))

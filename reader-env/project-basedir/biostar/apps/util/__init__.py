@@ -33,23 +33,23 @@ def now():
     return datetime.utcnow().replace(tzinfo=utc)
 
 def split_tags(text):
-        "Splits tags by comma and applies a formatting on case"
-        # Upper case
-        def fixcase(w):
-            w = w.strip()
-            w = w.upper() if len(w) == 1 else w.lower()
-            return w
+    "Splits tags by comma and applies a formatting on case"
+    # Upper case
+    def fixcase(w):
+        w = w.strip()
+        w = w.upper() if len(w) == 1 else w.lower()
+        return w
 
-        # Try splitting by comma
-        words = text.split(",")
+    # Try splitting by comma
+    words = text.split(",")
 
-        # Change case as necessary.
-        words = map(fixcase, words)
+    # Change case as necessary.
+    words = map(fixcase, words)
 
-        # Remove empty
-        words = filter(None, words)
+    # Remove empty
+    words = filter(None, words)
 
-        return words
+    return words
 
 def make_uuid(size=None):
     "Returns a unique id"

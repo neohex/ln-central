@@ -79,3 +79,14 @@
 <h2>What if I want to save draft and resume later?</h2>
 <div>To save current work and continue later, then <b>bookmark this page</b>. The URL of this page encodes the work in-progress. The URL encodes only what's visible on this page. Specifically, the content of the post and timestamp. It does not contain your wallet's pubkey, IP address, or any other data about the person or people involved in writing the post.</div>
 
+<h2>How can I know what information is actually stored in the URL?</h2>
+<div>You can decode the URL with python3 like so</div>
+<code>
+echo PUT_URL_HERE | python3 -c 'import zlib, binascii, urllib.parse, sys; urllib; url = sys.stdin.readline(); memo = urllib.parse.unquote(url.split("/", 6)[6].rstrip("/")); decoded = zlib.decompress(binascii.a2b_base64(memo)).decode("utf-8"); print(decoded)'   | python3 -m json.tool
+</code>
+
+<h2>How can I know what information is actually stored in the invoice?</h2>
+<div>You can decode the payment invoice with Lightning CLI like so</div>
+<code>
+lncli decodepayreq PUT_INVOICE_HERE
+</code>
