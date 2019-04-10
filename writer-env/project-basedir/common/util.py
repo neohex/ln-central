@@ -1,7 +1,13 @@
 import logging
+import time
 
-def logger():
-    logger = logging.getLogger(__name__)
+import datetime
+import json
+import subprocess
+
+
+def getLogger(name):
+    logger = logging.getLogger(name)
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
@@ -13,8 +19,14 @@ def logger():
     return logger
 
 
+logger = getLogger(__name__)
+
+
+class RunCommandException(Exception):
+    pass
+
+
 def run(cmd, timeout=5, try_num=3, run_try_sleep=1):
-    logger = logger()
     logger.info("Running command: {}".format(cmd))
     accumulated_timeout = 0
     for _ in range(try_num):

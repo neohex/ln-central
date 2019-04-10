@@ -15,14 +15,8 @@ from .serializers import LightningNodeSerializer
 from .serializers import LightningInvoiceSerializer
 from common import util
 
-import time
-import datetime
-import json
-import subprocess
 
-
-class RunCommandException(Exception):
-    pass
+logger = util.getLogger("lner.views")
 
 
 class LightningNodeViewSet(viewsets.ModelViewSet):
