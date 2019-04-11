@@ -64,11 +64,12 @@
 </div>
 
 
-<h2>Next step:</h2>
-<div>Now it's time to review and publish. Payment of <b>300 sat</b> is required to publish this question.</div>
 
-<h2>What happens when I publish this post?</h2>
-<div>The post will be published after a payment is made on the Lightning Network. The following information is going to be associated with the post and made publicly visible.</div>
+<h1>Next step</h1>
+<div>Now it's time to review and publish your question. Click edit to make changes before publishing. The post will be published after a payment is made on the Lightning Network using the invoice. Payment of <b>300 sat</b> is required.</div>
+
+<h4>What happens when I publish this post?</h4>
+<div>The following information is going to be associated with the post and made publicly visible.</div>
 <ul>
     <li>Your wallet's <b>pubkey</b></li>
     <li>A "pen name" base on the pubkey</li>
@@ -76,17 +77,29 @@
     <li>Statistics such as number of posts, up-votes, and reputation score</li>
 </ul>
 
-<h2>What if I want to save draft and resume later?</h2>
-<div>To save current work and continue later, then <b>bookmark this page</b>. The URL of this page encodes the work in-progress. The URL encodes only what's visible on this page. Specifically, the content of the post and timestamp. It does not contain your wallet's pubkey, IP address, or any other data about the person or people involved in writing the post.</div>
+<h4>What if I want to save draft and resume later?</h4>
+<div>To save current work and continue later, then <b>bookmark this page</b>.
 
-<h2>How can I know what information is actually stored in the URL?</h2>
+
+<h1>Regarding privacy</h1>
+
+<div>First, please read our short <nobr><a href="{% url 'flatpage' 'policy' %}">User Agreement and Privacy Policy</a></nobr>.</div>
+
+<div style="margin-top: 1em">This website does not set cookies. You can also hide your IP address from us by using a VPN service. The website gets information from you only via <b>URLs</b> (links) and <b>invoices</b> (requests of payments on the Lightning Network). Payments of invoices are required for all actions on the website such as posting, commenting, and upvoting.</div>
+
+<h4>What information is saved in the URL and invoice?</h4>
+The URL of this page encodes the work in-progress. The URL encodes only what's visible on this page. Specifically, the content of the post and timestamp. It does not contain your wallet's pubkey, IP address, or any other data about the person or people involved in writing the post. A part of this URL is going to be
+included in the invoice which when payed publishes the post.</div>
+
+<h4>How can I know what you're saying about the URL and invoice is true?</h4>
 <div>You can decode the URL with python3 like so</div>
 <code>
 echo PUT_URL_HERE | python3 -c 'import zlib, binascii, urllib.parse, sys; urllib; url = sys.stdin.readline(); memo = urllib.parse.unquote(url.split("/", 6)[6].rstrip("/")); decoded = zlib.decompress(binascii.a2b_base64(memo)).decode("utf-8"); print(decoded)'   | python3 -m json.tool
 </code>
 
-<h2>How can I know what information is actually stored in the invoice?</h2>
-<div>You can decode the payment invoice with Lightning CLI like so</div>
+
+<div style="margin-top: 1em">... and decode the payment invoice with Lightning CLI like so</div>
 <code>
 lncli decodepayreq PUT_INVOICE_HERE
 </code>
+
