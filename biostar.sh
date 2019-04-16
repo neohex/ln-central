@@ -9,7 +9,7 @@ if [ $# == 0 ]; then
     echo 'Commands:'
     echo ''
     echo '  install     - create virtual environments and install dependencies'
-    echo '  uninstall   - uninstall all dependencies in the virtual environments'
+    echo '  uninstall   - [depricated] uninstall all dependencies in the virtual environments'
     echo '  reader-dev  - invoke manage.py for reader with dev settings'
     echo '  reader-prod - invoke manage.py for reader with prod settings'
     echo '  writer-dev  - invoke manage.py for writer with dev settings'
@@ -48,15 +48,22 @@ set +ue
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 
 if [ "$1" = "install" ]; then
+	if [[ "$VIRTUAL_ENV" != "" ]]
+	then
+		echo 'ERROR: You are in a virtenv, run "deactivate"'
+		exit 1
+	fi
+
 	set -ue  # stop on errors or missing environment variables.
 
 	echo ""
 	echo "==================== Installing reader-env ===================="
 	virtualenv reader-env -p python2.7
 	(
+		mkdir -p reader-env
 		cd reader-env
 		. bin/activate
-		pip install --upgrade -r requirements.txt
+		pip install --upgrade -r ../reader/requirements.txt
 		deactivate
 	)
 
@@ -64,9 +71,10 @@ if [ "$1" = "install" ]; then
 	echo "==================== Installing writer-env ===================="
 	virtualenv writer-env -p python3
 	(
+		mkdir -p writer-env
 		cd writer-env
 		. bin/activate
-		pip install --upgrade -r requirements.txt
+		pip install --upgrade -r ../writer/requirements.txt
 		deactivate
 	)
 
@@ -74,6 +82,16 @@ if [ "$1" = "install" ]; then
 fi
 
 if [ "$1" = "uninstall" ]; then
+	echo "WARNING: to do a complete uninstall, simply delete the *-env directories"
+	echo "WARNING: biostar.sh uninstall in depricated and does not remove all files"
+
+	read -p "Continue (y/n)? " -n 1 -r
+	echo
+	if [[ ! $REPLY =~ ^[Yy]$ ]]
+	then
+		exit
+	fi
+
 	set -ue  # stop on errors or missing environment variables.
 
 	echo ""
@@ -102,7 +120,7 @@ if [ "$1" = "reader-prod" ]; then
 	(
 		cd reader-env
 		. bin/activate
-		cd project-basedir
+		cd ../reader/project-basedir
 		. ./conf/deploy.env
 		cd live
 		../manage.py $@
@@ -117,7 +135,7 @@ if [ "$1" = "reader-dev" ]; then
 	(
 		cd reader-env
 		. bin/activate
-		cd project-basedir
+		cd ../reader/project-basedir
 		. ./conf/defaults.env
 		cd live
 		../manage.py $@
@@ -132,7 +150,7 @@ if [ "$1" = "writer-dev" ]; then
 	(
 		cd writer-env
 		. bin/activate
-		cd project-basedir
+		cd ../writer/project-basedir
 		DJANGO_SETTINGS_MODULE=biostar_writer.settings.dev ./manage.py $@
 	)
 	exit
@@ -144,7 +162,7 @@ if [ "$1" = "writer-prod" ]; then
 	(
 		cd writer-env
 		. bin/activate
-		cd project-basedir
+		cd ../writer/project-basedir
 		DJANGO_SETTINGS_MODULE=biostar_writer.settings.prod ./manage.py $@
 	)
 	exit
@@ -155,7 +173,7 @@ fi
 # Active environment
 cd ./reader-env
 VIRTUAL_ENV_DISABLE_PROMPT=1 source ./bin/activate
-cd ./project-basedir
+cd ../reader/project-basedir
 
 # Set defaults for environment variables.
 
