@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 import os
 import sys
+import glob
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LIVE_DIR = '{}/live'.format(BASE_DIR)
 
 def create_live_dir():
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    LIVE_DIR = '{}/live'.format(BASE_DIR)
     LIVE_DIR_ACCESS_RIGHTS = 0o755
     
     try:  
@@ -25,4 +27,11 @@ if __name__ == '__main__':
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
+
+    # workaround for https://github.com/arteria/django-background-tasks/issues/181
+    if 'migrate' in sys.argv and '-h' not in sys.argv and '--help' not in sys.argv:
+        file_list = glob.glob('{}/../../writer-env/lib/python*/site-packages/background_task/migrations/0003_auto_*.py'.format(BASE_DIR))
+        for f in file_list:
+            os.remove(f)
+
     execute_from_command_line(sys.argv)
