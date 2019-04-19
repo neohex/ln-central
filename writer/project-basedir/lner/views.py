@@ -14,6 +14,7 @@ from .models import LightningInvoice
 from .serializers import LightningNodeSerializer
 from .serializers import LightningInvoiceSerializer
 from common import util
+from common import lnclient
 
 
 logger = util.getLogger("lner.views")
@@ -32,18 +33,6 @@ class LightningInvoiceList(APIView):
     List all snippets, or create a new snippet.
     """
 
-    LNCLI_BIN = "/home/lightning/gocode/bin/lncli"
-
-    def addinvoice(self, memo):
-    	cmd = [
-                self.LNCLI_BIN,
-    		"--macaroonpath", "/etc/biostar/invoice.macaroon",
-    		"--tlscertpath", "/etc/biostar/tls.cert",
-    		"--rpcserver", "ec2-34-217-175-162.us-west-2.compute.amazonaws.com:10009",
-    		"addinvoice", "--memo", memo, "--amt", "300"
-    	]
-    	return util.run(cmd)
-
     def get(self, request, format=None):
         if settings.MOCK_LN_CLIENT:
             invoice = [
@@ -54,7 +43,7 @@ class LightningInvoiceList(APIView):
                  }
             ]
         else:
-            invoice = [self.addinvoice(request.GET["memo"])]
+            invoice = [lnclient.addinvoice(request.GET["memo"])]
 
         serializer = LightningInvoiceSerializer(invoice, many=True)  # re-serialize
         return Response(serializer.data)
