@@ -22,7 +22,7 @@ def addinvoice(memo, mock=False):
     return util.run(cmd)
 
 
-def listinvoices(index_offset, mock=False):
+def listinvoices(index_offset, max_invoices=100, mock=False):
     if mock:
         return {
             "first_index_offset": "5",
@@ -146,5 +146,11 @@ def listinvoices(index_offset, mock=False):
                 "last_index_offset": "32"
             }
 
-    cmd =  [LNCLI_BIN] + AUTH_ARGS + ["listinvoices", "--index_offset", str(index_offset), "--reversed=False"]
+    cmd =  [LNCLI_BIN] + AUTH_ARGS + [
+        "listinvoices", 
+        "--index_offset", str(index_offset),
+        "--max_invoices", str(max_invoices), 
+        "--reversed=False"
+    ]
+    
     return util.run(cmd)
