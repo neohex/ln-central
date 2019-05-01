@@ -11,7 +11,7 @@ from django.conf import settings
 from django.core.cache import get_cache
 
 from ..apps.users.models import User
-from ..apps.posts.models import Vote, Post, PostView
+from ..apps.posts.models import Vote, Post
 
 
 logger = logging.getLogger(__name__)
@@ -35,27 +35,6 @@ def json_response(f):
             response.reason_phrase = 'Not found'
         return response
     return to_json
-
-
-@json_response
-def traffic(request):
-    """
-    Traffic as post views in the last 60 min.
-    """
-    now_freeze = datetime.now()
-    start = now_freeze - timedelta(minutes=60)
-    try:
-        post_views = PostView.objects.filter(date__gt=start).exclude(date__gt=now_freeze).distinct(
-            'ip').count()
-    except NotImplementedError:
-        post_views = PostView.objects.filter(date__gt=start).exclude(date__gt=now_freeze).count()
-
-    data = {
-        'date': datetime_to_iso(now_freeze),
-        'timestamp': datetime_to_unix(now_freeze),
-        'post_views_last_60_min': post_views,
-    }
-    return data
 
 
 @json_response

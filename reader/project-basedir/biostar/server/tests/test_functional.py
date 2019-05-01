@@ -3,7 +3,7 @@ from django.test import Client
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from biostar.apps.users.models import User
-from biostar.apps.posts.models import Post, Tag, PostView, Subscription
+from biostar.apps.posts.models import Post, Tag, Subscription
 from biostar.apps.messages.models import Message, MessageBody
 
 import logging, random

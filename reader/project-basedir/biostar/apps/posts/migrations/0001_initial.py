@@ -54,15 +54,6 @@ class Migration(SchemaMigration):
         ))
         db.create_unique(m2m_table_name, ['post_id', 'tag_id'])
 
-        # Adding model 'PostView'
-        db.create_table(u'posts_postview', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('ip', self.gf('django.db.models.fields.GenericIPAddressField')(default=u'', max_length=39, null=True, blank=True)),
-            ('post', self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'post_views', to=orm['posts.Post'])),
-            ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-        ))
-        db.send_create_signal(u'posts', ['PostView'])
-
         # Adding model 'Vote'
         db.create_table(u'posts_vote', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -100,9 +91,6 @@ class Migration(SchemaMigration):
         # Removing M2M table for field tag_set on 'Post'
         db.delete_table(db.shorten_name(u'posts_post_tag_set'))
 
-        # Deleting model 'PostView'
-        db.delete_table(u'posts_postview')
-
         # Deleting model 'Vote'
         db.delete_table(u'posts_vote')
 
@@ -138,13 +126,6 @@ class Migration(SchemaMigration):
             'type': ('django.db.models.fields.IntegerField', [], {'db_index': 'True'}),
             'view_count': ('django.db.models.fields.IntegerField', [], {'default': '0', 'blank': 'True'}),
             'vote_count': ('django.db.models.fields.IntegerField', [], {'default': '0', 'db_index': 'True', 'blank': 'True'})
-        },
-        u'posts.postview': {
-            'Meta': {'object_name': 'PostView'},
-            'date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'ip': ('django.db.models.fields.GenericIPAddressField', [], {'default': "u''", 'max_length': '39', 'null': 'True', 'blank': 'True'}),
-            'post': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'post_views'", 'to': u"orm['posts.Post']"})
         },
         u'posts.subscription': {
             'Meta': {'unique_together': "((u'user', u'post'),)", 'object_name': 'Subscription'},

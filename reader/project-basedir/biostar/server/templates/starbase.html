@@ -113,15 +113,14 @@
                 Policy</a>.
             </div>
             <div class="col-md-12 text-center">
-                Powered by <a href="https://github.com/ialbert/biostar-central">Biostar</a>
-                running code change {{ BUILD_HASH }} which was committed {{ BUILD_TIME|time_ago }},
-                webserver restarted {{ SERVER_START_TIME|time_ago }}
+                Powered by <a href="https://github.com/alevchuk/ministar">ministar</a> open soruce Q&A software
+                running code change <a href="https://github.com/alevchuk/biostar-central-ln-private/commit/{{ BUILD_HASH }}">{{ BUILD_HASH }}</a> which was committed {{ BUILD_TIME|time_ago }}
             </div>
         </div>
     {% endblock %}
 
     {# This information is cached and updated periodically via the context. #}
-    <div id="traffic">Traffic: {{ TRAFFIC }} users visited in the last hour</div>
+    <div id="traffic">Traffic: {{ TRAFFIC }} user actions in the last hour</div>
 
  	{% include "banners/bottom-block.html" %}
 

@@ -327,27 +327,6 @@ class Post(models.Model):
         return url if self.is_toplevel else "%s#%s" % (url, self.id)
 
     @staticmethod
-    def update_post_views(post, request, minutes=settings.POST_VIEW_MINUTES):
-        "Views are updated per user session"
-
-        # Extract the IP number from the request.
-        ip1 = request.META.get('REMOTE_ADDR', '')
-        ip2 = request.META.get('HTTP_X_FORWARDED_FOR', '').split(",")[0].strip()
-        # 'localhost' is not a valid ip address.
-        ip1 = '' if ip1.lower() == 'localhost' else ip1
-        ip2 = '' if ip2.lower() == 'localhost' else ip2
-        ip = ip1 or ip2 or '0.0.0.0'
-
-	now_freeze = util.now()
-        since = now_freeze - datetime.timedelta(minutes=minutes)
-
-        # One view per time interval from each IP address.
-        if not PostView.objects.filter(ip=ip, post=post, date__gt=since):
-            PostView.objects.create(ip=ip, post=post, date=now_freeze)
-            Post.objects.filter(id=post.id).update(view_count=F('view_count') + 1)
-        return post
-
-    @staticmethod
     def check_root(sender, instance, created, *args, **kwargs):
         "We need to ensure that the parent and root are set on object creation."
         if created:
@@ -499,14 +478,6 @@ class PostAdmin(admin.ModelAdmin):
 
 admin.site.register(Post, PostAdmin)
 
-
-class PostView(models.Model):
-    """
-    Keeps track of post views based on IP address.
-    """
-    ip = models.GenericIPAddressField(default='', null=True, blank=True)
-    post = models.ForeignKey(Post, related_name="post_views")
-    date = models.DateTimeField(auto_now=True)
 
 
 class Vote(models.Model):

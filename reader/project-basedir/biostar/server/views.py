@@ -312,9 +312,6 @@ class PostDetails(DetailView):
         if (obj.status == Post.DELETED):
             raise Http404()
 
-        # Update the post views.
-        Post.update_post_views(obj, request=self.request)
-
         # Adds the permissions
         obj = post_permissions(request=self.request, post=obj)
 

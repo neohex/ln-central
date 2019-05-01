@@ -103,13 +103,6 @@ class Migration(SchemaMigration):
             'view_count': ('django.db.models.fields.IntegerField', [], {'default': '0', 'blank': 'True'}),
             'vote_count': ('django.db.models.fields.IntegerField', [], {'default': '0', 'db_index': 'True', 'blank': 'True'})
         },
-        u'posts.postview': {
-            'Meta': {'object_name': 'PostView'},
-            'date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'ip': ('django.db.models.fields.GenericIPAddressField', [], {'default': "u''", 'max_length': '39', 'null': 'True', 'blank': 'True'}),
-            'post': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'post_views'", 'to': u"orm['posts.Post']"})
-        },
         u'posts.replytoken': {
             'Meta': {'object_name': 'ReplyToken'},
             'date': ('django.db.models.fields.DateTimeField', [], {}),
