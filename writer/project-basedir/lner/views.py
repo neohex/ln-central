@@ -34,9 +34,7 @@ class LightningInvoiceList(APIView):
     """
 
     def get(self, request, format=None):
-        invoice = [
-            lnclient.addinvoice(request.GET["memo"], mock=settings.MOCK_LN_CLIENT)
-        ]
+        invoice = lnclient.addinvoice(request.GET["memo"], mock=settings.MOCK_LN_CLIENT)
 
         serializer = LightningInvoiceSerializer(invoice, many=True)  # re-serialize
         return Response(serializer.data)
