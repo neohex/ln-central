@@ -10,8 +10,8 @@ class LNUtilError(Exception):
     pass
         
 def call_endpoint(path, args=""):
-    if settings.WRITER_AUTH_TOKEN is not None:
-        headers = {'Authorization': 'Token {}'.format(settings.WRITER_AUTH_TOKEN)}
+    if settings.READER_TO_WRITER_AUTH_TOKEN is not None:
+        headers = {'Authorization': 'Token {}'.format(settings.READER_TO_WRITER_AUTH_TOKEN)}
     else:
         headers = {}
 

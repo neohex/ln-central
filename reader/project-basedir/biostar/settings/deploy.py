@@ -25,5 +25,5 @@ with open('/etc/biostar/dbropass') as dbpass:
             }
         }
 
-with open('/etc/biostar/writer-auth-token') as writer_auth_token:
-    WRITER_AUTH_TOKEN = writer_auth_token.read().strip()
+with open('/etc/biostar/reader-to-writer-auth-token') as writer_auth_token:
+    READER_TO_WRITER_AUTH_TOKEN = writer_auth_token.read().strip()
