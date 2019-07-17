@@ -10,7 +10,7 @@ SITE_NAME = get_env("SITE_NAME", "Site Name")
 with open('/etc/biostar/django-secret') as django_secret:
     SECRET_KEY = django_secret.read().strip()
 
-with open('/etc/biostar/dbpass') as dbpass:
+with open('/etc/biostar/dbropass') as dbpass:
     with open('/etc/biostar/dbhost') as dbhost:
         DATABASES = {
             'default': {
@@ -18,7 +18,7 @@ with open('/etc/biostar/dbpass') as dbpass:
                 # add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
                 'ENGINE': 'django.db.backends.postgresql_psycopg2',
                 'NAME': DATABASE_NAME,
-                'USER': 'biostar',
+                'USER': 'dbro_user',
                 'PASSWORD': dbpass.read().strip(),
                 'HOST': dbhost.read().strip(),
                 'PORT': '5432',
