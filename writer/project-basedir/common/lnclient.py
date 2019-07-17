@@ -2,8 +2,8 @@ from common import util
 
 LNCLI_BIN = "/home/lightning/gocode/bin/lncli"
 AUTH_ARGS = [
-    "--macaroonpath", "/etc/biostar/invoice.macaroon",
-    "--tlscertpath", "/etc/biostar/tls.cert",
+    "--macaroonpath", "/etc/biostar/writer-invoice.macaroon",
+    "--tlscertpath", "/etc/biostar/writer-tls.cert",
     "--rpcserver", "ec2-34-217-175-162.us-west-2.compute.amazonaws.com:10009"
 ]
 

@@ -14,10 +14,10 @@ ALLOWED_HOSTS = ['127.0.0.1']  # https://docs.djangoproject.com/en/2.1/ref/setti
 CSRF_COOKIE_SECURE=True
 SESSION_COOKIE_SECURE=True
 
-with open('/etc/biostar/django-secret') as django_secret:
+with open('/etc/biostar/writer-django-secret') as django_secret:
     SECRET_KEY = django_secret.read().strip()
 
-with open('/etc/biostar/dbpass') as dbpass:
+with open('/etc/biostar/writer-dbpass') as dbpass:
     with open('/etc/biostar/dbhost') as dbhost:
         DATABASES = {
             'default': {
@@ -31,8 +31,6 @@ with open('/etc/biostar/dbpass') as dbpass:
                 'PORT': '5432',
             }
         }
-
-INSTALLED_APPS += ["rest_framework.authtoken"]
 
 REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = REST_FRAMEWORK.get('DEFAULT_AUTHENTICATION_CLASSES', [])
 REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ["rest_framework.authentication.TokenAuthentication"]
