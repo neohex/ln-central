@@ -255,10 +255,14 @@ TEMPLATE_DIRS = (
 # The user score that halves the chance.
 HALF_LIFE = 30.0
 
-# Avataar server name
-#   To use a centralized third-party server set to "https://avatars.dicebear.com"
-#   Default is to use own avatar server
-__DEFAULT_AVATAR_SERVER_NAME = "/"
+# Avataar server name (3 options):
+#   A. Default is a cookie-less server provided by ln.support
+#   B. You could use a third-party server "https://avatars.dicebear.com"
+#   C. To use own avatar server change to:
+#   __DEFAULT_AVATAR_SERVER_NAME = "/"
+#   and run your own server:
+#   https://github.com/DiceBear/avatars/tree/5a12112e98830c9ab017ed494fa4e3b20266303f/server#3-start-server
+__DEFAULT_AVATAR_SERVER_NAME = "https://ln.support"
 AVATAR_SERVER_NAME = get_env("AVATAR_SERVER_NAME", __DEFAULT_AVATAR_SERVER_NAME)
 
 LOGIN_REDIRECT_URL = "/"
