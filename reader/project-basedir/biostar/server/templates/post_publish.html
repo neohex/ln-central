@@ -44,6 +44,7 @@
     <h2>Pay to publish</h2>
     Your invoice is:
     <pre>{{ pay_req }}</pre>
+    <img src="/qr/{{ pay_req }}/qr.svg" />
 {% else %}
     <div>
         <h2>Sorry, no LN Nodes are currently available</h2>

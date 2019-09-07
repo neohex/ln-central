@@ -10,6 +10,7 @@ from biostar.server import views, ajax, search, moderate, api
 from biostar.apps.posts.views import NewAnswer, NewPost, EditPost
 from biostar.apps.users.views import DigestManager, unsubscribe
 from biostar.apps.planet.views import BlogPostList
+from biostar.apps.util.views import QRCode
 
 urlpatterns = patterns('',
 
@@ -27,6 +28,14 @@ urlpatterns = patterns('',
 
     # Topic listing.
     url(r'^t/(?P<topic>.+)/$', views.PostList.as_view(), name="topic-list"),
+
+
+    # ==============================
+    # LN
+    # ==============================
+
+    # QR code image
+    url(r'^qr/(?P<pay_req>[\w]+)/qr.svg$', QRCode.as_view(content_type='image/svg+xml'), name="qr-code"),
 
 
     # ==============================
