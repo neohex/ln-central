@@ -11,7 +11,6 @@ from ajax import ajax_error, ajax_success, ajax_error_wrapper, json_response
 from django.conf.urls import patterns
 from django.contrib.sitemaps import FlatPageSitemap, GenericSitemap
 from biostar.apps.posts.models import Post, Tag
-from biostar.apps.planet.models import BlogPost
 import logging
 
 logger = logging.getLogger(__name__)

@@ -8,7 +8,6 @@ from biostar import const
 from django.core.cache import cache
 from biostar.apps.posts.models import Post, Vote
 from biostar.apps.messages.models import Message
-from biostar.apps.planet.models import BlogPost
 
 from collections import defaultdict
 from biostar.awards import create_user_award, check_user_profile

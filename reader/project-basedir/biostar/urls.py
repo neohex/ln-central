@@ -9,7 +9,6 @@ from django.views.generic import TemplateView
 from biostar.server import views, ajax, search, moderate, api
 from biostar.apps.posts.views import NewAnswer, NewPost, EditPost
 from biostar.apps.users.views import DigestManager, unsubscribe
-from biostar.apps.planet.views import BlogPostList
 from biostar.apps.util.views import QRCode
 
 urlpatterns = patterns('',
@@ -93,7 +92,7 @@ urlpatterns = patterns('',
 
 
     # ==============================
-    # Search, Planet, Vote
+    # Search, Vote
     # ==============================
 
     # Search the body.
@@ -104,9 +103,6 @@ urlpatterns = patterns('',
 
      # Returns suggested tags
     url(r'^local/search/tags/', search.suggest_tags, name="suggest-tags"),
-
-    # Returns the planet view
-    url(r'^planet/$', BlogPostList.as_view(), name="planet"),
 
     # Vote submission.
     url(r'^x/vote/$', ajax.vote_handler, name="vote-submit"),
@@ -121,7 +117,7 @@ urlpatterns += patterns('',
     (r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': search.sitemaps})
 )
 
-from biostar.server.feeds import LatestFeed, TagFeed, UserFeed, PostFeed, PostTypeFeed, PlanetFeed
+from biostar.server.feeds import LatestFeed, TagFeed, UserFeed, PostFeed, PostTypeFeed
 
 # Adding the RSS related urls.
 urlpatterns += patterns('',
@@ -136,7 +132,6 @@ urlpatterns += patterns('',
     url(r'^feeds/user/(?P<text>[\w\-_\+!]+)/$', UserFeed(), name='user-feed'),
     url(r'^feeds/post/(?P<text>[\w\-_\+!]+)/$', PostFeed(), name='post-feed' ),
     url(r'^feeds/type/(?P<text>[\w\-_\+!]+)/$', PostTypeFeed(), name='post-type'),
-    url(r'^feeds/planet/$', PlanetFeed(), name='planet-feed'),
 )
 
 urlpatterns += patterns('',

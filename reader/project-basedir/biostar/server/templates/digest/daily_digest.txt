@@ -18,13 +18,6 @@ Highest Rated Answers
 - {{post.title}} by {{post.author.pubkey}}, https://{{site.domain}}{{post.get_absolute_url}}
 {% endfor %}
 {% endif %}
-{% if blogs %}
-Bioinformatics Planet
----------------------
-{% for post in blogs %}
-- {{post.title}} by {{post.author.pubkey}}, https://{{site.domain}}{{post.get_absolute_url}}
-{% endfor %}
-{% endif %}
 Biostars, https://{{site.domain}}, {{total_user_count|intcomma}} users, {{total_post_count|intcomma}} posts.
 
 ---

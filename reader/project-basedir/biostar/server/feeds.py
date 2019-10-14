@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404
 from biostar.apps.posts.models import Post
 from biostar.apps.users.models import User
 from biostar.apps.messages.models import Message
-from biostar.apps.planet.models import BlogPost
 from biostar.apps import util
 
 from django.conf import settings
@@ -30,30 +29,6 @@ def split(text):
     text = ''.join(text.split())
     rows = text.split('+')
     return rows
-
-class PlanetFeed(Feed):
-    "Latest posts"
-    link = "/"
-    FEED_COUNT = 50
-    title = "%s Planet!" % SITE_NAME
-    description = "Latest 50 posts of the %s" % title
-
-    def item_title(self, item):
-        try:
-            title = u"%s (%s)" % (item.title, item.blog.title)
-        except Exception, exc:
-            title = item.title
-        return title
-
-    def item_description(self, item):
-        return item.content[:250]
-
-    def item_guid(self, obj):
-        return "%s" % obj.id
-
-    def items(self):
-        posts = BlogPost.objects.select_related("blog").order_by('-creation_date')
-        return posts[:FEED_COUNT]
 
 
 class PostBase(Feed):

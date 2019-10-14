@@ -51,20 +51,6 @@ CELERYBEAT_SCHEDULE = {
         'args': ["biostar_pg_dump"],
     },
 
-    'hourly_feed': {
-        'task': 'biostar.celery.call_command',
-        'schedule': crontab(minute=10),
-        'args': ["planet"],
-        'kwargs': {"update": 1}
-    },
-
-    'daily_feed': {
-        'task': 'biostar.celery.call_command',
-        'schedule': crontab(hour='*/2', minute=15),
-        'args': ["planet"],
-        'kwargs': {"download": True}
-    },
-
     'bump': {
         'task': 'biostar.celery.call_command',
         'schedule': timedelta(hours=6),

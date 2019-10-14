@@ -8,7 +8,6 @@
                     <a href="{% url 'topic-list' topic=word %}">{{ word }}</a>
                 </div>
             {% endfor %}
-            <div class="col-md-1 {% active 'planet' topic %}"><a href="{% url 'planet' %}">Planet</a></div>
             <div class="col-md-1 {% current request 'tag-list' %}"><a href="{% url 'tag-list' %}">All &raquo;</a></div>
         </ul>
     </div>
@@ -30,12 +29,6 @@
                 {% endfor %}
             </ul>
         </div>
-    </div>
-
-    <div class="col-xs-4 text-center" style="margin-bottom:5px">
-        <a role="button" class="btn btn-primary" href="{% url 'planet' %}"">
-            <i class="fa fa-globe fa-1x"></i> Planet
-        </a>
     </div>
 
 

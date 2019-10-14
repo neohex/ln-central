@@ -1,6 +1,5 @@
 __author__ = 'ialbert'
 from biostar.apps.posts.models import Post
-from biostar.apps.planet.models import BlogPost
 from django.db.models import Q
 from haystack import indexes
 
