@@ -26,8 +26,19 @@ class RunCommandException(Exception):
     pass
 
 
+def h(cmd):
+	"""
+	Human readable cmd
+	"""
+	results = []
+	results += [cmd[0] + " \\"]
+	results += ["  {} \\".format(c) for c in cmd[1:-1]]
+	results += ["  {}".format(cmd[-1])]
+
+	return "\n".join(results)
+
 def run(cmd, timeout=5, try_num=3, run_try_sleep=1):
-    logger.info("Running command: {}".format(cmd))
+    logger.info("Running command: {}".format(h(cmd)))
     accumulated_timeout = 0
     for _ in range(try_num):
         try_start = time.time()
@@ -46,9 +57,9 @@ def run(cmd, timeout=5, try_num=3, run_try_sleep=1):
         accumulated_timeout += try_duration
 
         if accumulated_timeout > timeout:
-            raise RunCommandException("Run command {} timeout after {} seconds".format(cmd, accumulated_timeout))
+            raise RunCommandException("Run command {} timeout after {} seconds".format(h(cmd), accumulated_timeout))
 
     else:
-        raise RunCommandException("Failed command: {}".format(cmd))
+        raise RunCommandException("Failed command: {}".format(h(cmd)))
 
     return json.loads(raw)
