@@ -28,5 +28,5 @@ REST_FRAMEWORK = {
     ],
 }
 
-# biostar-ln specific config
+# ln-central specific config
 MOCK_LN_CLIENT = True

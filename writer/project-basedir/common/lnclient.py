@@ -1,10 +1,12 @@
 from common import util
 
+import json
+
 LNCLI_BIN = "/home/lightning/gocode/bin/lncli"
 AUTH_ARGS = [
     "--macaroonpath", "/etc/biostar/writer-invoice.macaroon",
     "--tlscertpath", "/etc/biostar/writer-tls.cert",
-    "--rpcserver", "ec2-34-217-175-162.us-west-2.compute.amazonaws.com:10009"
+    "--rpcserver", "bl3:10009"
 ]
 
 
@@ -18,8 +20,10 @@ def addinvoice(memo, mock=False):
              }
         ]
 
-    cmd = [LNCLI_BIN] + AUTH_ARGS + ["addinvoice", "--memo", memo, "--amt", "300"]
-    return util.run(cmd)
+    cmd = [LNCLI_BIN] + AUTH_ARGS + ["addinvoice", "--memo", memo, "--amt", "3"]
+    output = util.run(cmd)
+    print("ADDINVOICE OUTPUT: {}".format(output))
+    return output
 
 
 def listinvoices(index_offset, max_invoices=100, mock=False):

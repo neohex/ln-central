@@ -37,3 +37,6 @@ REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ["rest_framework.authenticat
 
 REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = REST_FRAMEWORK.get('DEFAULT_PERMISSION_CLASSES', [])
 REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] += ["rest_framework.permissions.IsAuthenticated"]
+
+# ln-central specific config
+MOCK_LN_CLIENT = False
