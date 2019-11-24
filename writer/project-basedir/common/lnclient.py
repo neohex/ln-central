@@ -12,13 +12,11 @@ AUTH_ARGS = [
 
 def addinvoice(memo, mock=False):
     if mock:
-        return [
-            {
+        return {
                 "r_hash": "48452417b7d351bdf1ce493521ffbc07157c68fd9340ba2aeead0c29899fa4b4",
                 "pay_req": "lnbc3u1pwfapdepp5fpzjg9ah6dgmmuwwfy6jrlauqu2hc68ajdqt52hw45xznzvl5j6qdqydp5scqzysdhdt9dngs8vw5532tcwnjvazn75cevfzz5r4drla8uvqlkt5u63nu5lrsa4s2q4rwmfe93yt7gavhrv3aq8rx3u842spdkwzhzketgsqv9zemq",
                 "add_index": 11
              }
-        ]
 
     cmd = [LNCLI_BIN] + AUTH_ARGS + ["addinvoice", "--memo", memo, "--amt", "3"]
     output = util.run(cmd)
