@@ -70,6 +70,6 @@ def get_nodes_list():
 def add_invoice(memo):
     response = call_endpoint('ln/addinvoice', args="memo={}".format(memo))
 
-    check_expected_key(response, "pay_req")
+    check_expected_key(response, "pay_req", is_list=False)
         
     return response.json()
