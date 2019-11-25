@@ -4,13 +4,26 @@ import json
 
 LNCLI_BIN = "/home/lightning/gocode/bin/lncli"
 AUTH_ARGS = [
-    "--macaroonpath", "/etc/biostar/writer-invoice.macaroon",
-    "--tlscertpath", "/etc/biostar/writer-tls.cert",
-    "--rpcserver", "bl3:10009"
+    "--macaroonpath", "/etc/biostar/writer-{rpcserver}-invoice.macaroon",
+    "--tlscertpath", "/etc/biostar/writer-{rpcserver}-tls.cert",
+    "--rpcserver", "{rpcserver}"
 ]
 
 
-def addinvoice(memo, mock=False):
+def _sanitize_rpcserver(rpcserver):
+    parts = rpcserver.split(":")
+    assert len(parts) <= 2, "too many :s in rpcserver"
+    assert parts[0].isalnum(), "rpcserver host part in not alphanumeric"
+    if len(parts) == 2:
+        assert parts[1].isdigit(), "rpcserver port part is not a number"
+    
+
+def _auth_args(rpcserver):
+    _sanitize_rpcserver(rpcserver)
+    return [arg.format(rpcserver=rpcserver) for arg in AUTH_ARGS]
+
+
+def addinvoice(memo, rpcserver, mock=False):
     if mock:
         return {
                 "r_hash": "48452417b7d351bdf1ce493521ffbc07157c68fd9340ba2aeead0c29899fa4b4",
@@ -18,13 +31,13 @@ def addinvoice(memo, mock=False):
                 "add_index": 11
              }
 
-    cmd = [LNCLI_BIN] + AUTH_ARGS + ["addinvoice", "--memo", memo, "--amt", "3"]
+    cmd = [LNCLI_BIN] + _auth_args(rpcserver) + ["addinvoice", "--memo", memo, "--amt", "3"]
     output = util.run(cmd)
     print("ADDINVOICE OUTPUT: {}".format(output))
     return output
 
 
-def listinvoices(index_offset, max_invoices=100, mock=False):
+def listinvoices(index_offset, rpcserver, max_invoices=100, mock=False):
     if mock:
         return {
             "first_index_offset": "5",
@@ -148,7 +161,7 @@ def listinvoices(index_offset, max_invoices=100, mock=False):
                 "last_index_offset": "32"
             }
 
-    cmd =  [LNCLI_BIN] + AUTH_ARGS + [
+    cmd =  [LNCLI_BIN] + _auth_args(rpcserver) + [
         "listinvoices", 
         "--index_offset", str(index_offset),
         "--max_invoices", str(max_invoices), 

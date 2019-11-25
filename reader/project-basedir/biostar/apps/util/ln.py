@@ -67,8 +67,8 @@ def get_nodes_list():
         return [n["identity_pubkey"] for n in response.json()]
 
 
-def add_invoice(memo):
-    response = call_endpoint('ln/addinvoice', args="memo={}".format(memo))
+def add_invoice(memo, node_id=1):
+    response = call_endpoint('ln/addinvoice', args="memo={}&node_id={}".format(memo, node_id))
 
     check_expected_key(response, "pay_req", is_list=False)
         
