@@ -9,15 +9,21 @@ logger = logging.getLogger(__name__)
 class LNUtilError(Exception):
     pass
         
-def call_endpoint(path, args=""):
+def call_endpoint(path, args={}, as_post=False):
     if settings.READER_TO_WRITER_AUTH_TOKEN is not None:
         headers = {'Authorization': 'Token {}'.format(settings.READER_TO_WRITER_AUTH_TOKEN)}
     else:
         headers = {}
 
-    full_path = 'http://127.0.0.1:8000/{}.json?{}'.format(path, args)
+    full_path = 'http://127.0.0.1:8000/{}.json'.format(path)
     try:
-        return requests.get(full_path)
+        if as_post:
+            return requests.post(full_path, headers=headers, data=args)
+        else:
+            if len(args) > 0:
+                full_path += "?{}".format("&".join(["{k}={v}".format(k, v) for k, v in args]))
+
+            return requests.get(full_path, headers=headers)
 
     except requests.exceptions.ConnectionError as e:
         logger.exception(e)
@@ -68,7 +74,8 @@ def get_nodes_list():
 
 
 def add_invoice(memo, node_id=1):
-    response = call_endpoint('ln/addinvoice', args="memo={}&node_id={}".format(memo, node_id))
+    response = call_endpoint('ln/addinvoice', args={"memo": memo, "node_id": node_id}, as_post=True)
+    print(response)
 
     check_expected_key(response, "pay_req", is_list=False)
         
