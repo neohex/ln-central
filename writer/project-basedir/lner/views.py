@@ -13,6 +13,7 @@ from .models import LightningNode
 from .models import LightningInvoice
 from .serializers import LightningNodeSerializer
 from .serializers import LightningInvoiceSerializer
+from .serializers import LightningInvoiceRequestSerializer
 from common import util
 from common import lnclient
 
@@ -22,20 +23,22 @@ logger = util.getLogger("lner.views")
 
 class LightningNodeViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows lightning nodes to be viewed
+    List all available lightning nodes
     """
     queryset = LightningNode.objects.all()
     serializer_class = LightningNodeSerializer
 
 
-class LightningInvoiceList(APIView):
+class CreateLightningInvoiceViewSet(viewsets.ModelViewSet):
     """
-    List all snippets, or create a new snippet.
+    Create a new lightning invoice
     """
+    queryset = []
+    serializer_class = LightningInvoiceRequestSerializer
 
-    def get(self, request, format=None):
-        node = LightningNode.objects.get(id=request.GET["node_id"])
-        invoice = lnclient.addinvoice(request.GET["memo"], node.rpcserver, mock=settings.MOCK_LN_CLIENT)
+    def create(self, request):
+        node = LightningNode.objects.get(id=request.POST["node_id"])
+        invoice = lnclient.addinvoice(request.POST["memo"], node.rpcserver, mock=settings.MOCK_LN_CLIENT)
 
         serializer = LightningInvoiceSerializer(invoice, many=False)  # re-serialize
 
