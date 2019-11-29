@@ -92,7 +92,6 @@ def export_data(path, limit):
             date_joined=prof.date_joined.isoformat(),
             last_login=prof.last_login.isoformat(),
             type=user.get_type_display(),
-            location=prof.location,
             website=prof.website,
             info=prof.info,
             my_tags=prof.my_tags,
@@ -156,7 +155,6 @@ def post_patch():
         post.html = post.content
         post.save()
     for prof in Profile.objects.all():
-        prof.location = prof.location.strip()
         prof.save()
 
 

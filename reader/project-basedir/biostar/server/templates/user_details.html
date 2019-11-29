@@ -120,14 +120,6 @@
 
                 {% if target.score > 0 or user.is_moderator %}
                     {{ target.profile.info|safe }}
-                {% else %}
-                    <p>
-                        Profile information, website and location are
-                        not shown for new users.
-                    </p>
-                    <p>
-                        This helps us discourage the inappropriate use of our site.
-                    </p>
                 {% endif %}
 
             </div>

@@ -199,11 +199,6 @@ def sidebar_users(users):
     return dict(users=users)
 
 
-@register.inclusion_tag('server_tags/sidebar_locations.html')
-def sidebar_locations(users):
-    return dict(users=users)
-
-
 @register.inclusion_tag('server_tags/sidebar_awards.html')
 def sidebar_awards(awards):
     return dict(awards=awards)

@@ -230,7 +230,6 @@ class Command(BaseCommand):
             pubkey = get(row, 'pubkey')
             name = get(row, 'display_name')
             score = get(row, 'score')
-            location = get(row, 'location')
             website = get(row, 'website')
 
             user_type = USER_TYPE_MAP[get(row, 'type')]
@@ -247,7 +246,6 @@ class Command(BaseCommand):
             # Populate the profile
             prof = user.profile
             prof.website = website
-            prof.location = location
             prof.date_joined = localize_time(date_joined)
             prof.last_login = localize_time(last_visited)
             about_me_file = path_join(source, 'about_me', str(uid))

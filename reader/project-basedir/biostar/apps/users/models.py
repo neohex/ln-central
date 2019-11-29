@@ -143,14 +143,6 @@ class User(models.Model):
 from biostar import const
 
 
-class EmailList(models.Model):
-    "The list of pubkeys that opted in receiving pubkeys"
-    pubkey = models.EmailField(verbose_name='Email', db_index=True, max_length=255, unique=True)
-    type = models.IntegerField(default=0)
-    active = models.BooleanField(default=True)
-    date = models.DateTimeField(auto_created=True)
-
-
 class Tag(models.Model):
     name = models.TextField(max_length=50, db_index=True)
 
@@ -175,9 +167,6 @@ class Profile(models.Model):
 
     # The last visit by the user.
     date_joined = models.DateTimeField()
-
-    # User provided location.
-    location = models.CharField(default="", max_length=255, blank=True)
 
     # User provided website.
     website = models.URLField(default="", max_length=255, blank=True)
@@ -213,7 +202,7 @@ class Profile(models.Model):
 
     def clear_data(self):
         "Actions to take when suspending or banning users"
-        self.website = self.info = self.location = ''
+        self.website = self.info = ''
         self.save()
 
     def add_tags(self, text):
@@ -231,9 +220,6 @@ class Profile(models.Model):
         self.info = bleach.clean(self.info, tags=ALLOWED_TAGS,
                                  attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
 
-        # Strip whitespace from location string
-        self.location = self.location.strip()
-
         if not self.id:
             # This runs only once upon object creation.
             self.uuid = util.make_uuid()
@@ -247,9 +233,8 @@ class Profile(models.Model):
 
     @property
     def filled(self):
-        has_location = bool(self.location.strip())
         has_info = bool(self.info.strip())
-        return has_location and has_info
+        return has_info
 
     @staticmethod
     def auto_create(sender, instance, created, *args, **kwargs):
@@ -269,7 +254,7 @@ class UserChangeForm(forms.ModelForm):
 
 class ProfileInline(admin.StackedInline):
     model = Profile
-    fields = ["location", "website", "message_prefs", "my_tags", "watched_tags", "info"]
+    fields = ["website", "message_prefs", "my_tags", "watched_tags", "info"]
 
 
 # Data signals

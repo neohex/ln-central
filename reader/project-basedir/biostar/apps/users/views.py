@@ -24,9 +24,6 @@ class UserEditForm(forms.Form):
 
     email = forms.EmailField(help_text="Your email, it will not be visible to other users (required)")
 
-    location = forms.CharField(required=False,
-                               help_text="Country/City/Institution (recommended)")
-
     website = forms.URLField(required=False, max_length=100,
                              help_text="The URL to your website (optional)")
 
@@ -56,7 +53,6 @@ class UserEditForm(forms.Form):
                 Div(
                     Div('name', ),
                     Div('email', ),
-                    Div('location'),
                     Div('website'),
                     css_class="col-md-offset-3 col-md-6",
                 ),
@@ -88,7 +84,7 @@ class EditUser(FormView):
     template_name = ""
     form_class = UserEditForm
     user_fields = "name email".split()
-    prof_fields = "location website info my_tags watched_tags message_prefs digest_prefs".split()
+    prof_fields = "website info my_tags watched_tags message_prefs digest_prefs".split()
 
     def get(self, request, *args, **kwargs):
         target = User.objects.get(pk=self.kwargs['pk'])

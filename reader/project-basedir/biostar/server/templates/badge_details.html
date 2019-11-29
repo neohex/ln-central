@@ -24,7 +24,6 @@
                     <div>{% avataaar award.user 82 %}</div>
                     <div class="ago">{{ award.date|time_ago }} to</div>
                     <div class="uname">{% userlink award.user %}</div>
-                    <div class="loc">{{ award.user.profile.location }}</div>
                     {% if award.context %}
                         <div class="">For: {{ award.context|safe }}</div>
                     {% endif %}
