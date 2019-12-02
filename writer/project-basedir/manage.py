@@ -28,10 +28,4 @@ if __name__ == '__main__':
             "forget to activate a virtual environment?"
         ) from exc
 
-    # workaround for https://github.com/arteria/django-background-tasks/issues/181
-    if 'migrate' in sys.argv and '-h' not in sys.argv and '--help' not in sys.argv:
-        file_list = glob.glob('{}/../../writer-env/lib/python*/site-packages/background_task/migrations/0003_auto_*.py'.format(BASE_DIR))
-        for f in file_list:
-            os.remove(f)
-
     execute_from_command_line(sys.argv)
