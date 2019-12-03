@@ -1,6 +1,6 @@
 Django==2.1.7
-django-background-tasks>=1.2.0
+PyYAML==5.1
+django-compat==1.0.15  # django-compat is requred by the submodule django-background-tasks
 djangorestframework==3.9.2
 psycopg2==2.7.7
 pytz==2018.9
-PyYAML==5.1

@@ -57,6 +57,25 @@ if [ "$1" = "install" ]; then
 	set -ue  # stop on errors or missing environment variables.
 
 	echo ""
+	echo "==================== Updating submodules ===================="
+
+    cmd="git submodule update --init --recursive"
+    echo "Running: $cmd"
+    $cmd
+
+    (
+        cat writer/submodules | while read submodule_line; do
+            echo $submodule_line
+            submodule_path=$(echo $submodule_line | awk '{print $1}')
+            submodule_version=$(echo $submodule_line | awk '{print $2}')
+
+            cd $submodule_path
+            echo -e "Running: git checkout $submodule_version"
+            git checkout $submodule_version
+        done
+    )
+
+	echo ""
 	echo "==================== Installing reader-env ===================="
 	virtualenv reader-env -p python2.7
 	(
