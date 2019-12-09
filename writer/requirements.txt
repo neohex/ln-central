@@ -1,6 +1,10 @@
 Django==2.1.7
 PyYAML==5.1
+bleach==1.4
+html5lib==0.999
 django-compat==1.0.15  # django-compat is requred by the submodule django-background-tasks
 djangorestframework==3.9.2
+markdown2==2.3.7
 psycopg2==2.7.7
 pytz==2018.9
+requests==2.3.0

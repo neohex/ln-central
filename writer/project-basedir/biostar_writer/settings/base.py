@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import sys
 
 # directory where manage.py lives
 BASE_DIR = (
@@ -44,7 +45,9 @@ INSTALLED_APPS = [
 
     # project
     'users',
-    'lner'
+    'lner',
+    'posts',
+    'common'
 ]
 
 REST_FRAMEWORK = {
@@ -107,6 +110,47 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+def get_env(name, default=None, strict=False, func=None):
+    """Get the environment variable or return exception"""
+
+    if strict and name not in os.environ:
+        msg = "*** Required environment variable '{}' not set.".format(name)
+        raise ImproperlyConfigured(msg)
+
+    value = os.environ.get(name, default)
+
+    if not value:
+        msg = "*** Required environment variable '{}' not set and has no default value".format(
+            name)
+        raise ImproperlyConfigured(msg)
+
+    if func:
+        return func(value)
+    else:
+        # python 3 no longer has "unicode" type, it uses "str" instaed
+        try:
+            return unicode(value, encoding="utf-8")
+
+        except Exception as e: 
+            if sys.version_info >= (3, 0):
+                return str(value)
+            else:
+                raise e
+
+#
+# Used in common.html_util
+#
+ALLOWED_TAGS = "p div br code pre h1 h2 h3 h4 hr span s sub sup b i img strong strike em underline super table thead tr th td tbody".split()
+ALLOWED_STYLES = 'color font-weight background-color width height'.split()
+ALLOWED_ATTRIBUTES = {
+    '*': ['class', 'style'],
+    'a': ['href', 'rel'],
+    'img': ['src', 'alt', 'width', 'height'],
+    'table': ['border', 'cellpadding', 'cellspacing'],
+}
+__DEFAULT_SITE_DOMAIN = 'www.lvh.me'
+SITE_DOMAIN = get_env("SITE_DOMAIN", __DEFAULT_SITE_DOMAIN)
 
 
 # biostar-ln specific config

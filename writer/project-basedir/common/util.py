@@ -5,6 +5,7 @@ import datetime
 import json
 import subprocess
 
+# TODO: "util" has a diffrent use in reader, split into common.logging and common.cli
 
 def getLogger(name):
     logger = logging.getLogger(name)

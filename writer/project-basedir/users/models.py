@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.sites.models import Site
 from datetime import datetime
-from biostar_writer import const
+from common import const
 
 
 def now():
