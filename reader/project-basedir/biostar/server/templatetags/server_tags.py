@@ -10,8 +10,8 @@ import dateutil.parser
 from django.utils.timezone import utc
 from django import template
 from django.core.urlresolvers import reverse
-from biostar import const
-from biostar.apps import util
+from common import const
+from common import general_util
 from biostar.server.views import LATEST
 import coolname as coolname_lib
 
@@ -138,7 +138,7 @@ def time_ago(date):
     if not isinstance(date, datetime):
         date = dateutil.parser.parse(date)
 
-    delta = util.now() - date
+    delta = general_util.now() - date
     if delta < timedelta(minutes=1):
         return 'just now'
     elif delta < timedelta(hours=1):

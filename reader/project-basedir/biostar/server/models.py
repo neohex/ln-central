@@ -12,12 +12,14 @@ from biostar.apps.posts.models import Post, Subscription, ReplyToken
 from biostar.apps.messages.models import Message, MessageBody
 from biostar.apps.badges.models import Award
 
-from biostar.apps.util import html, make_uuid
-from biostar.apps import util
+from common.const import *
+from common import general_util
+from common import html_util
+from common import json_util
+
 
 from django.core import mail
 from django.conf import settings
-from biostar.const import *
 from django.contrib.sites.models import Site
 
 logger = logging.getLogger(__name__)
@@ -52,14 +54,14 @@ def post_create_messages(sender, instance, created, *args, **kwargs):
         subs = Subscription.objects.get_subs(post).exclude(user=author)
 
         # Generate the message from the template.
-        content = html.render(name=POST_CREATED_SHORT, post=post, user=author)
+        content = html_util.render(name=POST_CREATED_SHORT, post=post, user=author)
 
         # Generate the email message body.
         site = Site.objects.get_current()
-        email_text = html.render(name=POST_CREATED_TEXT, post=post, user=author, site=site)
+        email_text = html_util.render(name=POST_CREATED_TEXT, post=post, user=author, site=site)
 
         # Generate the html message
-        email_html = html.render(name=POST_CREATED_HTML, post=post, user=author, site=site)
+        email_html = html_util.render(name=POST_CREATED_HTML, post=post, user=author, site=site)
 
         # Create the message body.
         body = MessageBody.objects.create(author=author, subject=post.root.title,
@@ -76,7 +78,7 @@ def post_create_messages(sender, instance, created, *args, **kwargs):
                 # collect to a bulk email if the subscription is by email:
                 if sub.type in (EMAIL_MESSAGE, ALL_MESSAGES):
                     try:
-                        token = ReplyToken(user=sub.user, post=post, token=make_uuid(8), date=util.now())
+                        token = ReplyToken(user=sub.user, post=post, token=general_util.make_uuid(8), date=general_util.now())
                         from_email = settings.EMAIL_FROM_PATTERN % (author.pubkey, settings.DEFAULT_FROM_EMAIL)
                         from_email = from_email.encode("utf-8")
                         reply_to = settings.EMAIL_REPLY_PATTERN % token.token
@@ -118,7 +120,7 @@ def award_create_messages(sender, instance, created, *args, **kwargs):
         # The user sending the notifications.
         user = award.user
         # Generate the message from the template.
-        content = html.render(name=AWARD_CREATED_HTML_TEMPLATE, award=award, user=user)
+        content = html_util.render(name=AWARD_CREATED_HTML_TEMPLATE, award=award, user=user)
 
         subject = "Congratulations: you won %s" % award.badge.name
 

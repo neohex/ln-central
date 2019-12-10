@@ -205,7 +205,7 @@ class NewPost(FormView):
 
         # # TEMPORARY HACK: create new user
         # user = User()
-        # user.pubkey = "%s@xyz2.xyz" % util.make_uuid()
+        # user.pubkey = "%s@xyz2.xyz" % general_util.make_uuid()
         # user.score = 0
         # user.last_login = now()
         # user.date_joined = user.last_login

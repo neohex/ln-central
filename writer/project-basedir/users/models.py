@@ -1,11 +1,54 @@
+from __future__ import print_function, unicode_literals, absolute_import, division
+import logging
+from django import forms
 from django.db import models
-from django.contrib.sites.models import Site
-from datetime import datetime
+from django.conf import settings
+from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.utils.timezone import utc
+
 from common import const
+from common import general_util
+from common import html_util
+from common import json_util
+
+import bleach
+# TODO: remove version check after upgrading reader 
+import django
+if django.VERSION[0] == 1:
+    from django.core.urlresolvers import reverse
+else:
+    from django.urls import reverse
+from django.contrib.sites.models import Site
+from datetime import datetime, timedelta
 
 
-def now():
-    return datetime.utcnow().replace(tzinfo=utc)
+# HTML sanitization parameters.
+ALLOWED_TAGS = bleach.ALLOWED_TAGS + settings.ALLOWED_TAGS
+ALLOWED_STYLES = bleach.ALLOWED_STYLES + settings.ALLOWED_STYLES
+ALLOWED_ATTRIBUTES = dict(bleach.ALLOWED_ATTRIBUTES)
+ALLOWED_ATTRIBUTES.update(settings.ALLOWED_ATTRIBUTES)
+
+logger = logging.getLogger(__name__)
+
+
+class LocalManager(models.Manager):
+    def get_users(self, sort, limit, q):
+        sort = const.USER_SORT_MAP.get(sort, None)
+        days = const.POST_LIMIT_MAP.get(limit, 0)
+
+        if q:
+            query = self.filter(name__icontains=q)
+        else:
+            query = self
+
+        if days:
+            delta = general_util.now() - timedelta(days=days)
+            query = self.filter(profile__last_login__gt=delta)
+
+
+        query = query.exclude(status=User.BANNED).select_related("profile").order_by(sort)
+
+        return query
 
 
 class User(models.Model):
@@ -16,8 +59,12 @@ class User(models.Model):
     NEW_USER, TRUSTED, SUSPENDED, BANNED = range(4)
     STATUS_CHOICES = ((NEW_USER, 'New User'), (TRUSTED, 'Trusted'), (SUSPENDED, 'Suspended'), (BANNED, 'Banned'))
 
+    REQUIRED_FIELDS = []
+    USERNAME_FIELD = 'pubkey'
+    objects = LocalManager()
+
     # Default information on every user.
-    pubkey = models.CharField(verbose_name='LN Identity Pubkey', db_index=True, max_length=255, unique=True)
+    pubkey = models.CharField(verbose_name='LN Identity PubKey', db_index=True, max_length=255, unique=True)
 
     # This designates a user types and with that permissions.
     type = models.IntegerField(choices=TYPE_CHOICES, default=USER)
@@ -44,7 +91,61 @@ class User(models.Model):
     site = models.ForeignKey(Site, null=True, on_delete=models.CASCADE)
 
     # The last visit by the user.
-    last_login = models.DateTimeField(default=datetime.now)
+    last_login = models.DateTimeField()
+
+    @property
+    def is_moderator(self):
+        return self.type == User.MODERATOR or self.type == User.ADMIN
+
+    @property
+    def is_administrator(self):
+        return self.type == User.ADMIN
+
+    @property
+    def is_trusted(self):
+        return self.status == User.TRUSTED
+
+    @property
+    def is_suspended(self):
+        return self.status == User.SUSPENDED or self.status == User.BANNED
+
+    def get_full_name(self):
+        # The user is identified by their pubkey address
+        return self.pubkey
+
+    def get_short_name(self):
+        # The user is identified by their pubkey address
+        return self.pubkey
+
+    def has_perm(self, perm, obj=None):
+        "Does the user have a specific permission?"
+        # Simplest possible answer: Yes, always
+        return True
+
+    def has_module_perms(self, app_label):
+        "Does the user have permissions to view the app `app_label`?"
+        # Simplest possible answer: Yes, always
+        return True
+
+    def save(self, *args, **kwargs):
+        "Actions that need to be performed on every user save."
+
+        super(User, self).save(*args, **kwargs)
+
+    @property
+    def scaled_score(self):
+        "People like to see big scores."
+        if self.score > 30:
+            return 300
+        else:
+            return self.score * 10
+
+    def __unicode__(self):
+        return "%s (id=%s, last_login: %s)" % (self.pubkey, self.id, self.last_login)
+
+    def get_absolute_url(self):
+        url = reverse("user-details", kwargs=dict(pk=self.id))
+        return url
 
 
 class Tag(models.Model):
@@ -61,7 +162,7 @@ class Profile(models.Model):
 
     DIGEST_CHOICES = [(NO_DIGEST, 'Never'), (DAILY_DIGEST, 'Daily'),
                       (WEEKLY_DIGEST, 'Weekly'), (MONTHLY_DIGEST, 'Monthly')]
-    user = models.OneToOneField(User, on_delete=models.DO_NOTHING)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     # Globally unique id used to identify the user in a private feeds
     uuid = models.CharField(null=False, db_index=True, unique=True, max_length=255)
@@ -71,9 +172,6 @@ class Profile(models.Model):
 
     # The last visit by the user.
     date_joined = models.DateTimeField()
-
-    # User provided location.
-    location = models.CharField(default="", max_length=255, blank=True)
 
     # User provided website.
     website = models.URLField(default="", max_length=255, blank=True)
@@ -105,11 +203,11 @@ class Profile(models.Model):
     opt_in = models.BooleanField(default=False)
 
     def parse_tags(self):
-        return util.split_tags(self.tag_val)
+        return html_util.split_tags(self.tag_val)
 
     def clear_data(self):
         "Actions to take when suspending or banning users"
-        self.website = self.info = self.location = ''
+        self.website = self.info = ''
         self.save()
 
     def add_tags(self, text):
@@ -127,13 +225,10 @@ class Profile(models.Model):
         self.info = bleach.clean(self.info, tags=ALLOWED_TAGS,
                                  attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
 
-        # Strip whitespace from location string
-        self.location = self.location.strip()
-
         if not self.id:
             # This runs only once upon object creation.
-            self.uuid = util.make_uuid()
-            self.date_joined = self.date_joined or now()
+            self.uuid = general_util.make_uuid()
+            self.date_joined = self.date_joined or general_util.now()
             self.last_login = self.date_joined
 
         super(Profile, self).save(*args, **kwargs)
@@ -143,9 +238,8 @@ class Profile(models.Model):
 
     @property
     def filled(self):
-        has_location = bool(self.location.strip())
         has_info = bool(self.info.strip())
-        return has_location and has_info
+        return has_info
 
     @staticmethod
     def auto_create(sender, instance, created, *args, **kwargs):
@@ -153,3 +247,17 @@ class Profile(models.Model):
         if created:
             prof = Profile(user=instance)
             prof.save()
+
+
+class UserChangeForm(forms.ModelForm):
+    """A form for updating users."""
+
+    class Meta:
+        model = User
+        fields = ['type']
+
+
+# Data signals
+from django.db.models.signals import post_save
+
+post_save.connect(Profile.auto_create, sender=User)

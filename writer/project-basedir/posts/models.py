@@ -20,8 +20,16 @@ from django.db.models import Q, F
 from django.core.exceptions import ObjectDoesNotExist
 
 from common import const
+from common import general_util
 from common import html_util
 from common import json_util
+
+try:
+    # writer
+    from users.models import User
+except ImportError:
+    # reader
+    from biostar.apps.users.models import User
 
 # HTML sanitization parameters.
 import json
@@ -144,10 +152,14 @@ class Post(models.Model):
     title = models.CharField(max_length=200, null=False)
 
     # The user that originally created the post.
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    # TODO: remove
+    # author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    # lastedit_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='editor', on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
 
     # The user that edited the post most recently.
-    lastedit_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='editor', on_delete=models.CASCADE)
+    lastedit_user = models.ForeignKey(User, related_name='editor', on_delete=models.CASCADE)
 
     # Indicates the information value of the post.
     rank = models.FloatField(default=0, blank=True)
@@ -214,7 +226,7 @@ class Post(models.Model):
     site = models.ForeignKey(Site, null=True, on_delete=models.CASCADE)
 
     def parse_tags(self):
-        return json_util.split_tags(self.tag_val)
+        return html_util.split_tags(self.tag_val)
 
     def add_tags(self, text):
         text = text.strip()
@@ -250,7 +262,7 @@ class Post(models.Model):
 
     @property
     def age_in_days(self):
-        delta = json_util.now() - self.creation_date
+        delta = general_util.now() - self.creation_date
         return delta.days
 
     def update_reply_count(self):
@@ -271,7 +283,6 @@ class Post(models.Model):
         super(Post, self).delete(using=using)
 
     def save(self, *args, **kwargs):
-
         # Sanitize the post body.
         self.html = html_util.parse_html(self.content)
 
@@ -285,7 +296,6 @@ class Post(models.Model):
                 self.tag_val += "," + required_tag
 
         if not self.id:
-
             # Set the titles
             if self.parent and not self.title:
                 self.title = self.parent.title
@@ -302,7 +312,7 @@ class Post(models.Model):
             self.title = self.parent.title if self.parent else self.title
             self.lastedit_user = self.author
             self.status = self.status or Post.PENDING
-            self.creation_date = self.creation_date or json_util.now()
+            self.creation_date = self.creation_date or general_util.now()
             self.lastedit_date = self.creation_date
 
             # Set the timestamps on the parent
@@ -363,7 +373,6 @@ class Post(models.Model):
             instance.save()
 
 
-
 class PostPreview(models.Model):
     objects = []
 
@@ -418,14 +427,16 @@ class ReplyToken(models.Model):
     Connects a user and a post to a unique token. Sending back the token identifies
     both the user and the post that they are replying to.
     """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    # TODO: remove
+    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     token = models.CharField(max_length=256)
     date = models.DateTimeField(auto_created=True)
 
     def save(self, *args, **kwargs):
         if not self.id:
-            self.token = json_util.make_uuid()
+            self.token = general_util.make_uuid()
         super(ReplyToken, self).save(*args, **kwargs)
 
 
@@ -469,7 +480,9 @@ class Vote(models.Model):
     UP, DOWN, BOOKMARK, ACCEPT = range(4)
     TYPE_CHOICES = [(UP, "Upvote"), (DOWN, "DownVote"), (BOOKMARK, "Bookmark"), (ACCEPT, "Accept")]
 
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    # TODO: Remove
+    # author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, related_name='votes', on_delete=models.CASCADE)
     type = models.IntegerField(choices=TYPE_CHOICES, db_index=True)
     date = models.DateTimeField(db_index=True, auto_now=True)
@@ -490,7 +503,9 @@ class Subscription(models.Model):
     class Meta:
         unique_together = (("user", "post"),)
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("User"), db_index=True, on_delete=models.CASCADE)
+    # TODO: Remove
+    # user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("User"), db_index=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, verbose_name=_("User"), db_index=True, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, verbose_name=_("Post"), related_name="subs", db_index=True, on_delete=models.CASCADE)
     type = models.IntegerField(choices=const.MESSAGING_TYPE_CHOICES, default=const.LOCAL_MESSAGE, db_index=True)
     date = models.DateTimeField(_("Date"), db_index=True)
@@ -504,7 +519,7 @@ class Subscription(models.Model):
 
         if not self.id:
             # Set the date to current time if missing.
-            self.date = self.date or json_util.now()
+            self.date = self.date or general_util.now()
 
         super(Subscription, self).save(*args, **kwargs)
 
@@ -523,7 +538,7 @@ class Subscription(models.Model):
             if sub_type == const.DEFAULT_MESSAGES:
                 sub_type = const.EMAIL_MESSAGE if instance.is_toplevel else const.LOCAL_MESSAGE
             sub = Subscription(post=root, user=user, type=sub_type)
-            sub.date = json_util.now()
+            sub.date = general_util.now()
             sub.save()
             # Increase the subscription count of the root.
             Post.objects.filter(pk=root.id).update(subs_count=F('subs_count') + 1)
