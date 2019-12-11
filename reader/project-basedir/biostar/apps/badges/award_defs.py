@@ -4,7 +4,7 @@ from biostar.apps.posts.models import Post, Vote
 
 from django.utils.timezone import utc
 from datetime import datetime, timedelta
-from biostar.apps import util
+from common import general_util
 
 
 def wrap_list(obj, cond):
@@ -147,7 +147,7 @@ LIBRARIAN = AwardDef(
 
 def rising_star(user):
     # The user joined no more than three months ago
-    cond = util.now() < user.profile.date_joined + timedelta(weeks=15)
+    cond = general_util.now() < user.profile.date_joined + timedelta(weeks=15)
     cond = cond and Post.objects.filter(author=user).count() > 50
     return wrap_list(user, cond)
 

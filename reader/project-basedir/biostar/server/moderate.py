@@ -6,7 +6,6 @@ from biostar.apps.badges.models import Award
 from biostar.apps.posts.auth import post_permissions
 from biostar.apps.users.models import User
 from biostar.apps.users.auth import user_permissions
-from biostar.apps.util import html
 from django.conf import settings
 from django.views.generic import FormView
 from django.shortcuts import render
@@ -28,7 +27,8 @@ logger = logging.getLogger(__name__)
 OPEN, CLOSE_OFFTOPIC, CLOSE_SPAM, DELETE, \
     DUPLICATE, MOVE_TO_COMMENT, MOVE_TO_ANSWER, CROSSPOST, TOGGLE_ACCEPT, BUMP_POST = map(str, range(10))
 
-import biostar.apps.util
+from common import html_util
+from common import general_util
 
 POST_LIMIT_ERROR_MSG = '''
 <p><b>Sorry!</b> Your posting limit of (%s) posts per six hours has been reached.</p>
@@ -56,7 +56,7 @@ def user_exceeds_limits(request, top_level=False):
     """
 
     # user = request.user
-    # since = util.now() - timedelta(hours=6)
+    # since = general_util.now() - timedelta(hours=6)
 
     # # Check the user's credentials.
     # user = update_user_status(user)
@@ -207,7 +207,7 @@ class PostModeration(LoginRequiredMixin, FormView):
             return response
 
         if action == (BUMP_POST):
-            Post.objects.filter(id=post.id).update(lastedit_date=util.now())
+            Post.objects.filter(id=post.id).update(lastedit_date=general_util.now())
             logger.info("Post bumped  (Request: %s)", request)
             return response
 
@@ -250,13 +250,13 @@ class PostModeration(LoginRequiredMixin, FormView):
         if action in CLOSE_OFFTOPIC:
             query.update(status=Post.CLOSED)
             logger.info("Closed post: %s (Request: %s)", post.title, request)
-            content = html.render(name="messages/offtopic_posts.html", user=post.author, comment=get("comment"), post=post)
+            content = html_util.render(name="messages/offtopic_posts.html", user=post.author, comment=get("comment"), post=post)
             comment = Post(content=content, type=Post.COMMENT, parent=post)
             comment.save()
             return response
 
         if action == CROSSPOST:
-            content = html.render(name="messages/crossposted.html", user=post.author, comment=get("comment"), post=post)
+            content = html_util.render(name="messages/crossposted.html", user=post.author, comment=get("comment"), post=post)
             comment = Post(content=content, type=Post.COMMENT, parent=post, author=user)
             comment.save()
             return response
@@ -264,7 +264,7 @@ class PostModeration(LoginRequiredMixin, FormView):
         if action == DUPLICATE:
             query.update(status=Post.CLOSED)
             posts = Post.objects.filter(id__in=get("dupe"))
-            content = html.render(name="messages/duplicate_posts.html", user=post.author, comment=get("comment"), posts=posts)
+            content = html_util.render(name="messages/duplicate_posts.html", user=post.author, comment=get("comment"), posts=posts)
             comment = Post(content=content, type=Post.COMMENT, parent=post, author=user)
             comment.save()
             return response

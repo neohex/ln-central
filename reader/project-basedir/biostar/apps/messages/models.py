@@ -9,7 +9,7 @@ from django.conf import settings
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.core import mail
-from biostar.apps import util
+from common import general_util
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class MessageBody(models.Model):
 
     def save(self, **kwargs):
         self.subject = self.subject[:self.MAX_SIZE]
-        self.sent_at= self.sent_at or util.now()
+        self.sent_at= self.sent_at or general_util.now()
         super(MessageBody, self).save(**kwargs)
 
 

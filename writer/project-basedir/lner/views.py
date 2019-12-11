@@ -14,11 +14,11 @@ from .models import LightningInvoice
 from .serializers import LightningNodeSerializer
 from .serializers import LightningInvoiceSerializer
 from .serializers import LightningInvoiceRequestSerializer
-from common import util
+from common import log
 from common import lnclient
 
 
-logger = util.getLogger("lner.views")
+logger = log.getLogger("lner.views")
 
 
 class LightningNodeViewSet(viewsets.ModelViewSet):

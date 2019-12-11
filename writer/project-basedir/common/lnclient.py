@@ -1,4 +1,4 @@
-from common import util
+from common import cli
 
 import json
 
@@ -32,7 +32,7 @@ def addinvoice(memo, rpcserver, mock=False):
              }
 
     cmd = [LNCLI_BIN] + _auth_args(rpcserver) + ["addinvoice", "--memo", memo, "--amt", "3"]
-    output = util.run(cmd)
+    output = cli.run(cmd)
     print("ADDINVOICE OUTPUT: {}".format(output))
     return output
 
@@ -168,4 +168,4 @@ def listinvoices(index_offset, rpcserver, max_invoices=100, mock=False):
         "--reversed=False"
     ]
     
-    return util.run(cmd)
+    return cli.run(cmd)

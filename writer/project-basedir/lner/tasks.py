@@ -2,11 +2,8 @@ import logging
 
 from django.conf import settings
 from background_task import background
-from common import util
 from common import lnclient
-
-
-logger = util.getLogger("lner.tasks")
+from common.log import logger
 
 
 @background(queue='queue-1', remove_existing_tasks=True)

@@ -19,7 +19,10 @@ import logging
 
 import langdetect
 from django.template.loader import render_to_string
-from biostar.apps import util
+
+from common import general_util
+from common import json_util
+
 from biostar.apps.util import ln
 from biostar.apps.users.models import User
 
@@ -158,7 +161,7 @@ class NewPost(FormView):
         initial = dict()
 
         if "memo" in kwargs:
-            memo = util.deserialize_memo(kwargs["memo"])
+            memo = json_util.deserialize_memo(kwargs["memo"])
             for key in "title post_type tag_val content".split():
                 initial[key] = memo[key]
         else:
@@ -222,7 +225,7 @@ class NewPost(FormView):
               content=data('content'),
               tag_val=data('tag_val'),
               type=int(data('post_type')),
-              date=util.now()
+              date=general_util.now()
         )
 
         return HttpResponseRedirect(post_preview.get_absolute_url(memo=post_preview.serialize_memo()))

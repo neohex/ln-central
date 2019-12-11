@@ -21,7 +21,7 @@ def call_endpoint(path, args={}, as_post=False):
             return requests.post(full_path, headers=headers, data=args)
         else:
             if len(args) > 0:
-                full_path += "?{}".format("&".join(["{k}={v}".format(k, v) for k, v in args]))
+                full_path += "?{}".format("&".join(["{}={}".format(k, v) for k, v in args]))
 
             return requests.get(full_path, headers=headers)
 
@@ -75,7 +75,6 @@ def get_nodes_list():
 
 def add_invoice(memo, node_id=1):
     response = call_endpoint('ln/addinvoice', args={"memo": memo, "node_id": node_id}, as_post=True)
-    print(response)
 
     check_expected_key(response, "pay_req", is_list=False)
         

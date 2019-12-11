@@ -11,8 +11,12 @@ from biostar.apps.posts.models import Post, PostPreview, Vote, Tag, Subscription
 from biostar.apps.posts.views import NewPost, NewAnswer, ShortForm
 from biostar.apps.badges.models import Badge, Award
 from biostar.apps.posts.auth import post_permissions
-from biostar.apps import util
-from biostar.apps.util import html
+
+
+from common import general_util
+from common import html_util
+from common import json_util
+
 from biostar.apps.util import ln
 
 from datetime import datetime, timedelta
@@ -82,7 +86,7 @@ def apply_sort(request, query):
     limit = request.GET.get('limit', const.POST_LIMIT_DEFAULT)
     days = const.POST_LIMIT_MAP.get(limit, 0)
     if days:
-        delta = util.now() - timedelta(days=days)
+        delta = general_util.now() - timedelta(days=days)
         query = query.filter(lastedit_date__gt=delta)
     return query
 
@@ -384,16 +388,16 @@ class PostPreviewView(TemplateView):
 
         context = super(PostPreviewView, self).get_context_data(**kwargs)
 
-        memo = util.deserialize_memo(context["memo"])
+        memo = json_util.deserialize_memo(context["memo"])
 
         post_preview = PostPreview()
         post_preview.title = memo["title"]
         post_preview.status = Post.OPEN
         post_preview.type = memo["post_type"]
         post_preview.content = memo["content"]
-        post_preview.html = util.html.parse_html(memo["content"])
+        post_preview.html = html_util.parse_html(memo["content"])
         post_preview.tag_val = memo["tag_val"]
-        post_preview.tag_value = util.split_tags(memo["tag_val"])
+        post_preview.tag_value = html_util.split_tags(memo["tag_val"])
         post_preview.date = datetime.utcfromtimestamp(memo["unixtime"]).replace(tzinfo=utc)
 
         context['post'] = post_preview
@@ -628,13 +632,13 @@ def email_handler(request):
                 text = u"<div class='preformatted'>%s</div>" % text
 
             # Apply server specific formatting
-            text = html.parse_html(text)
+            text = html_util.parse_html(text)
 
             # Apply the markdown on the text
             text = markdown.markdown(text)
 
             # Rate-limit sanity check, potentially a runaway process
-            since = util.now() - timedelta(days=1)
+            since = html_util.now() - timedelta(days=1)
             if Post.objects.filter(author=author, creation_date__gt=since).count() > settings.MAX_POSTS_TRUSTED_USER:
                 raise Exception("too many posts created %s" % author.id)
 
