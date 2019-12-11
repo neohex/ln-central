@@ -44,10 +44,11 @@ INSTALLED_APPS = [
     'background_task',
 
     # project
-    'users',
+    'badges',
+    'common',
     'lner',
     'posts',
-    'common'
+    'users',
 ]
 
 REST_FRAMEWORK = {
