@@ -22,6 +22,9 @@ with open('/etc/biostar/dbropass') as dbpass:
                 'PASSWORD': dbpass.read().strip(),
                 'HOST': dbhost.read().strip(),
                 'PORT': '5432',
+                'OPTIONS': {
+                     'options': '-c default_transaction_read_only=on'
+                }
             }
         }
 
