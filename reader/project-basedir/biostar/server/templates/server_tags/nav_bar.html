@@ -41,11 +41,16 @@
 
 <div class="top row" style="padding-right:15px">
     <div class="visible-sm visible-xs pull-right">
-        <a href="{% url 'user-list' %}" class="navitem">
-            <i class="fa fa-heart fa-1x"></i> Community
+        <a href="{% url 'user-list' %}">
+            <i class="fa fa-heart fa-1x" style="margin-left:5px"></i> Community
         </a>
-
-        <a href="{% url 'new-post' %}" class="navitem" style="margin-left:15px">
+        <a href="{% url 'topic-list' topic='bookmarks' %}" style="margin-left:5px">
+            <i class="fa fa-book fa-1x"></i> Bookmarks
+        </a>
+        <a href="{% url 'badge-list' %}" style="margin-left:5px">
+            <i class="fa fa-trophy fa-1x"></i> Badges
+        </a>
+        <a href="{% url 'new-post' %}" style="margin-left:15px">
             <i class="fa fa-plus-circle"></i> New Post
         </a>
     </div>
@@ -75,7 +80,7 @@
         </div>
 
         <div class="col-sm-1 mid {% current request 'user-list' %}">
-            <a href="{% url 'user-list' %}">
+            <a href="{% url 'user-list' %}" class="navitem">
                 <div><i class="fa fa-heart"></i>
                 </div>
                 <div>Community</div>
@@ -86,6 +91,13 @@
             <a href="{% url 'topic-list' topic='bookmarks' %}" class="navitem">
                 <div><i class="fa fa-book"></i></div>
                 <div>Bookmarks</div>
+            </a>
+        </div>
+
+        <div class="col-sm-1 mid {% active 'badges' topic %}">
+            <a href="{% url 'badge-list' %}" class="navitem">
+                <div><i class="fa fa-trophy"></i></div>
+                <div>Badges</div>
             </a>
         </div>
 
