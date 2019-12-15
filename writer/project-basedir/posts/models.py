@@ -138,13 +138,18 @@ class Post(models.Model):
     STATUS_CHOICES = [(PENDING, "Pending"), (OPEN, "Open"), (CLOSED, "Closed"), (DELETED, "Deleted")]
 
     # Question types. Answers should be listed before comments.
-    QUESTION, META_QUESTION, ANSWER, COMMENT = range(4)
+    (
+        QUESTION, # 0
+        ANSWER, # 1
+        META_QUESTION, # ?
+        COMMENT # ?
+    ) = range(4)
 
     TYPE_CHOICES = [
-        (QUESTION, "Question"),
-        (META_QUESTION, "Meta"),
-        (ANSWER, "Answer"),
-        (COMMENT, "Comment"),
+        (QUESTION, "Question"),  # 0
+        (ANSWER, "Answer"),  # 1
+        (META_QUESTION, "Meta"), # TODO: check
+        (COMMENT, "Comment"),  # TODO: check
     ]
 
     TOP_LEVEL = set((QUESTION, META_QUESTION))
