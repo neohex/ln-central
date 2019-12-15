@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 
     # third-party
     'rest_framework',
-    'rest_framework.authtoken',
+    'rest_framework.authtoken',  # requered by TokenAuthentication
     'background_task',
 
     # project
@@ -52,9 +52,7 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
+    'DEFAULT_PERMISSION_CLASSES': [],
 }
 
 MIDDLEWARE = [

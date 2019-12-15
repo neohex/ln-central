@@ -32,11 +32,15 @@ with open('/etc/biostar/writer-dbpass') as dbpass:
             }
         }
 
-REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = REST_FRAMEWORK.get('DEFAULT_AUTHENTICATION_CLASSES', [])
-REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ["rest_framework.authentication.TokenAuthentication"]
-
-REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = REST_FRAMEWORK.get('DEFAULT_PERMISSION_CLASSES', [])
-REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] += ["rest_framework.permissions.IsAuthenticated"]
+# Token authentication is requied, all API calls are allowed
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        "rest_framework.authentication.TokenAuthentication"
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        "rest_framework.permissions.IsAuthenticated"
+    ],
+}
 
 # ln-central specific config
 MOCK_LN_CLIENT = False

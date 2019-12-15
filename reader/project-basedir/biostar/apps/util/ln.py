@@ -15,6 +15,8 @@ def call_endpoint(path, args={}, as_post=False):
     else:
         headers = {}
 
+    logger.info("Headers size: {}".format(len(headers)))
+
     full_path = 'http://127.0.0.1:8000/{}.json'.format(path)
     try:
         if as_post:
