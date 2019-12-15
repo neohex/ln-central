@@ -8,22 +8,26 @@ if [ $# == 0 ]; then
     echo ''
     echo 'Commands:'
     echo ''
-    echo '  install     - create virtual environments and install dependencies'
-    echo '  uninstall   - [depricated] uninstall all dependencies in the virtual environments'
-    echo '  reader-dev  - invoke manage.py for reader with dev settings'
-    echo '  reader-prod - invoke manage.py for reader with prod settings'
-    echo '  writer-dev  - invoke manage.py for writer with dev settings'
-    echo '  writer-prod - invoke manage.py for writer with prod settings'
+    echo '  install             - create virtual environments and install dependencies'
+    echo '  uninstall           - [depricated] uninstall all dependencies in the virtual environments'
+    echo '  reader-dev          - invoke manage.py for reader with dev settings'
+    echo '  reader-prod         - invoke manage.py for reader with prod settings'
+    echo '  writer-dev          - invoke manage.py for writer with dev settings'
+    echo '  writer-prod         - invoke manage.py for writer with prod settings'
+    echo ''
+    echo '  init-dev            - initializes a local database for testing'
+    echo '  import-dev          - imports the data fixture use fake test data'
+    echo '  drop-fake-test-data - drop the data that was imported for testing'
+    echo ''
+    echo '  dropdb-dev          - drop local databases'
     echo ''
     echo 'Deprecated commands (NOTE: multiple commands may be used on the same line):'
     echo ''
-    echo '  init      - initializes the database'
     echo '  run       - runs the development server'
     echo "  index     - initializes the search index"
     echo '  test      - runs all tests'
     echo '  env       - shows all customizable environment variables'
     echo ' '
-    echo "  import    - imports the data fixture JSON_DATA_FIXTURE=$JSON_DATA_FIXTURE"
     echo "  dump      - dumps data as JSON_DATA_FIXTURE=$JSON_DATA_FIXTURE"
     echo "  delete    - removes the sqlite database DATABASE_NAME=$DATABASE_NAME"
     echo ''
@@ -283,18 +287,34 @@ while (( "$#" )); do
 	continue
     fi
 
-    if [ "$1" = "init" ]; then
+    if [ "$1" = "init-dev" ]; then
         echo "*** Initializing server on $BIOSTAR_HOSTNAME with $DJANGO_SETTINGS_MODULE"
-        echo "*** Running all tests"
-        #$PYTHON manage.py test --noinput -v $VERBOSITY --settings=$DJANGO_SETTINGS_MODULE
-        $PYTHON manage.py syncdb -v $VERBOSITY --noinput --settings=$DJANGO_SETTINGS_MODULE
+        echo "*** Ininitalizing local db"
+        $SCRIPT_DIR/biostar.sh writer-dev makemigrations
+        $SCRIPT_DIR/biostar.sh writer-dev migrate
+	shift
+	continue
+    fi
 
-        $PYTHON manage.py migrate  biostar.apps.users --settings=$DJANGO_SETTINGS_MODULE
-        $PYTHON manage.py migrate  biostar.apps.posts --settings=$DJANGO_SETTINGS_MODULE
-        $PYTHON manage.py migrate  --settings=$DJANGO_SETTINGS_MODULE
-        $PYTHON manage.py initialize_site --settings=$DJANGO_SETTINGS_MODULE
+    if [ "$1" = "import-dev" ]; then
+        echo "*** Importing json data"
+        $SCRIPT_DIR/biostar.sh writer-dev loaddata users-fixture-1 posts-fixture-1 badges-fixture-1
+        cp -f $SCRIPT_DIR/writer/project-basedir/live/db.sqlite3 $SCRIPT_DIR/reader/project-basedir/live/biostar.db
+	shift
+	continue
+    fi
 
-        $PYTHON manage.py collectstatic -v $VERBOSITY --noinput --settings=$DJANGO_SETTINGS_MODULE
+    if [ "$1" = "drop-fake-test-data" ]; then
+        echo "*** Deleting fake test data"
+        $SCRIPT_DIR/biostar.sh writer-dev drop_fake_test_data
+        cp -f $SCRIPT_DIR/writer/project-basedir/live/db.sqlite3 $SCRIPT_DIR/reader/project-basedir/live/biostar.db
+	shift
+	continue
+    fi
+
+    if [ "$1" = "dropdb-dev" ]; then
+        echo "*** Deleting local databases"
+        rm -f $SCRIPT_DIR/writer/project-basedir/live/db.sqlite3 $SCRIPT_DIR/reader/project-basedir/live/biostar.db
 	shift
 	continue
     fi
@@ -310,13 +330,6 @@ while (( "$#" )); do
     # Produce the environment variables recognized by Biostar.
     if [ "$1" = "env" ]; then
         $PYTHON -m biostar.settings.base
-	shift
-	continue
-    fi
-
-    if [ "$1" = "import" ]; then
-        echo "*** Importing json data from $JSON_DATA_FIXTURE"
-        $PYTHON manage.py loaddata $JSON_DATA_FIXTURE --settings=$DJANGO_SETTINGS_MODULE
 	shift
 	continue
     fi
@@ -344,7 +357,6 @@ while (( "$#" )); do
 
     if [ "$1" = "import_biostar1" ]; then
         echo "*** Migrating from Biostar 1"
-        echo "*** BIOSTAR_MIGRATE_DIR=$BIOSTAR_MIGRATE_DIR"
         $PYTHON manage.py import_biostar1 -u -p -x
 	shift
 	continue

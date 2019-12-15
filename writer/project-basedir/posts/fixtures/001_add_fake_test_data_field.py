@@ -1,8 +1,17 @@
 #!/usr/bin/env python
 
+import gzip
 import json
 
-j = json.load(file("default-fixture.json"))
+FIXTURE_FILE = "posts-fixture-1.json.gz"
+
+# To inspect, run:
+#   gunzip -c posts-fixture-1.json.gz | less -S
+
+with gzip.GzipFile(FIXTURE_FILE, 'r') as f: 
+    lines = f.readlines()
+
+j = json.loads("\n".join(lines))
 
 #  Example json: [
 #      {
@@ -29,12 +38,12 @@ j = json.load(file("default-fixture.json"))
 
 count = 0
 for item in j:
-    if item["model"] == "users.user":
-	pubkey = item["fields"]["pubkey"]
-	print(pubkey)
-	item["fields"]["pubkey"] = pubkey
+	item["fields"]["is_fake_test_data"] = True
 	count += 1
-
 print("Num rows updated: {}".format(count))
-json.dump(j, file("default-fixture.json", 'w'))
+
+with gzip.GzipFile(FIXTURE_FILE, 'w') as f: 
+    f.write(
+        json.dumps(j, indent=2)
+    )
 print("Overwrote file")

@@ -93,6 +93,9 @@ class User(models.Model):
     # The last visit by the user.
     last_login = models.DateTimeField()
 
+    # Rows used for testing
+    is_fake_test_data = models.BooleanField(default=False)
+
     @property
     def is_moderator(self):
         return self.type == User.MODERATOR or self.type == User.ADMIN
@@ -150,6 +153,7 @@ class User(models.Model):
 
 class Tag(models.Model):
     name = models.TextField(max_length=50, db_index=True)
+    is_fake_test_data = models.BooleanField(default=False)
 
 
 class Profile(models.Model):
@@ -201,6 +205,8 @@ class Profile(models.Model):
 
     # Opt-in to all messages from the site
     opt_in = models.BooleanField(default=False)
+
+    is_fake_test_data = models.BooleanField(default=False)
 
     def parse_tags(self):
         return html_util.split_tags(self.tag_val)

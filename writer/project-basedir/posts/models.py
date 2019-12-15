@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 class Tag(models.Model):
     name = models.TextField(max_length=50, db_index=True)
     count = models.IntegerField(default=0)
+    is_fake_test_data = models.BooleanField(default=False)
 
     @staticmethod
     def fixcase(name):
@@ -230,6 +231,10 @@ class Post(models.Model):
     # What site does the post belong to.
     site = models.ForeignKey(Site, null=True, on_delete=models.CASCADE)
 
+    # Rows used for testing
+    is_fake_test_data = models.BooleanField(default=False)
+    
+
     def parse_tags(self):
         return html_util.split_tags(self.tag_val)
 
@@ -396,6 +401,8 @@ class PostPreview(models.Model):
 
     memo = models.CharField(max_length=100, null=True, blank=False)
 
+    is_fake_test_data = models.BooleanField(default=False)
+
     @property
     def is_toplevel(self):
         return self.type in Post.TOP_LEVEL
@@ -438,6 +445,7 @@ class ReplyToken(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     token = models.CharField(max_length=256)
     date = models.DateTimeField(auto_created=True)
+    is_fake_test_data = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -456,6 +464,7 @@ class EmailSub(models.Model):
     ]
     email = models.EmailField()
     status = models.IntegerField(choices=TYPE_CHOICES)
+    is_fake_test_data = models.BooleanField(default=False)
 
 
 class EmailEntry(models.Model):
@@ -479,6 +488,8 @@ class EmailEntry(models.Model):
     # The date the email was sent
     status = models.IntegerField(choices=((DRAFT, "Draft"), (PUBLISHED, "Published")))
 
+    is_fake_test_data = models.BooleanField(default=False)
+
 
 class Vote(models.Model):
     # Post statuses.
@@ -491,6 +502,7 @@ class Vote(models.Model):
     post = models.ForeignKey(Post, related_name='votes', on_delete=models.CASCADE)
     type = models.IntegerField(choices=TYPE_CHOICES, db_index=True)
     date = models.DateTimeField(db_index=True, auto_now=True)
+    is_fake_test_data = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u"Vote: %s, %s, %s" % (self.post_id, self.author_id, self.get_type_display())
@@ -514,6 +526,7 @@ class Subscription(models.Model):
     post = models.ForeignKey(Post, verbose_name=_("Post"), related_name="subs", db_index=True, on_delete=models.CASCADE)
     type = models.IntegerField(choices=const.MESSAGING_TYPE_CHOICES, default=const.LOCAL_MESSAGE, db_index=True)
     date = models.DateTimeField(_("Date"), db_index=True)
+    is_fake_test_data = models.BooleanField(default=False)
 
     objects = SubscriptionManager()
 

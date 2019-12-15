@@ -35,6 +35,9 @@ class Badge(models.Model):
     # The icon to display for the badge.
     icon = models.CharField(default='fa fa-asterisk', max_length=250)
 
+    # Rows used for testing
+    is_fake_test_data = models.BooleanField(default=False)
+
     def get_absolute_url(self):
         url = reverse("badge-details", kwargs=dict(pk=self.id))
         return url
