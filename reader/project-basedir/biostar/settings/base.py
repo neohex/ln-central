@@ -140,15 +140,11 @@ DATABASES = {
     }
 }
 
-if os.path.exists(DATABASE_NAME):
+if os.path.isfile(DATABASE_NAME):
     current_permissions = stat.S_IMODE(os.lstat(DATABASE_NAME).st_mode)
     os.chmod(DATABASE_NAME, current_permissions & ~stat.S_IWUSR & ~stat.S_IWGRP & ~stat.S_IWOTH)
     print("Database file {} exist, changed permission to read-only".format(
         DATABASE_NAME))
-else:
-    print("Database file {} does not exist, not changing permission to read-only".format(
-        DATABASE_NAME))
-
 
 # admin site may fail if this setting is active
 TEMPLATE_STRING_IF_INVALID = "*** MISSING ***"
