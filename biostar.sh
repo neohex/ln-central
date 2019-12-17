@@ -6,6 +6,11 @@ if [ $# == 0 ]; then
     echo ''
     echo "  $ $(basename $0) <command>"
     echo ''
+    echo 'NOTE: prod and dev settings partial list of differences:'
+    echo '  * dev web-server will respond with full debug stacks when exceptions are raised'
+    echo '  * dev database is a local file'
+    echo '  * prod database is a remote service'
+    echo ''
     echo 'Commands:'
     echo ''
     echo '  install             - create virtual environments and install dependencies'
@@ -16,8 +21,11 @@ if [ $# == 0 ]; then
     echo '  writer-prod         - invoke manage.py for writer with prod settings'
     echo ''
     echo '  init-dev            - initializes a local database for testing'
+    echo '  init-prod           - initializes a local database for testing'
     echo '  import-dev          - imports the data fixture use fake test data'
-    echo '  drop-fake-test-data - drop the data that was imported for testing'
+    echo '  import-prod         - imports the data fixture use fake test data'
+    echo '  drop-test-data-dev  - drop the data that was imported for testing'
+    echo '  drop-test-data-prod - drop the data that was imported for testing'
     echo ''
     echo '  dropdb-dev          - drop local databases'
     echo ''
@@ -288,7 +296,6 @@ while (( "$#" )); do
     fi
 
     if [ "$1" = "init-dev" ]; then
-        echo "*** Initializing server on $BIOSTAR_HOSTNAME with $DJANGO_SETTINGS_MODULE"
         echo "*** Ininitalizing local db"
         $SCRIPT_DIR/biostar.sh writer-dev makemigrations
         $SCRIPT_DIR/biostar.sh writer-dev migrate
@@ -296,18 +303,44 @@ while (( "$#" )); do
 	continue
     fi
 
+    if [ "$1" = "init-prod" ]; then
+        echo "*** Ininitalizing prod db"
+        $SCRIPT_DIR/biostar.sh writer-prod makemigrations
+        $SCRIPT_DIR/biostar.sh writer-prod migrate
+        echo "*** Copying static files to live/export"
+        rsync -ai $SCRIPT_DIR/reader/project-basedir/biostar/static/ \
+                  $SCRIPT_DIR/reader/project-basedir/live/export/static/
+	shift
+	continue
+    fi
+
     if [ "$1" = "import-dev" ]; then
         echo "*** Importing json data"
         $SCRIPT_DIR/biostar.sh writer-dev loaddata users-fixture-1 posts-fixture-1 badges-fixture-1
+        cp -f $SCRIPT_DIR/writer/project-basedir/live/db.sqlite3 \
+              $SCRIPT_DIR/reader/project-basedir/live/biostar.db
+	shift
+	continue
+    fi
+
+    if [ "$1" = "import-prod" ]; then
+        echo "*** Importing json data"
+        $SCRIPT_DIR/biostar.sh writer-prod loaddata users-fixture-1 posts-fixture-1 badges-fixture-1
+	shift
+	continue
+    fi
+
+    if [ "$1" = "drop-test-data-dev" ]; then
+        echo "*** Deleting fake test data"
+        $SCRIPT_DIR/biostar.sh writer-dev drop_fake_test_data
         cp -f $SCRIPT_DIR/writer/project-basedir/live/db.sqlite3 $SCRIPT_DIR/reader/project-basedir/live/biostar.db
 	shift
 	continue
     fi
 
-    if [ "$1" = "drop-fake-test-data" ]; then
+    if [ "$1" = "drop-test-data-prod" ]; then
         echo "*** Deleting fake test data"
-        $SCRIPT_DIR/biostar.sh writer-dev drop_fake_test_data
-        cp -f $SCRIPT_DIR/writer/project-basedir/live/db.sqlite3 $SCRIPT_DIR/reader/project-basedir/live/biostar.db
+        $SCRIPT_DIR/biostar.sh writer-prod drop_fake_test_data
 	shift
 	continue
     fi
