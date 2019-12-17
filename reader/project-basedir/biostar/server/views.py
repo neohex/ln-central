@@ -27,7 +27,6 @@ from django import shortcuts
 from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator
 import logging
-from django.contrib.flatpages.models import FlatPage
 from haystack.query import SearchQuerySet
 from . import moderate
 from django.http import Http404
@@ -421,10 +420,6 @@ class PostPublishView(TemplateView):
         return context
 
 
-class RSS(TemplateView):
-    template_name = "rss_info.html"
-
-
 class RateLimitedNewPost(NewPost):
     "Applies limits to the number of top level posts that can be made"
 
@@ -452,98 +447,6 @@ class RateLimitedNewAnswer(NewAnswer):
             return HttpResponseRedirect("/")
         return super(RateLimitedNewAnswer, self).post(request, *args, **kwargs)
 
-
-class FlatPageView(DetailView):
-    template_name = "flatpages/default.html"
-    context_object_name = 'flatpage'
-
-    def get_object(self):
-        #site_id = get_current_site(self.request).id
-        slug = self.kwargs['slug']
-        # This is so that we can switch this off and
-        # Fall back to the real flatpages app.
-        url = "/info/%s/" % slug
-        try:
-            query = FlatPage.objects.get(url=url)
-        except FlatPage.DoesNotExist, exc:
-            raise Http404
-        return query
-
-    def get_context_data(self, **kwargs):
-        context = super(FlatPageView, self).get_context_data(**kwargs)
-
-        admins = User.objects.filter(type=User.ADMIN)
-
-        mods = User.objects.filter(type=User.MODERATOR)
-
-        fields = stat_key, u_count, p_count, q_count, a_count, c_count = "user_stats user_count post_count\
-            question_count answer_count comment_count".split()
-
-        params = cache.get(stat_key)
-
-        if not params:
-            params = dict()
-            params[u_count] = User.objects.all().select_related('profile').count()
-            params[p_count] = Post.objects.all().count()
-            params[q_count] = Post.objects.filter(type=Post.QUESTION).count()
-            params[a_count] = Post.objects.filter(type=Post.ANSWER).count()
-            params[c_count] = Post.objects.filter(type=Post.COMMENT).count()
-            cache.set(stat_key, params, 600)
-
-        # Add each value to the context
-        for field in fields:
-            context[field] = params.get(field, 0)
-
-        context['admins'] = admins
-        context['mods'] = mods
-
-        return context
-
-
-class FlatPageUpdate(UpdateView):
-    model = FlatPage
-    fields = ['content']
-    template_name = "flatpages/flatpage_edit.html"
-
-    def get_success_url(self):
-
-        # The purpose here is to allow site admins to
-        # edit they flatpages and have them being saved
-        # on the filesystem. That way they can reimport
-        # the modified pages if they need to.
-
-        pk = self.kwargs['pk']
-        page = FlatPage.objects.get(pk=pk)
-
-        # The page will be saved under this name.
-        fname = "%s.html" % page.title.lower()
-
-        # The output directory for the flatpage.
-        fdir = abspath(settings.LIVE_DIR, "flatpages")
-
-        # Temporary activated only in development.
-        #fdir = settings.FLATPAGE_IMPORT_DIR
-
-        # Make the directory under the live path.
-        if not os.path.isdir(fdir):
-            os.mkdir(fdir)
-
-        # This here is user inputted!
-        fpath = abspath(fdir, fname)
-
-        # Ensure file goes under the export directory
-        if fpath.startswith(fdir):
-            with file(fpath, 'wt') as fp:
-                fp.write(page.content)
-
-        return super(FlatPageUpdate, self).get_success_url()
-
-    def post(self, *args, **kwargs):
-        req = self.request
-
-        logger.info("edited %s", kwargs)
-
-        return super(FlatPageUpdate, self).post(*args, **kwargs)
 
 
 class BadgeView(BaseDetailMixin):

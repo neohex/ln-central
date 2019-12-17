@@ -9,8 +9,8 @@ from django.conf import settings
 from biostar.server.views import BaseListMixin
 from ajax import ajax_error, ajax_success, ajax_error_wrapper, json_response
 from django.conf.urls import patterns
-from django.contrib.sitemaps import FlatPageSitemap, GenericSitemap
 from biostar.apps.posts.models import Post, Tag
+from django.contrib.sitemaps import GenericSitemap
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,6 @@ info_dict = {
 }
 
 sitemaps = {
-    'flatpages': FlatPageSitemap,
     'posts': GenericSitemap(info_dict, priority=0.6),
 }
 

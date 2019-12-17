@@ -4,7 +4,6 @@ import io
 
 from django import forms
 from django.views.generic import  UpdateView, DetailView, TemplateView
-from django.contrib.flatpages.models import FlatPage
 from django.http import HttpResponseRedirect
 from django.conf import settings
 

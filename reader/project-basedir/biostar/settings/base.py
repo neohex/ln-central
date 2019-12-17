@@ -88,7 +88,15 @@ LIVE_DIR = abspath(HOME_DIR, 'live')
 
 DATABASE_NAME = get_env("DATABASE_NAME")
 STATIC_DIR = abspath(HOME_DIR, 'biostar', 'static')
-TEMPLATE_DIR = abspath(HOME_DIR, 'biostar', 'server', 'templates')
+
+TEMPLATE_DIRS = (
+    abspath(HOME_DIR, 'biostar', 'server', 'templates'),
+    abspath(HOME_DIR, 'biostar', 'apps', 'info', 'templates'),
+
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+)
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -100,9 +108,6 @@ STATIC_ROOT = abspath(EXPORT_DIR, "static")
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 MEDIA_ROOT = abspath(EXPORT_DIR, "media")
 
-# Needs to point to the directory that contains the
-# html files that are stored in the flatpages about, faq, help, policy etc.
-FLATPAGE_IMPORT_DIR = abspath(HOME_DIR, "import", "pages")
 
 # Default search index location.
 WHOOSH_INDEX = abspath(LIVE_DIR, "whoosh_index")
@@ -245,7 +250,6 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'biostar.server.middleware.Visit',
 )
 
@@ -254,12 +258,6 @@ ROOT_URLCONF = 'biostar.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'biostar.wsgi.application'
 
-TEMPLATE_DIRS = (
-    TEMPLATE_DIR,
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
 
 # The user score that halves the chance.
 HALF_LIFE = 30.0
@@ -297,7 +295,6 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.humanize',
-    'django.contrib.flatpages',
 
     # Biostar specific apps.
     'biostar.apps.users',

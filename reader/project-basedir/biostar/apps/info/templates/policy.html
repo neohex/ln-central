@@ -1,0 +1,32 @@
+{% extends "starbase.html" %}
+{% load server_tags %}
+{% load humanize %}
+
+{% block page_title %}
+    Policy
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-9">
+            <h2>Policy</h2>
+
+            <h3>User agreement</h3>
+            <p>Be well, do good work and keep in touch.</p>
+
+            <h3>Privacy policy</h3>
+            <p>Everything you enter on this site is publicly available.</p>
+
+            <h3>Cookies</h3>
+            <p>This website does not use browser cookies or similar technologies.</p>
+
+            <h3>Contact</h3>
+
+            Contact email: <img src="/static/img/contact-email.png" style="width: auto; height: 2em;" />
+        </div>
+        <div class="col-xs-3">
+            <div class="user-sidebar">
+            </div>
+        </div>
+    </div>
+{% endblock %}

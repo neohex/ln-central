@@ -10,6 +10,7 @@ from biostar.server import views, ajax, search, moderate, api
 from biostar.apps.posts.views import NewAnswer, NewPost, EditPost
 from biostar.apps.users.views import DigestManager, unsubscribe
 from biostar.apps.util.views import QRCode
+import biostar.apps.info.views as info
 
 urlpatterns = patterns('',
 
@@ -122,9 +123,6 @@ from biostar.server.feeds import LatestFeed, TagFeed, UserFeed, PostFeed, PostTy
 # Adding the RSS related urls.
 urlpatterns += patterns('',
 
-    # RSS info page.
-    url(r'^info/rss/$', views.RSS.as_view(), name='rss'),
-
     # RSS feeds
     url(r'^feeds/latest/$', LatestFeed(), name='latest-feed'),
 
@@ -135,8 +133,12 @@ urlpatterns += patterns('',
 )
 
 urlpatterns += patterns('',
-    url(r'^info/(?P<slug>\w+)/$', views.FlatPageView.as_view(), name='flatpage'),
-    url(r'^info/update/(?P<pk>\d+)/$', views.FlatPageUpdate.as_view(), name='flatpage-update'),
+    url(r'^info/faq/$', info.FaqView.as_view(), name='info-faq'),
+    url(r'^info/policy/$', info.PolicyView.as_view(), name='info-policy'),
+    url(r'^info/about/$', info.AboutView.as_view(), name='info-about'),
+    url(r'^info/rss/$', info.RSSView.as_view(), name='info-rss'),
+   
+    # url(r'^info/help/$', views.InfoHelpView.as_view(), name='info-help'), 
 )
 
 # This is used only for the debug toolbar

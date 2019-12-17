@@ -1,0 +1,71 @@
+{% extends "starbase.html" %}
+{% load server_tags %}
+{% load humanize %}
+
+{% block page_title %}
+    FAQ
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-9">
+
+            <h2>Frequently Asked Questions</h2>
+
+
+            <h3>Contact</h3>
+            <p>Contact email: <img src="/static/img/contact-email.png" style="width: auto; height: 2em;" /></p>
+
+            <h3>User reputation</h3>
+            <p>The number next to a customer&#39;s pen name is the sum of upvotes and accepted answers that user has collected. The score is multiplied by 10 and capped at 300.</p>
+
+            <h3>Source code</h3>
+            <p><b>ln-central</b> has been released with the <b>MIT license</b>.</p>
+            <p><a href="https://github.com/alevchuk/ln-central">ln-central</a> is a software fork of <a href="https://github.com/ialbert/biostar-central">Biostar-central</a>.</p>
+            <p>Biostar-central has been developed as an open source software and has been released with the <b>MIT license</b> thanks to the support from the following institutions:
+                <ul>
+                    <li>The Pennsylvania State University</li>
+                    <li>National Institutes of Health (NIH), specifically grant NIH 5R25HG006243-02, Analyzing Next Generation Sequencing Data  principal investigator:  Titus Brown (Michigan State University)</li>
+                </ul>
+            </p>
+
+            <p>ln-central source code can be found at <a href="https://github.com/alevchuk/ln-central">ln-central repository</a>.</p>
+            <p>Copyright of the software is by the <a href="https://github.com/alevchuk/ln-central/contributors">contributors to the repository</a>.</p>
+
+
+            <h3>Citing Biostar</h3>
+
+            <p>Parnell LD, Lindenbaum P, Shameer K, Dall&#39;Olio GM, Swan DC, et al. 2011&nbsp;<strong>BioStar: An Online Question
+                &amp; Answer Resource for the Bioinformatics Community.</strong>&nbsp;<em>PLoS Comput Biol 7(10)</em>:&nbsp;<a
+            href="http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1002216">e1002216.
+                doi:10.1371/journal.pcbi.1002216</a></p>
+
+
+            <h3>Licensing</h3>
+            <p>
+                <div class="pull-right" style="margin-left:10px"><a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+                    <img alt="Creative Commons License"
+                         style="border-width:0"
+                         src="/static/img/creativecommons-88x31-v2.png"/></a>
+                </div>
+                All content on this website is licensed via the
+                <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons
+                    Attribution 4.0 International
+                    License</a>. This means that you should attribute the work
+                either to the author and/or to the site, depending on the scope and presentation of the information.
+                In addition our community supports the <a href="http://en.wikipedia.org/wiki/Fair_use">fair use policy</a>
+                when it comes to content created by users of this site.
+            </p>
+
+
+            <h3>Found a bug?</h3>
+            Report bugs or feature requests in the <a href="https://github.com/alevchuk/ln-central/issues">issue tracker</a>.
+
+
+        </div>
+        <div class="col-xs-3">
+            <div class="user-sidebar">
+            </div>
+        </div>
+    </div>
+{% endblock %}
