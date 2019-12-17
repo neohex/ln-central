@@ -4,7 +4,7 @@ import hmac, logging, re
 from datetime import timedelta
 from django.contrib.auth import authenticate, login, logout
 from biostar.apps.users.models import User, Profile
-from biostar import const
+from common import const
 from django.core.cache import cache
 from biostar.apps.posts.models import Post, Vote
 from biostar.apps.messages.models import Message

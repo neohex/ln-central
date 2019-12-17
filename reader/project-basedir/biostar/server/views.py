@@ -16,12 +16,12 @@ from biostar.apps.posts.auth import post_permissions
 from common import general_util
 from common import html_util
 from common import json_util
+from common.const import OrderedDict
+from common import const
 
 from biostar.apps.util import ln
 
 from datetime import datetime, timedelta
-from biostar.const import OrderedDict
-from biostar import const
 from braces.views import LoginRequiredMixin, JSONResponseMixin
 from django import shortcuts
 from django.http import HttpResponseRedirect

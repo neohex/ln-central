@@ -1,11 +1,13 @@
 __author__ = 'ialbert'
 from django.conf import settings
-from biostar import const, VERSION
 from django.core.cache import cache
 from biostar.apps.users.models import User
 from biostar.apps.posts.models import Post, Vote
 from biostar.apps.badges.models import Award
 from biostar.apps import util
+
+from common import const
+from biostar import VERSION
 
 from datetime import timedelta
 from math import pow, e, log

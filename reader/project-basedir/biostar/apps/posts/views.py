@@ -12,7 +12,6 @@ from datetime import datetime
 from django.utils.timezone import utc
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
-from biostar.const import OrderedDict
 from django.core.exceptions import ValidationError
 import re
 import logging
@@ -20,6 +19,7 @@ import logging
 import langdetect
 from django.template.loader import render_to_string
 
+from common.const import OrderedDict
 from common import general_util
 from common import json_util
 

@@ -50,7 +50,7 @@ class MessageBody(models.Model):
 
 
 # This contains the notification types.
-from biostar.const import LOCAL_MESSAGE, MESSAGING_TYPE_CHOICES
+from common.const import LOCAL_MESSAGE, MESSAGING_TYPE_CHOICES
 
 # Connects user to message bodies
 class Message(models.Model):

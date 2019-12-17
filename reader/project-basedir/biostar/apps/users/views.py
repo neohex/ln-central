@@ -10,7 +10,7 @@ from crispy_forms.layout import Layout, Field, Fieldset, Submit, ButtonHolder, D
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.core.validators import validate_email
-from biostar import const
+from common import const
 from django.contrib.auth import authenticate, login, logout
 from django.conf import settings
 from biostar.apps import util

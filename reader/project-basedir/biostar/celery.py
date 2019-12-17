@@ -3,7 +3,7 @@ from django.conf import settings
 from celery.utils.log import get_task_logger
 import os
 
-from biostar import const
+from common import const
 from datetime import timedelta
 
 logger = get_task_logger(__name__)

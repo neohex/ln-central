@@ -9,7 +9,6 @@ from biostar.apps.users.auth import user_permissions
 from django.conf import settings
 from django.views.generic import FormView
 from django.shortcuts import render
-from biostar import const
 from braces.views import LoginRequiredMixin
 from django import forms
 from django.core.urlresolvers import reverse
@@ -21,6 +20,8 @@ from datetime import timedelta
 import logging
 from datetime import datetime
 from django.utils.timezone import utc
+
+from common import const
 
 logger = logging.getLogger(__name__)
 
