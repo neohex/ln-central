@@ -50,6 +50,5 @@ redis
 pyelasticsearch
 psycopg2==2.7.6.1
 gunicorn
-whitenoise
 waitress
 django-db-readonly
