@@ -31,9 +31,9 @@ def addinvoice(memo, rpcserver, mock=False):
                 "add_index": 11
              }
 
-    cmd = [LNCLI_BIN] + _auth_args(rpcserver) + ["addinvoice", "--memo", memo, "--amt", "3"]
+    cmd = [LNCLI_BIN] + _auth_args(rpcserver) + ["addinvoice", "--memo", memo, "--amt", "1"]
     output = cli.run(cmd)
-    print("ADDINVOICE OUTPUT: {}".format(output))
+    print("Command finished, addinvoice json stdout: {}".format(output))
     return output
 
 
