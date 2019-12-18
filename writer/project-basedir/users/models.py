@@ -138,10 +138,7 @@ class User(models.Model):
     @property
     def scaled_score(self):
         "People like to see big scores."
-        if self.score > 30:
-            return 300
-        else:
-            return self.score * 10
+        return self.score * 10
 
     def __unicode__(self):
         return "%s (id=%s, last_login: %s)" % (self.pubkey, self.id, self.last_login)
