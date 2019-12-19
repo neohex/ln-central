@@ -257,7 +257,9 @@ def post_preview_body(context, post_preview):
         post=post_preview,
         edit_url=post_preview.get_edit_url(memo),
         publish_url=post_preview.get_publish_url(memo),
-        request=context['request'])
+        request=context['request'],
+        payment_amount=settings.PAYMENT_AMOUNT
+    )
 
 @register.inclusion_tag('server_tags/search_bar.html', takes_context=True)
 def search_bar(context):

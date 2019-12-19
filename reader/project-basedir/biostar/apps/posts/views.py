@@ -175,7 +175,8 @@ class NewPost(FormView):
         form = self.form_class(initial=initial)
         context = {
             'form': form,
-            'nodes_list': ln.get_nodes_list()   # Get LN Nodes list
+            'nodes_list': ln.get_nodes_list(),   # Get LN Nodes list
+            'payment_amount': settings.PAYMENT_AMOUNT
         }
 
         return render(request, self.template_name, context)
@@ -189,36 +190,14 @@ class NewPost(FormView):
         # Validating the form.
         form = self.form_class(request.POST)
         if not form.is_valid():
-            return render(request, self.template_name, {'form': form})
+            return render(
+                request,
+                self.template_name,
+                {'form': form}
+            )
 
         # Valid forms start here.
         data = form.cleaned_data.get
-
-        # title = data('title')
-        # content = data('content')
-        # post_type = int(data('post_type'))
-        # tag_val = data('tag_val')
-
-        # context = {
-        #     'post': form,
-        #     'nodes_list': ["A"]
-        # }
-
-        #return render(request, "post_preview.html", context)
-
-        # # TEMPORARY HACK: create new user
-        # user = User()
-        # user.pubkey = "%s@xyz2.xyz" % general_util.make_uuid()
-        # user.score = 0
-        # user.last_login = now()
-        # user.date_joined = user.last_login
-        # print("%r" % user)
-        # user.save()
-        # post.save()
-
-        # # # Triggers a new post save.
-        # post.add_tags(post.tag_val)
-
 
         post_preview = PostPreview(
               title=data('title'),

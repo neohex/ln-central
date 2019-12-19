@@ -3,8 +3,12 @@
 # Django settings for biostar project.
 #
 from __future__ import absolute_import
+
 import os
 import stat
+
+from .base_common import *
+
 from django.core.exceptions import ImproperlyConfigured
 from .logger import LOGGING
 import uuid
