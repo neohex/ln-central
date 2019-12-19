@@ -38,7 +38,12 @@ class CreateLightningInvoiceViewSet(viewsets.ModelViewSet):
 
     def create(self, request, format):
         node = LightningNode.objects.get(id=request.POST["node_id"])
-        invoice = lnclient.addinvoice(request.POST["memo"], node.rpcserver, mock=settings.MOCK_LN_CLIENT)
+        invoice = lnclient.addinvoice(
+            request.POST["memo"],
+            node.rpcserver,
+            amt=settings.PAYMENT_AMOUNT,
+            mock=settings.MOCK_LN_CLIENT
+        )
 
         serializer = LightningInvoiceSerializer(invoice, many=False)  # re-serialize
 

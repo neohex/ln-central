@@ -23,7 +23,7 @@ def _auth_args(rpcserver):
     return [arg.format(rpcserver=rpcserver) for arg in AUTH_ARGS]
 
 
-def addinvoice(memo, rpcserver, mock=False):
+def addinvoice(memo, rpcserver, amt, mock=False):
     if mock:
         return {
                 "r_hash": "48452417b7d351bdf1ce493521ffbc07157c68fd9340ba2aeead0c29899fa4b4",
@@ -31,7 +31,7 @@ def addinvoice(memo, rpcserver, mock=False):
                 "add_index": 11
              }
 
-    cmd = [LNCLI_BIN] + _auth_args(rpcserver) + ["addinvoice", "--memo", memo, "--amt", str(settings.PAYMENT_AMOUNT)]
+    cmd = [LNCLI_BIN] + _auth_args(rpcserver) + ["addinvoice", "--memo", memo, "--amt", str(amt)]
     output = cli.run(cmd)
     print("Command finished, addinvoice json stdout: {}".format(output))
     return output
