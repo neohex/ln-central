@@ -42,6 +42,7 @@ def valid_language(text):
             raise ValidationError(
                     'Language "{0}" is not one of the supported languages {1}!'.format(lang, supported_languages))
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -106,9 +107,11 @@ class LongForm(forms.Form):
         help_text="Choose one or more tags to match the topic. To create a new tag just type it in and press ENTER.",
     )
 
-
+    # note: max_length is larger than MAX_MEMO_SIZE because max_length applies before compression
+    # max_length is here to guide the user during editing, while MAX_MEMO_SIZE is the final
+    # insurance that the memo will fit into the lightning payment
     content = forms.CharField(widget=PagedownWidget, validators=[valid_language],
-                              min_length=80, max_length=15000,
+                              min_length=80, max_length=1100,
                               label="Enter your post below")
 
     def __init__(self, *args, **kwargs):
@@ -127,6 +130,35 @@ class LongForm(forms.Form):
                 Submit('submit', 'Preview')
             )
         )
+
+    def clean(self):
+        cleaned_data = super(LongForm, self).clean()
+
+        post_preview = PostPreview(
+              title=cleaned_data.get('title'),
+              content=cleaned_data.get('content'),
+              tag_val=cleaned_data.get('tag_val'),
+              type=int(cleaned_data.get('post_type')),
+              date=general_util.now()
+        )
+
+        try:
+            serialized = post_preview.serialize_memo()
+
+        except json_util.MemoTooLarge as err:
+            raise ValidationError(
+                (
+                    '%(msg)s. '
+                    'Sorry, we are not going to be able to fit this into a lightning payment memo.'
+                ),
+                code='too_big_serialized',
+                params={
+                    'max_size': settings.MAX_MEMO_SIZE,
+                    'msg': "{0}".format(err)
+                    },
+            )
+
+        return cleaned_data
 
 
 class ShortForm(forms.Form):
