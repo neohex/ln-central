@@ -21,7 +21,8 @@ if [ $# == 0 ]; then
     echo '  writer-prod         - invoke manage.py for writer with prod settings'
     echo ''
     echo '  init-dev            - initializes a local database for testing'
-    echo '  init-prod           - initializes a local database for testing'
+    echo '  init-reader-prod    - initializes static files'
+    echo '  init-writer-prod    - initializes database'
     echo '  import-dev          - imports the data fixture use fake test data'
     echo '  import-prod         - imports the data fixture use fake test data'
     echo '  drop-test-data-dev  - drop the data that was imported for testing'
@@ -303,13 +304,17 @@ while (( "$#" )); do
 	continue
     fi
 
-    if [ "$1" = "init-prod" ]; then
-        echo "*** Ininitalizing prod db"
-        $SCRIPT_DIR/biostar.sh writer-prod makemigrations
-        $SCRIPT_DIR/biostar.sh writer-prod migrate
+    if [ "$1" = "init-reader-prod" ]; then
         echo "*** Copying static files to live/export"
         rsync -ai $SCRIPT_DIR/reader/project-basedir/biostar/static/ \
                   $SCRIPT_DIR/reader/project-basedir/live/export/static/
+	shift
+	continue
+    fi
+    if [ "$1" = "init-writer-prod" ]; then
+        echo "*** Ininitalizing prod db"
+        $SCRIPT_DIR/biostar.sh writer-prod makemigrations
+        $SCRIPT_DIR/biostar.sh writer-prod migrate
 	shift
 	continue
     fi
