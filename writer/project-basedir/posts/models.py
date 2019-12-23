@@ -453,20 +453,6 @@ class ReplyToken(models.Model):
         super(ReplyToken, self).save(*args, **kwargs)
 
 
-class EmailSub(models.Model):
-    """
-    Represents an email subscription to the digest digest.
-    """
-    SUBSCRIBED, UNSUBSCRIBED = 0, 1
-    TYPE_CHOICES = [
-        (SUBSCRIBED, "Subscribed"), (UNSUBSCRIBED, "Unsubscribed"),
-
-    ]
-    email = models.EmailField()
-    status = models.IntegerField(choices=TYPE_CHOICES)
-    is_fake_test_data = models.BooleanField(default=False)
-
-
 class EmailEntry(models.Model):
     """
     Represents an digest digest email entry.

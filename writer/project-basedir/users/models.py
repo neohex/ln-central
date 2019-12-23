@@ -3,7 +3,6 @@ import logging
 from django import forms
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.timezone import utc
 
 from common import const
@@ -165,9 +164,6 @@ class Profile(models.Model):
                       (WEEKLY_DIGEST, 'Weekly'), (MONTHLY_DIGEST, 'Monthly')]
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    # Globally unique id used to identify the user in a private feeds
-    uuid = models.CharField(null=False, db_index=True, unique=True, max_length=255)
-
     # The last visit by the user.
     last_login = models.DateTimeField()
 
@@ -230,7 +226,6 @@ class Profile(models.Model):
 
         if not self.id:
             # This runs only once upon object creation.
-            self.uuid = general_util.make_uuid()
             self.date_joined = self.date_joined or general_util.now()
             self.last_login = self.date_joined
 

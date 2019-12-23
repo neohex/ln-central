@@ -8,7 +8,7 @@ admin.autodiscover()
 from django.views.generic import TemplateView
 from biostar.server import views, ajax, search, moderate, api
 from biostar.apps.posts.views import NewAnswer, NewPost, EditPost
-from biostar.apps.users.views import DigestManager, unsubscribe
+from biostar.apps.users.views import DigestManager
 from biostar.apps.util.views import QRCode
 import biostar.apps.info.views as info
 

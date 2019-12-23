@@ -167,17 +167,6 @@ class DigestForm(forms.Form):
             ),
         )
 
-def unsubscribe(request, uuid):
-
-    user = User.objects.filter(profile__uuid=uuid)
-    if not user:
-        logger.error('Invalid user identifier. (Request: %s)', request)
-    else:
-        user[0].profile.digest_prefs = Profile.NO_DIGEST
-        logger.info('User unsubscribed. (Request: %s)', request)
-
-    response = redirect(reverse("home"))
-    return response
 
 class DigestManager(FormView):
     "Handle user digest subscriptions"
