@@ -54,8 +54,27 @@ def deserialize_memo(memo):
 
     memo = memo.split("_", 1)[1]
 
-    json_str = zlib.decompress(binascii.a2b_base64(memo+1))
-    return json.loads(json_str.decode('utf-8'))
+    try:
+        memo64 = binascii.a2b_base64(memo)
+    except Exception as e:
+        raise JsonUtilException("Cannot convert memo to base64: {}".format(e))
+
+    try:
+        json_str = zlib.decompress(memo64)
+    except Exception as e:
+        raise JsonUtilException("Cannot decomress memo: {}".format(e))
+
+    try:
+        json_str = json_str.decode('utf-8')
+    except Exception as e:
+        raise JsonUtilException("Cannot decode memo to utf-8: {}".format(e))
+
+    try:
+        obj = json.loads(json_str)
+    except Exception as e:
+        raise JsonUtilException("Cannot parse JSON from memo: {}".format(e))
+
+    return obj
 
 
 def encode(data, key):
