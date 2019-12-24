@@ -52,7 +52,7 @@ def deserialize_memo(memo):
     memo = memo.split("_", 1)[1]
 
     json_str = zlib.decompress(binascii.a2b_base64(memo))
-    return json.loads(json_str)
+    return json.loads(json_str.decode('utf-8'))
 
 
 def encode(data, key):

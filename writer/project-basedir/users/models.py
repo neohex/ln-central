@@ -132,6 +132,11 @@ class User(models.Model):
     def save(self, *args, **kwargs):
         "Actions that need to be performed on every user save."
 
+        if not self.id:
+            # This runs only once upon object creation.
+            self.uuid = general_util.make_uuid()
+            self.last_login = general_util.now()
+
         super(User, self).save(*args, **kwargs)
 
     @property
@@ -154,7 +159,7 @@ class Tag(models.Model):
 
 class Profile(models.Model):
     """
-    Maintains information that does not always need to be retreived whe a user is accessed.
+    Maintains information that does not always need to be retreived when a user is accessed.
     """
     LOCAL_MESSAGE, EMAIL_MESSAGE = const.LOCAL_MESSAGE, const.EMAIL_MESSAGE
     NO_DIGEST, DAILY_DIGEST, WEEKLY_DIGEST, MONTHLY_DIGEST = range(4)
