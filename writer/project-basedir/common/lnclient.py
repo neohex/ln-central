@@ -1,6 +1,7 @@
 from common import cli
 
 import json
+import time
 
 LNCLI_BIN = "/home/lightning/gocode/bin/lncli"
 AUTH_ARGS = [
@@ -45,6 +46,7 @@ def listinvoices(index_offset, rpcserver, max_invoices=100, mock=False):
         return {
             "first_index_offset": "5",
                 "invoices": [
+                    # canceled
                     {
                         "add_index": "5",
                         "amt_paid": "0",
@@ -65,9 +67,10 @@ def listinvoices(index_offset, rpcserver, max_invoices=100, mock=False):
                         "settle_date": "0",
                         "settle_index": "0",
                         "settled": False,
-                        "state": "OPEN",
+                        "state": "CANCELED",
                         "value": "1"
                     },
+                    # inconsistent
                     {
                         "add_index": "6",
                         "amt_paid": "0",
@@ -87,10 +90,11 @@ def listinvoices(index_offset, rpcserver, max_invoices=100, mock=False):
                         "route_hints": [],
                         "settle_date": "0",
                         "settle_index": "0",
-                        "settled": False,
+                        "settled": True,
                         "state": "OPEN",
                         "value": "1"
                     },
+                    # expired
                     {
                         "add_index": "7",
                         "amt_paid": "1000",
@@ -114,13 +118,14 @@ def listinvoices(index_offset, rpcserver, max_invoices=100, mock=False):
                         "state": "SETTLED",
                         "value": "1"
                     },
+                    # open
                     {
                         "add_index": "8",
                         "amt_paid": "1000",
                         "amt_paid_msat": "1000",
                         "amt_paid_sat": "1",
                         "cltv_expiry": "144",
-                        "creation_date": "1553548298",
+                        "creation_date": str(int(time.time())),  # so it's not expired
                         "description_hash": None,
                         "expiry": "3600",
                         "fallback_addr": "",
@@ -131,19 +136,20 @@ def listinvoices(index_offset, rpcserver, max_invoices=100, mock=False):
                         "r_preimage": "yUSyH1Smmba2+MIgWd8UAtksKsgyKNokioeTUl9BUvA=",
                         "receipt": None,
                         "route_hints": [],
-                        "settle_date": "1553548385",
+                        "settle_date": "0",
                         "settle_index": "5",
-                        "settled": True,
-                        "state": "SETTLED",
+                        "settled": False,
+                        "state": "OPEN",
                         "value": "1"
                     },
+                    # settled
                     {
                         "add_index": "9",
                         "amt_paid": "1000",
                         "amt_paid_msat": "1000",
                         "amt_paid_sat": "1",
                         "cltv_expiry": "144",
-                        "creation_date": "1553548298",
+                        "creation_date": str(int(time.time())),  # so it's not expired
                         "description_hash": None,
                         "expiry": "3600",
                         "fallback_addr": "",

@@ -12,8 +12,8 @@ class LightningInvoice(models.Model):
 class InvoiceListCheckpoint(models.Model):
     lightning_node = models.ForeignKey(LightningNode, on_delete=models.CASCADE)
     checkpoint_name = models.CharField(verbose_name='Checkpoint name', max_length=255, default="__DEFAULT__")
-    add_index = models.IntegerField(verbose_name='LN Invoice add_index', default=0)
-
+    checkpoint_value = models.IntegerField(verbose_name='Integer value of the checkpoint (e.g. offset). Zero invalidates checkpoint.', default=0)
+    comment = models.CharField(verbose_name='Comment', max_length=255, default="__DEFAULT__")
 
 class LightningInvoiceRequest(models.Model):
     def __init__(self, node_id, memo):

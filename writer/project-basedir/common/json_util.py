@@ -49,9 +49,12 @@ def deserialize_memo(memo):
 
     # drop FRIENDLY_PREFIX, which is the first word, we don't check
     # what the actual word is because FRIENDLY_PREFIX can change
+    if "_" not in memo:
+        raise JsonUtilException("Expecting at least one _ in memo")
+
     memo = memo.split("_", 1)[1]
 
-    json_str = zlib.decompress(binascii.a2b_base64(memo))
+    json_str = zlib.decompress(binascii.a2b_base64(memo+1))
     return json.loads(json_str.decode('utf-8'))
 
 
