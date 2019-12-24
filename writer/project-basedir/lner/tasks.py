@@ -49,7 +49,7 @@ def _get_checkpoint(node, add_index):
 def run():
     node = LightningNode.objects.get()
 
-    checkpoint, created = InvoiceListCheckpoint.objects.get_or_create(
+    global_checkpoint, created = InvoiceListCheckpoint.objects.get_or_create(
         lightning_node=node,
         checkpoint_name="global_offset",
     )
@@ -58,7 +58,7 @@ def run():
         logger.info("New global checkpoint created")
 
     invoices_details = lnclient.listinvoices(
-        index_offset=checkpoint.checkpoint_value,
+        index_offset=global_checkpoint.checkpoint_value,
         rpcserver=node.rpcserver,
         mock=settings.MOCK_LN_CLIENT
     )
@@ -66,6 +66,8 @@ def run():
     # example of invoices_details: {"invoices": [], 'first_index_offset': '5', 'last_index_offset': '72'}
     invoices_list = invoices_details['invoices']
     logger.info("Got {} invoices".format(len(invoices_list)))
+
+    retry_mini_map = {int(invoice['add_index']):False for invoice in invoices_list}
 
     for invoice in invoices_list:
         # example of invoice:
@@ -108,6 +110,7 @@ def run():
 
         if not invoice['settled']:
             logger.info("Skipping invoice at index {}: Not yet settled".format(invoice['add_index']))
+            retry_mini_map[add_index] = True
             continue  # try again later
 
         #
@@ -139,5 +142,21 @@ def run():
         )
         post.save()
 
+        _set_checkpoint(node=node, add_index=add_index, comment="done")
+
+    # advance global checkpoint
+    new_global_checkpoint = None
+    for add_index in sorted(retry_mini_map.keys()):
+        retry = retry_mini_map[add_index]
+        if retry:
+            break
+        else:
+            logger.info("add_index={} advances global checkpoint".format(add_index))
+            new_global_checkpoint = add_index
+
+    if new_global_checkpoint:
+        global_checkpoint.checkpoint_value = new_global_checkpoint
+        global_checkpoint.save()
+        logger.info("Saved new global_checkpoint {}".format(new_global_checkpoint))
 
 run(repeat=1)
