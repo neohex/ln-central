@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.conf import settings
 
 # Uncomment the next two lines to enable the admin:
@@ -15,7 +15,7 @@ import biostar.apps.info.views as info
 
 memo_re = '{}_[\w\/\+\=]+'.format(settings.FRIENDLY_PREFIX)
 
-urlpatterns = patterns('',
+urlpatterns = [
 
     # Post listing.
     url(r'^$', views.PostList.as_view(), name="home"),
@@ -114,17 +114,17 @@ urlpatterns = patterns('',
     # Local robots.txt.
     url(r'^robots\.txt$', TemplateView.as_view(template_name="robots.txt", content_type='text/plain'), name='robots'),
 
-)
+]
 
 # Adding the sitemap.
-urlpatterns += patterns('',
-    (r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': search.sitemaps})
-)
+urlpatterns += [
+    url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': search.sitemaps})
+]
 
 from biostar.server.feeds import LatestFeed, TagFeed, UserFeed, PostFeed, PostTypeFeed
 
 # Adding the RSS related urls.
-urlpatterns += patterns('',
+urlpatterns += [
 
     # RSS feeds
     url(r'^feeds/latest/$', LatestFeed(), name='latest-feed'),
@@ -133,21 +133,21 @@ urlpatterns += patterns('',
     url(r'^feeds/user/(?P<text>[\w\-_\+!]+)/$', UserFeed(), name='user-feed'),
     url(r'^feeds/post/(?P<text>[\w\-_\+!]+)/$', PostFeed(), name='post-feed' ),
     url(r'^feeds/type/(?P<text>[\w\-_\+!]+)/$', PostTypeFeed(), name='post-type'),
-)
+]
 
-urlpatterns += patterns('',
+urlpatterns += [
     url(r'^info/faq/$', info.FaqView.as_view(), name='info-faq'),
     url(r'^info/policy/$', info.PolicyView.as_view(), name='info-policy'),
     url(r'^info/about/$', info.AboutView.as_view(), name='info-about'),
     url(r'^info/rss/$', info.RSSView.as_view(), name='info-rss'),
    
     # url(r'^info/help/$', views.InfoHelpView.as_view(), name='info-help'), 
-)
+]
 
 # This is used only for the debug toolbar
 if settings.DEBUG:
     import debug_toolbar
 
-    urlpatterns += patterns('',
+    urlpatterns += [
         url(r'^__debug__/', include(debug_toolbar.urls)),
-    )
+    ]

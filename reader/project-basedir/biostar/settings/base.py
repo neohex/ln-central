@@ -282,6 +282,8 @@ MESSAGE_TAGS = {
 INSTALLED_APPS = [
     'readonly',  # reader must be read-only
 
+    'django.contrib.auth',  # TODO: remove
+
     'django.contrib.contenttypes',
 
     'django.contrib.sites',
@@ -292,7 +294,6 @@ INSTALLED_APPS = [
     'compressor',
 
     # Enabling the admin and its documentation.
-    'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.humanize',
 
@@ -315,7 +316,6 @@ INSTALLED_APPS = [
                  # or gevent. Tasks can execute asynchronously (in the background) or 
                  # synchronously (wait until ready)"
     'kombu.transport.django',  # "transport using the Django database as a message store"
-    'south',  # "consistent, easy-to-use and database-agnostic migrations"
     'captcha',  # mostly deleted in the De-Cookify commit 19e67656233669db8c386fa69b125571faeaff4e
 ]
 

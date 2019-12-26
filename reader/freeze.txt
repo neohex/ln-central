@@ -7,7 +7,7 @@ celery==3.1.12
 certifi==2019.11.28
 chardet==2.2.1
 coolname==1.1.0
-Django==1.11.27
+Django==1.6.11
 django-allauth==0.17.0
 django-appconf==0.6
 django-braces==1.4.0
@@ -32,6 +32,7 @@ markdown2==2.3.7
 MarkupSafe==0.23
 oauthlib==0.6.3
 ordereddict==1.1
+pkg-resources==0.0.0
 psycopg2-binary==2.8.4
 pyelasticsearch==1.4.1
 Pygments==1.6

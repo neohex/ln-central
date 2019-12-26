@@ -6,9 +6,7 @@ from os.path import join, normpath, isfile, exists
 from os import makedirs
 
 from django.http import HttpResponse
-from django.contrib.sites.models import get_current_site
 from django.conf import settings
-from django.core.cache import get_cache
 
 from ..apps.users.models import User
 from ..apps.posts.models import Vote, Post
@@ -101,7 +99,7 @@ def post_details(request, id):
         'root_id': post.root_id,
         'xhtml': post.html,
         'tag_val': post.tag_val,
-        'url': 'http://{}{}'.format(get_current_site(request).domain, post.get_absolute_url()),
+        'url': 'http://{}{}'.format(settings.SITE_DOMAIN, post.get_absolute_url()),
     }
     return data
 
@@ -312,15 +310,11 @@ def days_after_day_zero_to_datetime(days):
     Params:
     days -- number of days after day-0 (the date of the first post ever).
     """
-    cache = get_cache('default')
-    day_zero = cache.get('day_zero')
 
-    if not day_zero:
-        first_post = Post.objects.order_by('creation_date').only('creation_date')
-        if not first_post:
-            return False
-        day_zero = first_post[0].creation_date
-        cache.set('day_zero', day_zero, 60*60*24*7)  # Cache valid for a week.
+    first_post = Post.objects.order_by('creation_date').only('creation_date')
+    if not first_post:
+        return False
+    day_zero = first_post[0].creation_date
 
     return day_zero + timedelta(days=int(days))
 
