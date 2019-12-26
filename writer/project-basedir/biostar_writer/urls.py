@@ -24,6 +24,7 @@ import lner.views
 router = routers.DefaultRouter()
 router.register(r'ln/list', lner.views.LightningNodeViewSet)
 router.register(r'ln/addinvoice', lner.views.CreateLightningInvoiceViewSet, basename='invoice')
+router.register(r'ln/check', lner.views.CheckPaymentViewSet, basename='checkpoint')
 
 urlpatterns = []
 

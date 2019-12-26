@@ -20,24 +20,31 @@ logger.info("Python version: {}".format(sys.version.replace("\n", " ")))
 def human_time(ts):
     return datetime.utcfromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
 
+def gen_checkpoint_name(node, add_index):
+    return "node-{}-add-index-{}".format(node.pk, add_index)
+
 def _set_checkpoint(node, add_index, comment):
+    checkpoint_name = gen_checkpoint_name(node=node, add_index=add_index)
     checkpoint, created = InvoiceListCheckpoint.objects.get_or_create(
         lightning_node=node,
-        checkpoint_name="offset_{}".format(add_index),
+        checkpoint_name=checkpoint_name
     )
 
-    if not created:
-        logger.info("Overwrting existing checkpoint add_index={}".format(add_index))
+    if created:
+        logger.info("Created new checkpoint {}".format(checkpoint_name))
+    else:
+        logger.info("Overwrting existing checkpoint {}".format(checkpoint_name))
 
     checkpoint.checkpoint_value = 1
     checkpoint.comment = comment
     checkpoint.save()
 
 def _get_checkpoint(node, add_index):
+    checkpoint_name = gen_checkpoint_name(node=node, add_index=add_index)
     try:
         checkpoint = InvoiceListCheckpoint.objects.get(
             lightning_node=node,
-            checkpoint_name="offset_{}".format(add_index),
+            checkpoint_name=checkpoint_name
         )
     except InvoiceListCheckpoint.DoesNotExist:
         return False
@@ -51,11 +58,11 @@ def run():
 
     global_checkpoint, created = InvoiceListCheckpoint.objects.get_or_create(
         lightning_node=node,
-        checkpoint_name="global_offset",
+        checkpoint_name="global-offset",
     )
 
     if created:
-        logger.info("New global checkpoint created")
+        logger.info("New global checkpoint created: global-offset")
 
     invoices_details = lnclient.listinvoices(
         index_offset=global_checkpoint.checkpoint_value,

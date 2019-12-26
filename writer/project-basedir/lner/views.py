@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 from django.http import Http404
 from django.conf import settings
 
@@ -11,9 +11,11 @@ from rest_framework import permissions
 
 from .models import LightningNode
 from .models import LightningInvoice
+from .models import InvoiceListCheckpoint
 from .serializers import LightningNodeSerializer
 from .serializers import LightningInvoiceSerializer
 from .serializers import LightningInvoiceRequestSerializer
+from .serializers import InvoiceListCheckpointSerializer
 from common import log
 from common import lnclient
 
@@ -47,4 +49,18 @@ class CreateLightningInvoiceViewSet(viewsets.ModelViewSet):
 
         serializer = LightningInvoiceSerializer(invoice, many=False)  # re-serialize
 
+        return Response(serializer.data)
+
+class CheckPaymentViewSet(viewsets.ViewSet):
+    """
+    Check invoice to see if payment was setteled
+    """
+
+    lookup_field = 'checkpoint_name'
+    lookup_value_regex = '[a-z0-9-]+'
+
+    def retrieve(self, request, checkpoint_name):
+        queryset = InvoiceListCheckpoint.objects.all()
+        checkpoint = get_object_or_404(queryset, checkpoint_name=checkpoint_name)
+        serializer = InvoiceListCheckpointSerializer(checkpoint, context={'request': request})
         return Response(serializer.data)
