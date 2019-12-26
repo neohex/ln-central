@@ -282,8 +282,6 @@ MESSAGE_TAGS = {
 INSTALLED_APPS = [
     'readonly',  # reader must be read-only
 
-    'django.contrib.auth',  # TODO: remove
-
     'django.contrib.contenttypes',
 
     'django.contrib.sites',
