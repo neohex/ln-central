@@ -1,4 +1,5 @@
 from django.db import models
+from lner import validators
 
 class LightningNode(models.Model):
     identity_pubkey = models.CharField(verbose_name='LN Identity Pubkey', db_index=True, max_length=255, unique=True)
@@ -16,6 +17,7 @@ class InvoiceListCheckpoint(models.Model):
         max_length=255,
         default="__DEFAULT__",
         unique=True,
+        validators=[validators.validate_checkpoint_name]
     )
     checkpoint_value = models.IntegerField(verbose_name='Integer value of the checkpoint (e.g. offset). Zero invalidates checkpoint.', default=0)
     comment = models.CharField(verbose_name='Comment', max_length=255, default="__DEFAULT__")

@@ -38,7 +38,7 @@ class CreateLightningInvoiceViewSet(viewsets.ModelViewSet):
     queryset = []
     serializer_class = LightningInvoiceRequestSerializer
 
-    def create(self, request, format):
+    def create(self, request):
         node = LightningNode.objects.get(id=request.POST["node_id"])
         invoice = lnclient.addinvoice(
             request.POST["memo"],
@@ -47,9 +47,10 @@ class CreateLightningInvoiceViewSet(viewsets.ModelViewSet):
             mock=settings.MOCK_LN_CLIENT
         )
 
-        serializer = LightningInvoiceSerializer(invoice, many=False)  # re-serialize
+        serializer = LightningInvoiceSerializer(data=invoice, many=False)  # re-serialize
+        serializer.is_valid(raise_exception=True)  # validate data going into the database
 
-        return Response(serializer.data)
+        return Response(serializer.validated_data)
 
 class CheckPaymentViewSet(viewsets.ViewSet):
     """
@@ -63,4 +64,5 @@ class CheckPaymentViewSet(viewsets.ViewSet):
         queryset = InvoiceListCheckpoint.objects.all()
         checkpoint = get_object_or_404(queryset, checkpoint_name=checkpoint_name)
         serializer = InvoiceListCheckpointSerializer(checkpoint, context={'request': request})
+
         return Response(serializer.data)
