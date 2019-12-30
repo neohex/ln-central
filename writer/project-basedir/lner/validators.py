@@ -1,3 +1,4 @@
+import re
 from rest_framework import serializers
 
 def validate_checkpoint_name(value):
@@ -37,3 +38,27 @@ def validate_checkpoint_name(value):
 
 
     return value
+
+
+def validate_memo(memo):
+    for key, value in memo.items():
+        if not isinstance(key, str):
+            raise serializers.ValidationError(("memo for key {} is not a string").format(key))
+
+        if re.match('^[a-z_]+$', key) is None:
+            raise serializers.ValidationError(
+                (
+                    "memo for key {} is not valid, should only contain letters and underscores"
+                ).format(key)
+            )
+
+        if isinstance(value, str):
+            if value.strip(" \t\n\r\x0b\f") != value:
+                # since we're asking the user to sign text via CLI
+                # it's very easy to accidently add an extra newline or space
+                # and change the signiture
+                raise serializers.ValidationError(
+                    (
+                        "memo for key {} has a value with leading or triling whitespace characters: {}"
+                    ).format(key, value)
+                )

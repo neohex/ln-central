@@ -3,6 +3,7 @@ import sys
 import time
 from datetime import datetime
 
+from rest_framework import serializers
 from django.conf import settings
 from background_task import background
 from common import lnclient
@@ -142,6 +143,15 @@ def run():
         except json_util.JsonUtilException:
             comment="deserialize_failure"
             logger.info("Checkpointing invoice at index {}: {}".format(add_index, comment))
+            _set_checkpoint(node=node, add_index=add_index, comment=comment)
+            continue
+
+        try:
+            validators.validate_memo(post_details)
+        except serializers.ValidationError as e:
+            comment = "memo_invalid"
+            logger.info("Checkpointing invoice at index {}: {}".format(add_index, comment))
+            logger.exception(e)
             _set_checkpoint(node=node, add_index=add_index, comment=comment)
             continue
 
