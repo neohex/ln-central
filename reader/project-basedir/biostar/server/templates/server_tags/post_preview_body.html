@@ -97,20 +97,20 @@ included in the invoice which when payed publishes the post.</div>
 
 <h4>How can I know what you're saying about the URL and invoice is true?</h4>
 <div>You can decode the URL with python3 like so</div>
-<pre>
-echo PUT_URL_HERE   | python3 -c '
-import zlib, binascii, urllib.parse, sys;
+<code>
+echo PUT_URL_HERE   | python3 -c 'import zlib, binascii, urllib.parse, sys;
 url = sys.stdin.readline();
-url = url.rstrip("/\n")  # drop trailing newline
-memo = url.split("/", 6)[6];  # drop https://ln.support/p/new/preview/
-memo = memo.split("_", 1)[1];  # drop "ln.support_" memo prefix
-memo = memo.rstrip("/");  # drop trailing "/"
-memo = urllib.parse.unquote(memo);  # url encdoding
+url = url.rstrip("/\n"); "## drop trailing newline";
+memo = url.split("/", 6)[6]; "## drop https://ln.support/p/new/preview/";
+memo = memo.split("_", 1)[1]; "## drop ln.support_ memo prefix";
+memo = memo.rstrip("/"); "## drop trailing /";
+memo = urllib.parse.unquote(memo); "## url encdoding";
 decoded = zlib.decompress(binascii.a2b_base64(memo)).decode("utf-8");
 print(decoded);
 ' | python3 -m json.tool
-</pre>
-
+</code>
+<p><br /></p>
 
 <div style="margin-top: 1em">... and decode the payment invoice with Lightning CLI like so</div>
-<pre>lncli decodepayreq PUT_INVOICE_HERE</pre>
+<code>lncli decodepayreq PUT_INVOICE_HERE</code>
+<p><br /></p>
