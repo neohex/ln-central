@@ -11,7 +11,7 @@ from common.log import logger
 
 from lner.models import LightningNode
 from lner.models import InvoiceListCheckpoint
-from lner import validators
+from common import validators
 from common import json_util
 from posts.models import Post
 from users.models import User
@@ -148,7 +148,7 @@ def run():
 
         try:
             validators.validate_memo(post_details)
-        except serializers.ValidationError as e:
+        except ValidationError as e:
             comment = "memo_invalid"
             logger.info("Checkpointing invoice at index {}: {}".format(add_index, comment))
             logger.exception(e)

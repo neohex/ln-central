@@ -23,6 +23,7 @@ from common import const
 from common import general_util
 from common import html_util
 from common import json_util
+from common import validators
 
 try:
     # writer
@@ -155,7 +156,7 @@ class Post(models.Model):
 
     TOP_LEVEL = set((QUESTION, META_QUESTION))
 
-    title = models.CharField(max_length=200, null=False)
+    title = models.CharField(max_length=200, null=False, validators=[validators.validate_signable_field])
 
     # The user that originally created the post.
 
@@ -217,7 +218,7 @@ class Post(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children', on_delete=models.CASCADE)
 
     # This is the HTML that the user enters.
-    content = models.TextField(default='')
+    content = models.TextField(default='', validators=[validators.validate_signable_field])
 
     # This is the  HTML that gets displayed.
     html = models.TextField(default='')
@@ -386,20 +387,20 @@ class Post(models.Model):
 class PostPreview(models.Model):
     objects = []
 
-    title = models.CharField(max_length=200, null=False, blank=False)
+    title = models.CharField(max_length=200, null=False, blank=False, validators=[validators.validate_signable_field])
 
     # The type of the post: question, answer, comment.
     type = models.IntegerField(choices=Post.TYPE_CHOICES, null=False, blank=False)
 
     # This is the HTML that the user enters.
-    content = models.TextField(default='', null=False, blank=False)
+    content = models.TextField(default='', null=False, blank=False, validators=[validators.validate_signable_field])
 
     # The tag value is the canonical form of the post's tags
     tag_val = models.CharField(max_length=100, null=False, blank=False)
 
     date = models.DateTimeField()
 
-    memo = models.CharField(max_length=100, null=True, blank=False)
+    memo = models.CharField(max_length=settings.MAX_MEMO_SIZE, null=True, blank=False)
 
     is_fake_test_data = models.BooleanField(default=False)
 
@@ -411,13 +412,16 @@ class PostPreview(models.Model):
         assert self.date.tzinfo == utc, "date must be in UTC"
         memo = json_util.serialize_memo(
             dict(
-                title=self.title,
+                title=validators.validate_signable_field(self.title),
                 post_type=self.type,
                 tag_val=self.tag_val,
-                content=self.content,
-                unixtime=int((self.date - datetime.datetime(1970,1,1).replace(tzinfo=utc)).total_seconds())
+                content=validators.validate_signable_field(self.content),
+                unixtime=int(
+                    (self.date - datetime.datetime(1970,1,1).replace(tzinfo=utc)).total_seconds()
+                )
             )
         )
+
         return memo
 
     def get_absolute_url(self, memo):

@@ -18,6 +18,7 @@ from common import html_util
 from common import json_util
 from common.const import OrderedDict
 from common import const
+from common import validators
 
 from biostar.apps.util import ln
 
@@ -387,7 +388,9 @@ class PostPreviewView(TemplateView):
 
         context = super(PostPreviewView, self).get_context_data(**kwargs)
 
-        memo = json_util.deserialize_memo(context["memo"])
+        memo = validators.validate_memo(
+            json_util.deserialize_memo(context["memo"])
+        )
 
         post_preview = PostPreview()
         post_preview.title = memo["title"]
@@ -398,9 +401,12 @@ class PostPreviewView(TemplateView):
         post_preview.tag_val = memo["tag_val"]
         post_preview.tag_value = html_util.split_tags(memo["tag_val"])
         post_preview.date = datetime.utcfromtimestamp(memo["unixtime"]).replace(tzinfo=utc)
+        post_preview.memo = post_preview.serialize_memo()
+
+        post_preview.clean_fields()
 
         context['post'] = post_preview
-        context['publish_url'] = post_preview.get_publish_url(context["memo"])
+        context['publish_url'] = post_preview.get_publish_url(post_preview.memo)
 
         return context
 

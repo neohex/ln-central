@@ -1,5 +1,5 @@
 from django.db import models
-from lner import validators
+from common import validators
 from django.conf import settings
 
 class LightningNode(models.Model):

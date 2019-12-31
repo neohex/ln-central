@@ -22,6 +22,7 @@ from django.template.loader import render_to_string
 from common.const import OrderedDict
 from common import general_util
 from common import json_util
+from common import validators
 
 from biostar.apps.util import ln
 from biostar.apps.users.models import User
@@ -93,7 +94,8 @@ class LongForm(forms.Form):
     title = forms.CharField(
         label="Post Title",
         required=True,
-        max_length=200, min_length=10, validators=[valid_title, english_only],
+        max_length=200, min_length=10,
+        validators=[valid_title, english_only, validators.validate_signable_field],
         help_text="Descriptive titles promote better answers.")
 
     post_type = forms.ChoiceField(
