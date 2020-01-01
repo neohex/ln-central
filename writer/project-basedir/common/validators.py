@@ -1,4 +1,6 @@
 import re
+import sys
+
 from django.core.exceptions import ValidationError
 
 
@@ -66,8 +68,13 @@ def validate_memo(memo, no_auto_correct=False):
     new_memo = {}
 
     for key, value in memo.items():
-        if not isinstance(key, basestring):
-            raise ValidationError(("memo for key {} is not a string").format(repr(key)))
+        # TODO: Remove version check after reader is migrated to Python 3
+        if sys.version_info >= (3, 0):
+            if not isinstance(key, str):
+                raise ValidationError(("memo for key {} is not a string").format(repr(key)))
+        else:
+            if not isinstance(key, basestring):
+                raise ValidationError(("memo for key {} is not a string").format(repr(key)))
 
         if re.match('^[a-z_]+$', key) is None:
             raise ValidationError(
