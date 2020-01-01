@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lner', '0002_lightninginvoicerequest'),
+        ('lner', '0001_initial'),
     ]
 
     operations = [

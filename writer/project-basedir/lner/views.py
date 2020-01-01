@@ -11,6 +11,7 @@ from rest_framework import permissions
 
 from .models import LightningNode
 from .models import LightningInvoice
+from .models import LightningInvoiceRequest
 from .models import InvoiceListCheckpoint
 from .serializers import LightningNodeSerializer
 from .serializers import LightningInvoiceSerializer
@@ -40,17 +41,36 @@ class CreateLightningInvoiceViewSet(viewsets.ModelViewSet):
 
     def create(self, request, format=None):
         node = LightningNode.objects.get(id=request.POST["node_id"])
-        invoice = lnclient.addinvoice(
-            request.POST["memo"],
-            node.rpcserver,
-            amt=settings.PAYMENT_AMOUNT,
-            mock=settings.MOCK_LN_CLIENT
+        request_obj, created = LightningInvoiceRequest.objects.get_or_create(
+            lightning_node=node,
+            memo=request.POST["memo"]
         )
 
-        serializer = LightningInvoiceSerializer(data=invoice, many=False)  # re-serialize
-        serializer.is_valid(raise_exception=True)  # validate data going into the database
+        if created:
+            invoice_stdout = lnclient.addinvoice(
+                request.POST["memo"],
+                node.rpcserver,
+                amt=settings.PAYMENT_AMOUNT,
+                mock=settings.MOCK_LN_CLIENT
+            )
 
-        return Response(serializer.validated_data)
+            serializer = LightningInvoiceSerializer(data=invoice_stdout, many=False)  # re-serialize
+            serializer.is_valid(raise_exception=True)  # validate data going into the database
+
+            invoice_obj = LightningInvoice(
+                lightning_invoice_request=request_obj,
+                r_hash=serializer.validated_data.get("r_hash"),
+                pay_req=serializer.validated_data.get("pay_req"),
+                add_index=serializer.validated_data.get("add_index")
+            )
+            invoice_obj.save()
+            return Response(serializer.validated_data)
+
+        else:
+            invoice_obj = LightningInvoice.objects.get(lightning_invoice_request=request_obj)
+            serializer = LightningInvoiceSerializer(invoice_obj)
+            return Response(serializer.data)
+        
 
 class CheckPaymentViewSet(viewsets.ViewSet):
     """
