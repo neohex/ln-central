@@ -1,4 +1,5 @@
 {% load server_tags %}
+{% load crispy_forms_tags %}
 
 <div>
     <div style="background: #5bbad5; color: #ffffff; text-align: center; padding: 0.5em">
@@ -66,23 +67,65 @@
 
 
 <h1>Next step</h1>
-<div>Now it's time to review and publish your question.
-    Click edit to make changes before publishing.
-    The post will be published after a payment is made on the Lightning Network using the invoice.
-    Payment of <b>{{ payment_amount }} satoshi</b> is required.
+<div>Now it's time to review, sign, and publish your post.</div>
+<h4>Review</h4>
+<div style="margin-left: 5em; margin-bottom: 2em;">
+<p style="margin-bottom: 2em;">Click edit to make changes.</p>
+
+<h5>What if I want to save draft and resume later?</h5>
+To save current work and continue later, make a <b>bookmark of this page</b> in your web browser.
 </div>
 
-<h4>What happens when I publish this post?</h4>
+<h4>Sign (optional)</h4>
+<div style="margin-left: 5em;">
+<div style="margin-bottom: 2em;">
+<p>1. Sign using <tt>LND</tt> run:
+
+<pre>lncli signmessage '{{ memo_json }}'</pre>
+
+To sign using c-lightning instead of <tt>lncli</tt> put <tt>lightning-cli</tt>
+</p>
+<p>2. Copy and paste the signature here:</p>
+{% crispy signmessage_form %}
+</div>
+
+<h4>What happens if I sign this post?</h4>
 <div>The following information is going to be associated with the post and made publicly visible.</div>
 <ul>
-    <li>Your wallet's <b>pubkey</b></li>
-    <li>A "pen name" base on the pubkey</li>
-    <li>An avatar image base on the pubkey</li>
+    <li>Your wallet's <b>pubkey</b>
+        <ul>
+            <li>by <b>pubkey</b> we mean the Lightning Network Node wallet <tt>identity_pubkey</tt></li>
+        </ul>
+    </li>
     <li>Statistics such as number of posts, up-votes, and reputation score</li>
+    <li>There will also be a "pen name" and an avatar image generated based on the <b>pubkey</b></li>
 </ul>
 
-<h4>What if I want to save draft and resume later?</h4>
-<div>To save current work and continue later, then <b>bookmark this page</b>.
+
+<h4>What are the advantages of signing?</h4>
+<ul>
+    <li>Earn reputation if people up-vote or bookmark your post</li>
+    <li>Ability to modify your post later</li>
+    <li>If the post becomes popular, there is a possibility that people will want to reach out to you for payed private consultations. For example, they could use <tt>whatsat chat &lt;pubkey&gt;</tt> to initiate a chat session.</li>
+</ul>
+
+<h4>What are the disadvantages of signing?</h4>
+<ul>
+<li>Your wallet's <b>pubkey</b> becomes visible publicly on the Internet</li>
+<li>This post will associated with your wallet's <b>pubkey</b></li>
+<li>You may or may not like the random-looking "pen name" and an avatar image generated based on the <b>pubkey</b></li>
+</ul>
+</div>
+
+<h4>Publish</h4>
+<div style="margin-left: 5em;">
+Click "Get Invoice" button on the bottom of this page. The post will be published after a payment is made on the Lightning Network using the invoice.
+Payment of <b>{{ payment_amount }} satoshi</b> is required.
+</div>
+
+
+
+
 
 
 <h1>Regarding privacy</h1>

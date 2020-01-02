@@ -182,6 +182,27 @@ class ShortForm(forms.Form):
         )
 
 
+class SignMessageForm(forms.Form):
+    FIELDS = ["signiture"]
+
+    signiture = forms.CharField(
+        widget=forms.Textarea,
+        label="Signature",
+        required=False,
+        max_length=200, min_length=10,
+        validators=[],
+        help_text="JSON output of the signmessage command")
+
+    def __init__(self, *args, **kwargs):
+        super(SignMessageForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Field('signiture', rows="4"),
+            ButtonHolder(
+                Submit('submit', 'Check')
+            )
+        )
+
 def parse_tags(category, tag_val):
     pass
 
@@ -210,7 +231,6 @@ class NewPost(FormView):
         context = {
             'form': form,
             'nodes_list': ln.get_nodes_list(),   # Get LN Nodes list
-            'payment_amount': settings.PAYMENT_AMOUNT
         }
 
         return render(request, self.template_name, context)

@@ -28,6 +28,7 @@ from django import shortcuts
 from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator
 import logging
+
 from haystack.query import SearchQuerySet
 from . import moderate
 from django.http import Http404

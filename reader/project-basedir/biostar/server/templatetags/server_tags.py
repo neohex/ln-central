@@ -1,9 +1,12 @@
+import json
+
 from django import template
 from django.conf import settings
 from django.template import Context, Template
 from django.template.defaultfilters import stringfilter
 from biostar.apps.posts.models import Post, Tag
 from biostar.apps.messages.models import Message
+from biostar.apps.posts.views import SignMessageForm
 import random, hashlib, urllib
 from datetime import datetime, timedelta
 import dateutil.parser
@@ -12,6 +15,7 @@ from django import template
 from django.core.urlresolvers import reverse
 from common import const
 from common import general_util
+from common import json_util
 from biostar.server.views import LATEST
 import coolname as coolname_lib
 
@@ -258,7 +262,9 @@ def post_preview_body(context, post_preview):
         edit_url=post_preview.get_edit_url(memo),
         publish_url=post_preview.get_publish_url(memo),
         request=context['request'],
-        payment_amount=settings.PAYMENT_AMOUNT
+        payment_amount=settings.PAYMENT_AMOUNT,
+        memo_json=json.dumps(json_util.deserialize_memo(memo)),
+        signmessage_form=SignMessageForm()
     )
 
 @register.inclusion_tag('server_tags/search_bar.html', takes_context=True)
