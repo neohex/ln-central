@@ -1,5 +1,7 @@
 {% load server_tags %}
 {% load crispy_forms_tags %}
+{% load cache %}
+{% load more_like_this %}
 
 <div>
     <div style="background: #5bbad5; color: #ffffff; text-align: center; padding: 0.5em">
@@ -64,6 +66,36 @@
 
 </div>
 
+<div class="col-xs-12 col-md-3 sidebar">
+    {% cache 600 "similar" post.id %}
+        <h4>Similar posts &bull; <a href="{% url 'search-page' %}">Search &raquo;</a></h4>
+
+        {% more_like_this post as related limit 25 %}
+
+        <ul class="more-like-this">
+            {% for row in related %}
+                {% with row.object as post %}
+                    {% if post.is_toplevel %}
+                        <li>
+                            <a href="{{ post.get_absolute_url }}">{{ post.title }} </a>
+
+                            <div class="peek">{{ post.peek|truncatechars:100 }}</div>
+                        </li>
+                    {% endif %}
+                {% endwith %}
+                {%  if forloop.counter == 3 %}
+                    {% include "banners/sidebar.html" %}
+                {%  endif %}
+            {% empty %}
+
+                {% include "banners/sidebar.html" %}
+
+                <li>Nothing matches yet.</li>
+
+            {% endfor %}
+        </ul>
+    {% endcache %}
+</div>
 
 
 <h1>Next step</h1>

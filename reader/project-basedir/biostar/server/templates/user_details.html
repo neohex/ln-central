@@ -45,7 +45,7 @@
 
             </div>
 
-            {#  The short description entered by the user.  #}
+            {#  Reputation, pubkey, and stats.  #}
             <div class="col-md-4">
                 <dl class="dl-horizontal">
                     <dt>Reputation:</dt>
@@ -61,7 +61,6 @@
 
                     <dt>Joined:</dt>
                     <dd>{{ target.profile.date_joined|naturaltime }}</dd>
-
 
                     {% if target.has_ownership %}
 
@@ -89,7 +88,12 @@
                         </dd>
                     {% endif %}
                 </dl>
+                <div class="col-md-12">
+                <input type="submit" name="submit" value="Schedule private payed consultation: This feature is not ready. The idea is to use Whatsat - encrypted chat directly on Lightning network "
+                class="btn btn-primary" id="submit-id-submit" />
+                </div>
             </div>
+
 
             {#  Post list goes here #}
             <div class="col-md-12">
