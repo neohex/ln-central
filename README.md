@@ -6,7 +6,7 @@
 [build-image]: https://travis-ci.org/alevchuk/ln-central.svg?branch=4.0
 [build-url]: https://travis-ci.org/alevchuk/ln-central/builds
 
-Biostar is a [Python][python] and [Django][django] based Q&A software.
+Biostar is a Python and Django based Q&A software.
 It is a simple, generic, flexible and extensible Q&A framework.
 
 The site has been developed by **scientists and for scientists**. It aims
@@ -70,15 +70,16 @@ Enjoy.
 
 ### Development
 
-### Documentation of dependencies
+See docs https://github.com/alevchuk/ln-central/tree/master/docs
 
+Documentation of dependencies:
 * [django](http://www.djangoproject.com/)
 * [django-rest-framework](https://www.django-rest-framework.org/)
 
 ### Citing
 
 * Parnell LD, Lindenbaum P, Shameer K, Dall'Olio GM, Swan DC, et al.
-  [2011 BioStar: An Online Question & Answer Resource for the Bioinformatics Community.] (http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1002216)
+  [2011 BioStar: An Online Question & Answer Resource for the Bioinformatics Community.](http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1002216)
   PLoS Comput Biol 7(10): e1002216. doi:10.1371/journal.pcbi.1002216
 
 ### Contributors
