@@ -3,8 +3,8 @@
 [![Build Status][build-image]][build-url] 
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)
 
-[build-image]: https://travis-ci.org/ialbert/biostar-central.svg?branch=4.0
-[build-url]: https://travis-ci.org/ialbert/biostar-central/builds
+[build-image]: https://travis-ci.org/alevchuk/ln-central.svg?branch=4.0
+[build-url]: https://travis-ci.org/alevchuk/ln-central/builds
 
 Biostar is a [Python][python] and [Django][django] based Q&A software.
 It is a simple, generic, flexible and extensible Q&A framework.
@@ -70,15 +70,10 @@ Enjoy.
 
 ### Development
 
-Biostar versions and upgrade path: https://github.com/ialbert/biostar-central/issues/400
+### Documentation of dependencies
 
-### Support
-
-We may be able to provide support for organizations or institutions. 
-For more information contact **admin@biostars.org**
-
-[django]: http://www.djangoproject.com/
-[python]: http://www.python.org/
+* [django](http://www.djangoproject.com/)
+* [django-rest-framework](https://www.django-rest-framework.org/)
 
 ### Citing
 
@@ -88,4 +83,4 @@ For more information contact **admin@biostars.org**
 
 ### Contributors
 
-List of contributors: https://github.com/ialbert/biostar-central/graphs/contributors
+List of contributors: https://github.com/alevchuk/ln-central/graphs/contributors
