@@ -31,8 +31,8 @@ def addinvoice(memo, rpcserver, amt, mock=False):
     """
     if mock:
         return {
-                "r_hash": str(random.random()),
-                "pay_req": str(random.random()),
+                "r_hash": str(int(random.random() * (10 ** 15))),
+                "pay_req": str(int(random.random() * (10 ** 15))),
                 "add_index": 11
              }
 
