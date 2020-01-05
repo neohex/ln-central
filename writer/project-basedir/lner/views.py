@@ -48,11 +48,9 @@ class CreateLightningInvoiceViewSet(viewsets.ModelViewSet):
     RETRY_SLEEP_SECONDS = 1
 
     def create(self, request, format=None, retry_addinvoice=False, retry_num=0):
-        if retry_num > CreateLightningInvoiceViewSet.MAX_RETRIES:
+        if retry_num >= CreateLightningInvoiceViewSet.MAX_RETRIES:
             raise CreateLightningInvoiceError(
-                "Retry count exceeded: {}".format(
-                    CreateLightningInvoiceViewSet.MAX_RETRIES
-                )
+                "Retry count exceeded: {}".format(retry_num)
             )
 
         node = LightningNode.objects.get(id=request.POST["node_id"])
