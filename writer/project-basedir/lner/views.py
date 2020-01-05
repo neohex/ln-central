@@ -1,3 +1,5 @@
+import time
+
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 from django.conf import settings
@@ -32,6 +34,9 @@ class LightningNodeViewSet(viewsets.ModelViewSet):
     serializer_class = LightningNodeSerializer
 
 
+class CreateLightningInvoiceError(Exception):
+    pass
+
 class CreateLightningInvoiceViewSet(viewsets.ModelViewSet):
     """
     Create a new lightning invoice
@@ -39,14 +44,25 @@ class CreateLightningInvoiceViewSet(viewsets.ModelViewSet):
     queryset = []
     serializer_class = LightningInvoiceRequestSerializer
 
-    def create(self, request, format=None):
+    MAX_RETRIES = 3
+    RETRY_SLEEP_SECONDS = 1
+
+    def create(self, request, format=None, retry_addinvoice=False, retry_num=0):
+        if retry_num > CreateLightningInvoiceViewSet.MAX_RETRIES:
+            raise CreateLightningInvoiceError(
+                "Retry count exceeded: {}".format(
+                    CreateLightningInvoiceViewSet.MAX_RETRIES
+                )
+            )
+
         node = LightningNode.objects.get(id=request.POST["node_id"])
         request_obj, created = LightningInvoiceRequest.objects.get_or_create(
             lightning_node=node,
             memo=request.POST["memo"]
         )
 
-        if created:
+        if created or retry_addinvoice:
+            # TODO: surface addinvoice timeout and other exceptions back to the user
             invoice_stdout = lnclient.addinvoice(
                 request.POST["memo"],
                 node.rpcserver,
@@ -67,7 +83,13 @@ class CreateLightningInvoiceViewSet(viewsets.ModelViewSet):
             return Response(serializer.validated_data)
 
         else:
-            invoice_obj = LightningInvoice.objects.get(lightning_invoice_request=request_obj)
+            try:
+                invoice_obj = LightningInvoice.objects.get(lightning_invoice_request=request_obj)
+            except LightningInvoice.DoesNotExist:
+                retry_num += 1
+                time.sleep(CreateLightningInvoiceViewSet.RETRY_SLEEP_SECONDS)
+                return self.create(request, format=format, retry_addinvoice=True, retry_num=retry_num)
+
             serializer = LightningInvoiceSerializer(invoice_obj)
             return Response(serializer.data)
         
