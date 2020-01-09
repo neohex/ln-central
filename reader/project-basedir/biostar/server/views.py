@@ -422,7 +422,8 @@ class PostPublishView(TemplateView):
         context = super(PostPublishView, self).get_context_data(**kwargs)
 
         context['nodes_list'] = ln.get_nodes_list() 
-        context['pay_req'] = ln.add_invoice(context["memo"])['pay_req']
+        details = ln.add_invoice(context["memo"])
+        context['pay_req'] = details['pay_req']
 
         return context
 

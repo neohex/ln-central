@@ -24,47 +24,72 @@ logger.info("Python version: {}".format(sys.version.replace("\n", " ")))
 def human_time(ts):
     return datetime.utcfromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
 
-def gen_checkpoint_name(node, add_index):
-    return "node-{}-add-index-{}".format(node.pk, add_index)
 
-def _set_checkpoint(node, add_index, comment):
+class CheckpointHelper(object):
+    def __init__(self, node, add_index, creation_date):
+        self.node = node
+        self.add_index = int(add_index)
+        self.creation_date = creation_date
 
-    checkpoint_name = gen_checkpoint_name(node=node, add_index=add_index)
-    validators.validate_checkpoint_name(checkpoint_name)  # TODO: make it run automatically in models and serializers
-
-    try:
-        checkpoint = InvoiceListCheckpoint.objects.get(
-            lightning_node=node,
-            checkpoint_name=checkpoint_name
+        logger.info(
+                (
+                    "Processing invoice of node={} at add_index={} creation_date={}"
+                ).format(
+                    self.node.identity_pubkey,
+                    self.add_index,
+                    human_time(self.creation_date)
+                )
         )
-    except InvoiceListCheckpoint.DoesNotExist:
-        checkpoint = InvoiceListCheckpoint(
-            lightning_node=node,
-            checkpoint_name=checkpoint_name
-        )
-        checkpoint.save()
-        logger.info("Created new checkpoint {}".format(checkpoint_name))
-    else:
-        logger.info("Overwrting existing checkpoint {}".format(checkpoint_name))
-        checkpoint.checkpoint_value = 1
-        checkpoint.comment = comment
-        checkpoint.save()
 
-def _get_checkpoint(node, add_index):
-    checkpoint_name = gen_checkpoint_name(node=node, add_index=add_index)
-    try:
-        checkpoint = InvoiceListCheckpoint.objects.get(
-            lightning_node=node,
-            checkpoint_name=checkpoint_name
-        )
-    except InvoiceListCheckpoint.DoesNotExist:
-        return False
+    def __repr__(self):
+        return self._gen_checkpoint_name()
 
-    return checkpoint.checkpoint_value > 0
+    def _gen_checkpoint_name(self):
+        return "node-{}-add-index-{}".format(self.node.pk, self.add_index)
+
+    def set_checkpoint(self, comment):
+        checkpoint_name = self._gen_checkpoint_name()
+        validators.validate_checkpoint_name(checkpoint_name)  # TODO: make it run automatically in models and serializers
+
+        logger.info("Checkpointing invoice, checkpoint_name={} comment={}".format(checkpoint_name, comment))
+
+        try:
+            checkpoint = InvoiceListCheckpoint.objects.get(
+                lightning_node=self.node,
+                checkpoint_name=checkpoint_name
+            )
+        except InvoiceListCheckpoint.DoesNotExist:
+            checkpoint = InvoiceListCheckpoint(
+                lightning_node=self.node,
+                checkpoint_name=checkpoint_name
+            )
+            checkpoint.checkpoint_value = 1
+            checkpoint.comment = comment
+            checkpoint.save()
+            logger.info("Created new checkpoint {}".format(checkpoint_name))
+        else:
+            checkpoint.checkpoint_value = 1
+            checkpoint.comment = comment
+            checkpoint.save()
+            logger.info("Overwrote existing checkpoint {}".format(checkpoint_name))
+
+
+    def get_checkpoint(self):
+        checkpoint_name = self._gen_checkpoint_name()
+        try:
+            checkpoint = InvoiceListCheckpoint.objects.get(
+                lightning_node=self.node,
+                checkpoint_name=checkpoint_name
+            )
+        except InvoiceListCheckpoint.DoesNotExist:
+            return False
+
+        return checkpoint.checkpoint_value > 0
 
 
 @background(queue='queue-1', remove_existing_tasks=True)
 def run():
+    logger.info("\nprocess_tasks-----------------")
     node = LightningNode.objects.get()
 
     global_checkpoint, created = InvoiceListCheckpoint.objects.get_or_create(
@@ -88,73 +113,66 @@ def run():
     retry_mini_map = {int(invoice['add_index']):False for invoice in invoices_list}
 
     for invoice in invoices_list:
-        # example of invoice:
-        # {'htlcs': [], 'settled': False, 'add_index': '5', 'cltv_expiry': '40', 'description_hash': None, 'route_hints': [],
-        # 'r_hash': '+fw...=', 'settle_date': '0', 'private': False, 'expiry': '3600', 'creation_date': '1574459849', 'value': '1',
-        # 'amt_paid': '0', 'features': {}, 'state': 'OPEN', 'amt_paid_sat': '0', 'memo': '', 'value_msat': '1000', 'settle_index': '0',
-        # 'amt_paid_msat': '0', 'r_preimage': 'd...=', 'fallback_addr': '', 'payment_request': 'lnbc...'}
+        # Example of invoice:
+        # {
+        # 'htlcs': [], 
+        # 'settled': False,
+        # 'add_index': '5',
+        # 'value': '1',
+        # 'memo': '',
+        # 'cltv_expiry': '40', 'description_hash': None, 'route_hints': [],
+        # 'r_hash': '+fw...=', 'settle_date': '0', 'private': False, 'expiry': '3600',
+        # 'creation_date': '1574459849',
+        # 'amt_paid': '0', 'features': {}, 'state': 'OPEN', 'amt_paid_sat': '0',
+        # 'value_msat': '1000', 'settle_index': '0',
+        # 'amt_paid_msat': '0', 'r_preimage': 'd...=', 'fallback_addr': '', 'payment_request': 'lnbc...'
+        # }
 
-        add_index = int(invoice['add_index'])
+        checkpoint_helper = CheckpointHelper(node, int(invoice["add_index"]), invoice["creation_date"])
 
-        if _get_checkpoint(node=node, add_index=add_index):
+        if checkpoint_helper.get_checkpoint():
             continue
-
-        logger.info(
-                (
-                    "Processing invoice add_index={} creation_date={}"
-                ).format(
-                    add_index,
-                    human_time(invoice['creation_date'])
-                )
-        )
 
         if invoice['state'] == 'CANCELED':
             comment = "canceled"
-            logger.info("Checkpointing invoice at index {}: {}".format(add_index, comment))
-            _set_checkpoint(node=node, add_index=add_index, comment=comment)
+            checkpoint_helper.set_checkpoint(comment=comment)
             continue
 
         if invoice['settled'] and (invoice['state'] != 'SETTLED' or int(invoice['settle_date']) == 0):
             comment = "inconsistent"
-            logger.info("Checkpointing invoice at index {}: {}".format(add_index, comment))
-            _set_checkpoint(node=node, add_index=add_index, comment=comment)
+            checkpoint_helper.set_checkpoint(comment=comment)
             continue
 
         if time.time() > int(invoice['creation_date']) + int(invoice['expiry']):
             comment = "expired"
-            logger.info("Checkpointing invoice at index {}: {}".format(add_index, comment))
-            _set_checkpoint(node=node, add_index=add_index, comment=comment)
+            checkpoint_helper.set_checkpoint(comment=comment)
             continue
 
         if not invoice['settled']:
-            logger.info("Skipping invoice at index {}: Not yet settled".format(invoice['add_index']))
-            retry_mini_map[add_index] = True
+            logger.info("Skipping invoice at {}: Not yet settled".format(checkpoint_helper))
+            retry_mini_map[checkpoint_helper.add_index] = True
             continue  # try again later
 
         #
         # Invoice is settled
         #
 
-        logger.info("Processing invoice at index {}: SETTLED".format(invoice['add_index']))
+        logger.info("Processing invoice at {}: SETTLED".format(checkpoint_helper))
 
         memo = invoice["memo"]
-        logger.info("Memo: {}".format(memo))
-
         try:
             post_details = json_util.deserialize_memo(memo)
         except json_util.JsonUtilException:
             comment="deserialize_failure"
-            logger.info("Checkpointing invoice at index {}: {}".format(add_index, comment))
-            _set_checkpoint(node=node, add_index=add_index, comment=comment)
+            checkpoint_helper.set_checkpoint(comment=comment)
             continue
 
         try:
             validators.validate_memo(post_details)
         except ValidationError as e:
             comment = "memo_invalid"
-            logger.info("Checkpointing invoice at index {}: {}".format(add_index, comment))
             logger.exception(e)
-            _set_checkpoint(node=node, add_index=add_index, comment=comment)
+            checkpoint_helper.set_checkpoint(comment=comment)
             continue
 
         logger.info("Post details {}".format(post_details))
@@ -169,7 +187,7 @@ def run():
         )
         post.save()
 
-        _set_checkpoint(node=node, add_index=add_index, comment="done")
+        checkpoint_helper.set_checkpoint(comment="done")
 
     # advance global checkpoint
     new_global_checkpoint = None
