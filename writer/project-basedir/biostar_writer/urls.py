@@ -23,8 +23,7 @@ import lner.views
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
 router.register(r'ln/list', lner.views.LightningNodeViewSet)
-router.register(r'ln/addinvoice', lner.views.CreateLightningInvoiceViewSet, basename='invoice')
-router.register(r'ln/check', lner.views.CheckPaymentViewSet, basename='checkpoint')
+router.register(r'ln/addinvoice', lner.views.CreateInvoiceViewSet, basename='invoice')
 
 urlpatterns = []
 

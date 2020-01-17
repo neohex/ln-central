@@ -2,9 +2,8 @@ from rest_framework.serializers import HyperlinkedModelSerializer
 from rest_framework.serializers import IntegerField
 from rest_framework.serializers import CharField
 from .models import LightningNode
-from .models import LightningInvoice
-from .models import LightningInvoiceRequest
-from .models import InvoiceListCheckpoint
+from .models import Invoice
+from .models import InvoiceRequest
 from common import validators
 
 
@@ -14,27 +13,20 @@ class LightningNodeSerializer(HyperlinkedModelSerializer):
         fields = ['identity_pubkey', 'rpcserver']
 
 
-class LightningInvoiceRequestSerializer(HyperlinkedModelSerializer):
+class InvoiceRequestSerializer(HyperlinkedModelSerializer):
     node_id = IntegerField()
     memo = CharField(max_length=200)
 
     def create(self, validated_data):
-        return LightningInvoiceRequest(**validated_data)
+        return InvoiceRequest(**validated_data)
 
     class Meta:
         validators = []
-        model = LightningInvoiceRequest
+        model = InvoiceRequest
         fields = ['node_id', 'memo']
 
 
-class LightningInvoiceSerializer(HyperlinkedModelSerializer):
+class InvoiceSerializer(HyperlinkedModelSerializer):
     class Meta:
-        model = LightningInvoice
+        model = Invoice
         fields = ['r_hash', 'pay_req', 'add_index']
-
-
-class InvoiceListCheckpointSerializer(HyperlinkedModelSerializer):
-    checkpoint_name = CharField(validators=[validators.validate_checkpoint_name])
-    class Meta:
-        model = InvoiceListCheckpoint
-        fields = ['lightning_node', 'checkpoint_name', 'checkpoint_value'] 
