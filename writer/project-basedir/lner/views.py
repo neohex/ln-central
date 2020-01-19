@@ -75,9 +75,7 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
 
             invoice_obj = Invoice(
                 invoice_request=request_obj,
-                r_hash=serializer.validated_data.get("r_hash"),
                 pay_req=serializer.validated_data.get("pay_req"),
-                add_index=serializer.validated_data.get("add_index")
             )
             invoice_obj.save()
             return Response(serializer.validated_data)

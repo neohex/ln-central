@@ -29,7 +29,7 @@ class InvoiceRequestSerializer(HyperlinkedModelSerializer):
 class InvoiceSerializer(HyperlinkedModelSerializer):
     class Meta:
         model = Invoice
-        fields = ['r_hash', 'pay_req', 'add_index']
+        fields = ['pay_req']  # return only what reader needs
 
 
 class CheckPaymentSerializer(HyperlinkedModelSerializer):
