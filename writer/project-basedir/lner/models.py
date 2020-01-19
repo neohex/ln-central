@@ -10,6 +10,7 @@ class LightningNode(models.Model):
         verbose_name='add_index of the last global checkpoint',
         default=-1
     )
+
     created = models.DateTimeField(editable=False)
     modified = models.DateTimeField()
 
@@ -26,6 +27,7 @@ class InvoiceRequest(models.Model):
         unique=True,
         max_length=settings.MAX_MEMO_SIZE
     )
+
     created = models.DateTimeField(editable=False)
     modified = models.DateTimeField()
 
@@ -45,6 +47,7 @@ class Invoice(models.Model):
         max_length=255,
         default="no_checkpoint"
     )
+
     created = models.DateTimeField(editable=False)
     modified = models.DateTimeField()
 

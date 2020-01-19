@@ -10,6 +10,7 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions
+from rest_framework import mixins
 
 from .models import LightningNode
 from .models import Invoice
@@ -18,6 +19,8 @@ from .models import InvoiceRequest
 from .serializers import LightningNodeSerializer
 from .serializers import InvoiceSerializer
 from .serializers import InvoiceRequestSerializer
+from .serializers import CheckPaymentSerializer
+
 from common import log
 from common import lnclient
 
@@ -89,3 +92,21 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
 
             serializer = InvoiceSerializer(invoice_obj)
             return Response(serializer.data)
+
+class CheckPaymentViewSet(viewsets.ModelViewSet):
+    """
+    Check invoice to see if payment was setteled
+    """
+
+    queryset = []
+    serializer_class = CheckPaymentSerializer
+    lookup_field = 'memo'
+    lookup_value_regex = '[a-z0-9-]+'
+
+    def get_queryset(self):
+        memo = self.request.query_params.get("memo")
+
+        invoice_request = get_object_or_404(InvoiceRequest, memo=memo)
+        invoice = get_object_or_404(Invoice, invoice_request=invoice_request.pk)
+
+        return [invoice]

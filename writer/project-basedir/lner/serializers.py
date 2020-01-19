@@ -30,3 +30,9 @@ class InvoiceSerializer(HyperlinkedModelSerializer):
     class Meta:
         model = Invoice
         fields = ['r_hash', 'pay_req', 'add_index']
+
+
+class CheckPaymentSerializer(HyperlinkedModelSerializer):
+    class Meta:
+        model = Invoice
+        fields = ['checkpoint_value', 'pay_req']

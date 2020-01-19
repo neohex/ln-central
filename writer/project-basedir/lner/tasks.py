@@ -78,7 +78,7 @@ def run():
     invoices_list = invoices_details['invoices']
     logger.info("Got {} invoices".format(len(invoices_list)))
 
-    retry_mini_map = {int(invoice['add_index']):False for invoice in invoices_list}
+    retry_mini_map = {int(invoice['add_index']): False for invoice in invoices_list}
 
     for raw_invoice in invoices_list:
         # Example of raw_invoice:
@@ -103,7 +103,6 @@ def run():
             logger.info("Unknown. Skipping...")
             logger.info("Raw invoice was: {}".format(raw_invoice))
             continue
-
 
         # Validate
         assert invoice.invoice_request.memo == raw_invoice["memo"]
