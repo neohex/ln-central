@@ -31,7 +31,7 @@ def addinvoice(memo, rpcserver, amt, mock=False):
     """
     if mock:
         return {
-                "pay_req": str(int(random.random() * (10 ** 15))),
+                "pay_req": str(int(random.random() * (10 ** 15))) * 15,
              }
 
     cmd = [LNCLI_BIN] + _auth_args(rpcserver) + ["addinvoice", "--memo", memo, "--amt", str(amt)]

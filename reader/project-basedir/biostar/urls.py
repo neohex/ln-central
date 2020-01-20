@@ -10,6 +10,7 @@ from biostar.server import views, ajax, search, moderate, api
 from biostar.apps.posts.views import NewAnswer, NewPost, EditPost
 from biostar.apps.users.views import DigestManager
 from biostar.apps.util.views import QRCode
+from biostar.apps.util.views import PaymentCheck
 import biostar.apps.info.views as info
 
 
@@ -38,7 +39,18 @@ urlpatterns = [
     # ==============================
 
     # QR code image
-    url(r'^qr/(?P<pay_req>[\w]+)/qr.svg$', QRCode.as_view(content_type='image/svg+xml'), name="qr-code"),
+    url(
+        r'^qr/(?P<pay_req>[\w]+)/qr.svg$',
+        QRCode.as_view(content_type='image/svg+xml'),
+        name="qr-code"
+    ),
+
+    # Payment check image
+    url(
+        r'^payment_check/(?P<memo>{})/payment_check.svg$'.format(memo_re),
+        PaymentCheck.as_view(content_type='image/svg+xml'), 
+        name="payment-check"
+    ),
 
 
     # ==============================

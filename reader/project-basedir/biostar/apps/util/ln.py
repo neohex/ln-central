@@ -4,6 +4,10 @@ import requests
 from django.conf import settings
 
 
+CHECKPOINT_DONE = 1
+CHECKPOINT_WAIT = 2
+CHECKPOINT_ERROR = 3
+
 logger = logging.getLogger(__name__)
 
 class LNUtilError(Exception):
@@ -15,15 +19,13 @@ def call_endpoint(path, args={}, as_post=False):
     else:
         headers = {}
 
-    logger.info("Headers size: {}".format(len(headers)))
-
     full_path = 'http://127.0.0.1:8000/{}.json'.format(path)
     try:
         if as_post:
             return requests.post(full_path, headers=headers, data=args)
         else:
             if len(args) > 0:
-                full_path += "?{}".format("&".join(["{}={}".format(k, v) for k, v in args]))
+                full_path += "?{}".format("&".join(["{}={}".format(k, args[k]) for k in args.keys()]))
 
             return requests.get(full_path, headers=headers)
 
@@ -81,3 +83,35 @@ def add_invoice(memo, node_id=1):
     check_expected_key(response, "pay_req", is_list=False)
         
     return response.json()
+
+def check(memo, node_id=1):
+    response = call_endpoint('ln/check', args={"memo": memo, "node_id": node_id})
+    if response.status_code == 404:
+        return CHECKPOINT_WAIT
+
+    if response.status_code != 200:
+        logger.error(
+            "Got API error when looking up checkpoint, http_status={},node={},memo={}".format(
+                response.status_code,
+                node_id,
+                memo
+            )
+        )
+        return CHECKPOINT_ERROR
+
+    check_expected_key(response, "checkpoint_value", is_list=False)
+    checkpoint_value = response.json()["checkpoint_value"]
+
+    if checkpoint_value == "done":
+        return CHECKPOINT_DONE
+    elif checkpoint_value == "no_checkpoint":
+        return CHECKPOINT_WAIT
+    else:
+        logger.error(
+            "Got checkpoint error: {} for node={},memo={}".format(
+                checkpoint_value,
+                node_id,
+                memo
+            )
+        )
+        return CHECKPOINT_ERROR
