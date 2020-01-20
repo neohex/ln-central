@@ -22,8 +22,10 @@ def h(cmd):
 
 	return "\n".join(results)
 
-def run(cmd, timeout=5, try_num=3, run_try_sleep=1):
-    logger.info("Running command: {}".format(h(cmd)))
+def run(cmd, timeout=5, try_num=3, run_try_sleep=1, log_cmd=True):
+    if log_cmd:
+        logger.info("Running command: {}".format(h(cmd)))
+
     accumulated_timeout = 0
     for _ in range(try_num):
         try_start = time.time()

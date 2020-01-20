@@ -59,9 +59,7 @@ class CheckpointHelper(object):
 
 @background(queue='queue-1', remove_existing_tasks=True)
 def run():
-    logger.info("\nprocess_tasks-----------------")
     node = LightningNode.objects.get()
-
     created = (node.global_checkpoint == -1)
 
     if created:
@@ -76,6 +74,14 @@ def run():
 
     # example of invoices_details: {"invoices": [], 'first_index_offset': '5', 'last_index_offset': '72'}
     invoices_list = invoices_details['invoices']
+    if settings.MOCK_LN_CLIENT:
+        invoices_list += [
+            {
+                'settled': False,
+                'add_index': node.global_checkpoint + 1
+            }
+        ]
+
     logger.info("Got {} invoices".format(len(invoices_list)))
 
     retry_mini_map = {int(invoice['add_index']): False for invoice in invoices_list}
@@ -100,8 +106,8 @@ def run():
         try:
             invoice = Invoice.objects.get(add_index=int(raw_invoice["add_index"]))
         except Invoice.DoesNotExist:
-            logger.info("Unknown. Skipping...")
-            logger.info("Raw invoice was: {}".format(raw_invoice))
+            logger.error("Unknown add_index. Skipping invoice...")
+            logger.error("Raw invoice was: {}".format(raw_invoice))
             continue
 
         # Validate
