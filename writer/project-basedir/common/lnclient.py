@@ -27,7 +27,7 @@ def _auth_args(rpcserver):
 
 def addinvoice(memo, rpcserver, amt, mock=False):
     """
-    TODO: check for [lncli] rpc error: code = Unknown desc = memo too large: 1192 bytes (maxsize=1024)
+    TODO (2019-??-??): check for [lncli] rpc error: code = Unknown desc = memo too large: 1192 bytes (maxsize=1024)
     """
     if mock:
         return {

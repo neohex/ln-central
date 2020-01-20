@@ -19,6 +19,7 @@ from common import json_util
 from common.const import OrderedDict
 from common import const
 from common import validators
+from common.cli import RunCommandException
 
 from biostar.apps.util import ln
 
@@ -422,7 +423,16 @@ class PostPublishView(TemplateView):
         context = super(PostPublishView, self).get_context_data(**kwargs)
 
         context['nodes_list'] = ln.get_nodes_list() 
-        details = ln.add_invoice(context["memo"])
+
+        try:
+            details = ln.add_invoice(context["memo"])
+        except RunCommandException as e:
+            logger.excetion(e)
+            return HttpResponseNotFound(
+                "<h1>Command for <b>addinvoice</b> failed or timed-out. "
+                "Please refresh this page.</h1>"
+            )
+
         context['pay_req'] = details['pay_req']
 
         return context
