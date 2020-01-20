@@ -70,12 +70,17 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
                 mock=settings.MOCK_LN_CLIENT
             )
 
+            if settings.MOCK_LN_CLIENT:
+                invoice_stdout["add_index"] = node.global_checkpoint + 1
+
             serializer = InvoiceSerializer(data=invoice_stdout, many=False)  # re-serialize
             serializer.is_valid(raise_exception=True)  # validate data going into the database
 
             invoice_obj = Invoice(
                 invoice_request=request_obj,
                 pay_req=serializer.validated_data.get("pay_req"),
+                r_hash=serializer.validated_data.get("r_hash"),
+                add_index=serializer.validated_data.get("add_index")
             )
             invoice_obj.save()
             return Response(serializer.validated_data)
