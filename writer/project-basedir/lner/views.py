@@ -1,4 +1,5 @@
 import time
+import re
 
 from django.shortcuts import get_object_or_404
 from django.http import Http404
@@ -23,6 +24,8 @@ from .serializers import CheckPaymentSerializer
 
 from common import log
 from common import lnclient
+
+from common.const import MEMO_RE
 
 
 logger = log.getLogger("lner.views")
@@ -103,13 +106,12 @@ class CheckPaymentViewSet(viewsets.ModelViewSet):
 
     queryset = []
     serializer_class = CheckPaymentSerializer
-    lookup_field = 'memo'
-    lookup_value_regex = '[a-z0-9-]+'
 
     def get_queryset(self):
         memo = self.request.query_params.get("memo")
+        assert re.match(MEMO_RE, memo), "Got invalid memo {}".format(memo)
 
         invoice_request = get_object_or_404(InvoiceRequest, memo=memo)
-        invoice = get_object_or_404(Invoice, invoice_request=invoice_request.pk)
+        invoice = get_object_or_404(Invoice, invoice_request=invoice_request)
 
         return [invoice]

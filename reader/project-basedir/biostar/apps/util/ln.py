@@ -24,10 +24,7 @@ def call_endpoint(path, args={}, as_post=False):
         if as_post:
             return requests.post(full_path, headers=headers, data=args)
         else:
-            if len(args) > 0:
-                full_path += "?{}".format("&".join(["{}={}".format(k, args[k]) for k in args.keys()]))
-
-            return requests.get(full_path, headers=headers)
+            return requests.get(full_path, headers=headers, params=args)
 
     except requests.exceptions.ConnectionError as e:
         logger.exception(e)
@@ -39,6 +36,7 @@ def check_expected_key(response, expected_key, is_list=True):
         if is_list:
             [n[expected_key] for n in response.json()]
         else:
+            print(response.json())
             response.json()[expected_key]
 
     except ValueError:
@@ -56,11 +54,18 @@ def check_expected_key(response, expected_key, is_list=True):
 
         logger.error(error_msg)
         raise LNUtilError(error_msg)
-    except TypeError:
-        error_msg = "Got invalid response from API server: {} status_code={} response_text={}".format(
-            response.reason, response.status_code, response.text
+    except TypeError as e:
+        error_msg = (
+            (
+                "Is is_list correct for check_expected_key? "
+                "Got TypeError for a valid response from API "
+                "server: {} status_code={} response_text={} exception={}"
+            ).format(
+                    response.reason, response.status_code, response.text, e
+            )
         )
 
+        logger.exception(e)
         logger.error(error_msg)
         raise LNUtilError(error_msg)
 
@@ -99,8 +104,10 @@ def check(memo, node_id=1):
         )
         return CHECKPOINT_ERROR
 
-    check_expected_key(response, "checkpoint_value", is_list=False)
-    checkpoint_value = response.json()["checkpoint_value"]
+    check_expected_key(response, "checkpoint_value", is_list=True)
+
+    response_parsed = response.json()[0]
+    checkpoint_value = response_parsed["checkpoint_value"]
 
     if checkpoint_value == "done":
         return CHECKPOINT_DONE

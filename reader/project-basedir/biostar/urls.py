@@ -13,8 +13,7 @@ from biostar.apps.util.views import QRCode
 from biostar.apps.util.views import PaymentCheck
 import biostar.apps.info.views as info
 
-
-memo_re = '{}_[\w\/\+\=]+'.format(settings.FRIENDLY_PREFIX)
+from common.const import MEMO_RE
 
 urlpatterns = [
 
@@ -47,7 +46,7 @@ urlpatterns = [
 
     # Payment check image
     url(
-        r'^payment_check/(?P<memo>{})/payment_check.svg$'.format(memo_re),
+        r'^payment_check/(?P<memo>{})/payment_check.svg$'.format(MEMO_RE),
         PaymentCheck.as_view(content_type='image/svg+xml'), 
         name="payment-check"
     ),
@@ -75,13 +74,13 @@ urlpatterns = [
     url(r'^p/(?P<pk>\d+)/$', views.PostDetails.as_view(), name="post-details"),
 
     # Post preview edit
-    url(r'^p/edit/preview/(?P<memo>{})/$'.format(memo_re), views.RateLimitedNewPost.as_view(), name="post-preview-edit"),
+    url(r'^p/edit/preview/(?P<memo>{})/$'.format(MEMO_RE), views.RateLimitedNewPost.as_view(), name="post-preview-edit"),
 
     # Post publish
-    url(r'^p/publish/preview/(?P<memo>{})/$'.format(memo_re), views.PostPublishView.as_view(), name="post-publish"),
+    url(r'^p/publish/preview/(?P<memo>{})/$'.format(MEMO_RE), views.PostPublishView.as_view(), name="post-publish"),
 
     # Post preview
-    url(r'^p/new/preview/(?P<memo>{})/$'.format(memo_re), views.PostPreviewView.as_view(), name="post-preview"),
+    url(r'^p/new/preview/(?P<memo>{})/$'.format(MEMO_RE), views.PostPreviewView.as_view(), name="post-preview"),
 
     # A separate url for each post type.
     url(r'^p/new/post/$', views.RateLimitedNewPost.as_view(), name="new-post"),

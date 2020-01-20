@@ -1,3 +1,5 @@
+from django.conf import settings
+
 """
 Constants that may be used in multiple packages
 """
@@ -71,3 +73,5 @@ POST_LIMIT_DEFAULT = list(POST_LIMIT_FIELDS)[0]
 
 POST_LIMIT_INVALID_MSG = "Invalid limit parameter received"
 
+
+MEMO_RE = '{}_[\w\/\+\=]+'.format(settings.FRIENDLY_PREFIX)

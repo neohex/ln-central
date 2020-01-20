@@ -54,6 +54,7 @@ class PaymentCheck(TemplateView):
         count = 0
         while True:
             result = ln.check(memo, node_id=1)
+
             if result != ln.CHECKPOINT_WAIT:
                 break
 
@@ -95,8 +96,8 @@ class PaymentCheck(TemplateView):
         #     )
         # )
 
-        link = dwg.add(dwg.a(post_url, target="_top"))
-        link.add(dwg_link)
+        # link = dwg.add(dwg.a(post_url, target="_top"))
+        # link.add(dwg_link)
 
         context['payment_check'] = dwg.tostring()
 
