@@ -3,12 +3,12 @@ import requests
 
 from django.conf import settings
 
-
-CHECKPOINT_DONE = 1
-CHECKPOINT_WAIT = 2
-CHECKPOINT_ERROR = 3
-
 logger = logging.getLogger(__name__)
+
+
+class CheckResponce(object):
+    def __init__(self):
+        pass
 
 class LNUtilError(Exception):
     pass
@@ -88,36 +88,21 @@ def add_invoice(memo, node_id=1):
         
     return response.json()
 
-def check(memo, node_id=1):
+def check_payment(memo, node_id=1):
     response = call_endpoint('ln/check', args={"memo": memo, "node_id": node_id})
-    if response.status_code == 404:
-        return CHECKPOINT_WAIT
-
     if response.status_code != 200:
-        logger.error(
+        error_msg = (
             "Got API error when looking up checkpoint, http_status={},node={},memo={}".format(
                 response.status_code,
                 node_id,
                 memo
             )
         )
-        return CHECKPOINT_ERROR
+
+        logger.error(error_msg)
+        raise LNUtilError(error_msg)
 
     check_expected_key(response, "checkpoint_value", is_list=True)
 
     response_parsed = response.json()[0]
-    checkpoint_value = response_parsed["checkpoint_value"]
-
-    if checkpoint_value == "done":
-        return CHECKPOINT_DONE
-    elif checkpoint_value == "no_checkpoint":
-        return CHECKPOINT_WAIT
-    else:
-        logger.error(
-            "Got checkpoint error: {} for node={},memo={}".format(
-                checkpoint_value,
-                node_id,
-                memo
-            )
-        )
-        return CHECKPOINT_ERROR
+    return response_parsed

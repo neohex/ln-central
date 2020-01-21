@@ -35,4 +35,4 @@ class InvoiceSerializer(HyperlinkedModelSerializer):
 class CheckPaymentSerializer(HyperlinkedModelSerializer):
     class Meta:
         model = Invoice
-        fields = ['checkpoint_value', 'pay_req']
+        fields = ['checkpoint_value', 'pay_req', 'performed_action_type', 'performed_action_id']

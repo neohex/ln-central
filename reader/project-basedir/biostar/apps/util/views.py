@@ -20,6 +20,29 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+
+
+CHECKPOINT_DONE = 1
+CHECKPOINT_WAIT = 2
+CHECKPOINT_ERROR = 3
+
+
+def gen_conclusion(checkpoint_value, node_id, memo):
+    if checkpoint_value == "done":
+        return CHECKPOINT_DONE
+    elif checkpoint_value == "no_checkpoint":
+        return CHECKPOINT_WAIT
+    else:
+        logger.error(
+            "Got checkpoint error: {} for node={},memo={}".format(
+                checkpoint_value,
+                node_id,
+                memo
+            )
+        )
+        return CHECKPOINT_ERROR
+
+
 def abspath(*args):
     """Generates absolute paths"""
     return os.path.abspath(os.path.join(*args))
@@ -53,9 +76,12 @@ class PaymentCheck(TemplateView):
 
         count = 0
         while True:
-            result = ln.check(memo, node_id=1)
+            node_id = 1
+            result = ln.check_payment(memo, node_id=node_id)
+            checkpoint_value = result["checkpoint_value"]
+            conclusion = gen_conclusion(checkpoint_value, node_id=node_id, memo=memo)
 
-            if result != ln.CHECKPOINT_WAIT:
+            if conclusion != CHECKPOINT_WAIT:
                 break
 
             # TODO: shutdown if sigterm is caught
@@ -64,40 +90,46 @@ class PaymentCheck(TemplateView):
             if count > 10:
                 raise Http404("Max time exceeded")
 
-        if result == ln.CHECKPOINT_DONE:
-            # post_url = "https://ln.support/p/141/"
-            humanized_title = "Payment Sucessful"
-        else:
-            humanized_title = "Payment ERROR, please try again later"
-
         dwg = svgwrite.Drawing(size=(500, 2000))
-        dwg_title = dwg.add(dwg.g(font_size=22))
-        dwg_title.add(
-            dwg.text(
-                humanized_title,
-                (10, 20)
+
+        if conclusion == CHECKPOINT_DONE:
+            post_id = result["performed_action_id"]
+
+            dwg_title = dwg.add(dwg.g(font_size=50))
+            dwg_title.add(
+                dwg.text(
+                    "Payment Sucessful",
+                    (10, 50)
+                )
             )
-        )
 
-        # dwg_prefix = dwg.add(dwg.g(font_size=14))
-        # dwg_prefix.add(
-        #     dwg.text(
-        #         "Post published ---> ",
-        #         (10, 50),
-        #     )
-        # )
+            dwg_subtitle = dwg.add(dwg.g(font_size=14))
+            dwg_subtitle.add(
+                dwg.text(
+                    "Post published ---> Post ID is {}".format(post_id),
+                    (10, 100),
+                )
+            )
 
-        # dwg_link = dwg.add(dwg.g(font_size=14))
-        # dwg_link.add(
-        #     dwg.text(
-        #         post_url,
-        #         (120, 50),
-        #         text_decoration="underline"
-        #     )
-        # )
+            # dwg_link = dwg.add(dwg.g(font_size=14))
+            # dwg_link.add(
+            #     dwg.text(
+            #         post_url,
+            #         (120, 50),
+            #         text_decoration="underline"
+            #     )
+            # )
 
-        # link = dwg.add(dwg.a(post_url, target="_top"))
-        # link.add(dwg_link)
+            # link = dwg.add(dwg.a(post_url, target="_top"))
+            # link.add(dwg_link)
+        else:
+            dwg_title = dwg.add(dwg.g(font_size=20))
+            dwg_title.add(
+                dwg.text(
+                    "Payment ERROR, please try again later",
+                    (10, 50)
+                )
+            )
 
         context['payment_check'] = dwg.tostring()
 
