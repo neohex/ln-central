@@ -10,7 +10,7 @@ class CustomModel(models.Model):
 
     class Meta:
         abstract = True
-        
+
     def save(self, *args, **kwargs):
         if not self.id:
             self.created = timezone.now()
@@ -44,3 +44,9 @@ class Invoice(CustomModel):
         max_length=255,
         default="no_checkpoint"
     )
+    performed_action_type =  models.CharField(
+        verbose_name='E.g. "post"',
+        max_length=255,
+        default="no_action"
+    )
+    performed_action_id =  models.IntegerField(verbose_name='E.g. post.id', default=-1)

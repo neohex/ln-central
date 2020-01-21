@@ -45,10 +45,14 @@ class CheckpointHelper(object):
     def __repr__(self):
         return "node-{}-add-index-{}".format(self.node.pk, self.add_index)
 
-    def set_checkpoint(self, checkpoint_value):
+    def set_checkpoint(self, checkpoint_value, action_type=None, action_id=None):
         if self.invoice.checkpoint_value == checkpoint_value:
             logger.info("Invoice already has this checkpoint {}".format(self))
         else:
+            if action_type and action_id:
+                self.invoice.performed_action_type = action_type
+                self.invoice.performed_action_id = action_id
+
             self.invoice.checkpoint_value = checkpoint_value
             self.invoice.save()
             logger.info("Updated checkpoint to {}".format(self))
@@ -172,7 +176,7 @@ def run():
         )
         post.save()
 
-        checkpoint_helper.set_checkpoint("done")
+        checkpoint_helper.set_checkpoint("done", action_type="post", action_id=post.id)
 
     # advance global checkpoint
     new_global_checkpoint = None
