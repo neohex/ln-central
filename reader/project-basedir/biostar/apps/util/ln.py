@@ -36,7 +36,6 @@ def check_expected_key(response, expected_key, is_list=True):
         if is_list:
             [n[expected_key] for n in response.json()]
         else:
-            print(response.json())
             response.json()[expected_key]
 
     except ValueError:
