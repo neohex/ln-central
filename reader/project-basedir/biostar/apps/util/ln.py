@@ -3,7 +3,12 @@ import requests
 
 from django.conf import settings
 
-logger = logging.getLogger(__name__)
+from common.log import logger
+
+
+CHECKPOINT_DONE = 1
+CHECKPOINT_WAIT = 2
+CHECKPOINT_ERROR = 3
 
 
 class CheckResponce(object):
@@ -87,6 +92,25 @@ def add_invoice(memo, node_id=1):
     check_expected_key(response, "pay_req", is_list=False)
         
     return response.json()
+
+
+
+
+
+def gen_check_conclusion(checkpoint_value, node_id, memo):
+    if checkpoint_value == "done":
+        return CHECKPOINT_DONE
+    elif checkpoint_value == "no_checkpoint":
+        return CHECKPOINT_WAIT
+    else:
+        logger.error(
+            "Got checkpoint error: {} for node={},memo={}".format(
+                checkpoint_value,
+                node_id,
+                memo
+            )
+        )
+        return CHECKPOINT_ERROR
 
 def check_payment(memo, node_id=1):
     response = call_endpoint('ln/check', args={"memo": memo, "node_id": node_id})

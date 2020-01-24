@@ -19,27 +19,6 @@ import svgwrite
 from common.log import logger
 
 
-CHECKPOINT_DONE = 1
-CHECKPOINT_WAIT = 2
-CHECKPOINT_ERROR = 3
-
-
-def gen_conclusion(checkpoint_value, node_id, memo):
-    if checkpoint_value == "done":
-        return CHECKPOINT_DONE
-    elif checkpoint_value == "no_checkpoint":
-        return CHECKPOINT_WAIT
-    else:
-        logger.error(
-            "Got checkpoint error: {} for node={},memo={}".format(
-                checkpoint_value,
-                node_id,
-                memo
-            )
-        )
-        return CHECKPOINT_ERROR
-
-
 def abspath(*args):
     """Generates absolute paths"""
     return os.path.abspath(os.path.join(*args))
@@ -76,9 +55,9 @@ class PaymentCheck(TemplateView):
             node_id = 1
             result = ln.check_payment(memo, node_id=node_id)
             checkpoint_value = result["checkpoint_value"]
-            conclusion = gen_conclusion(checkpoint_value, node_id=node_id, memo=memo)
+            conclusion = ln.gen_check_conclusion(checkpoint_value, node_id=node_id, memo=memo)
 
-            if conclusion != CHECKPOINT_WAIT:
+            if conclusion != ln.CHECKPOINT_WAIT:
                 break
 
             # TODO: shutdown if sigterm is caught
@@ -89,7 +68,7 @@ class PaymentCheck(TemplateView):
 
         dwg = svgwrite.Drawing(size=(500, 2000))
 
-        if conclusion == CHECKPOINT_DONE:
+        if conclusion == ln.CHECKPOINT_DONE:
             post_id = result["performed_action_id"]
             post = Post.objects.get(id=post_id)
             post_url = 'https://{}{}'.format(settings.SITE_DOMAIN, post.get_absolute_url())

@@ -48,6 +48,10 @@ def validate_signable_field(value, key="unknown", no_auto_correct=False):
     if no_auto_correct is set to True then instead of returning
     corrected version, a ValidationError will be raise
     """
+
+    if value is None:
+        return None
+
     new_value = value.strip(" \t\n\r\x0b\f") 
     if new_value != value:
         # since we're asking the user to sign text via CLI
