@@ -10,9 +10,8 @@ from biostar.server.views import BaseListMixin
 from ajax import ajax_error, ajax_success, ajax_error_wrapper, json_response
 from biostar.apps.posts.models import Post, Tag
 from django.contrib.sitemaps import GenericSitemap
-import logging
 
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 info_dict = {
     'queryset': Post.objects.all(),

@@ -37,7 +37,7 @@ import json
 import binascii
 import zlib
 
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 
 class Tag(models.Model):

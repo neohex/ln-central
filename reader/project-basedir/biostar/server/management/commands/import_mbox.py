@@ -1,4 +1,4 @@
-import sys, time, os, logging
+import sys, time, os
 import mailbox, markdown, pyzmail
 from django.conf import settings
 from django.utils.timezone import utc
@@ -17,7 +17,7 @@ import difflib
 from collections import deque
 from datetime import timedelta
 
-logger = logging.getLogger('simple-logger')
+from common.log import logger
 
 # This needs to be shorter so that the content looks good
 # on smaller screens as well.

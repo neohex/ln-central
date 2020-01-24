@@ -19,7 +19,7 @@
 
 from django.core.management.base import BaseCommand, CommandError
 from optparse import make_option
-import sys, logging, os, datetime, pytz
+import sys, os, datetime, pytz
 from django.core.exceptions import ImproperlyConfigured
 from datetime import date
 from django.utils import timezone
@@ -28,7 +28,7 @@ import csv, re
 from biostar.apps.users.models import User
 from biostar.apps.posts.models import Post
 
-logger = logging.getLogger('simple-logger')
+from common.log import logger
 
 class Command(BaseCommand):
     help = 'Import phpbb posts from csv backup\nUsage: python manage.py import_phpbb -p /path/to/posts/table.csv -u /path/to/users/table.csv'

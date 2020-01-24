@@ -5,7 +5,7 @@ There are no database models declarations in this file. Data models are specifie
 Only signals and connections between models are specfied here.
 """
 from __future__ import print_function, unicode_literals, absolute_import, division
-import logging, datetime
+import datetime
 from django.db.models import signals, Q
 
 from biostar.apps.posts.models import Post, Subscription, ReplyToken
@@ -22,7 +22,7 @@ from django.core import mail
 from django.conf import settings
 from django.contrib.sites.models import Site
 
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 # This will be the message body on the site.
 POST_CREATED_TEXT = "messages/post_created.txt"

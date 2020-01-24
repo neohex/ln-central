@@ -3,7 +3,7 @@ Inspired by django-messages at https://github.com/arneb/django-messages
 '''
 
 from __future__ import print_function, unicode_literals, absolute_import, division
-import logging, datetime
+import datetime
 from django.db import models
 from django.conf import settings
 from django.utils.timezone import utc
@@ -11,8 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core import mail
 from common import general_util
 
-logger = logging.getLogger(__name__)
-
+from common.log import logger
 
 class MessageManager(models.Manager):
 

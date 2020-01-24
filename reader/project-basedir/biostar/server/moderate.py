@@ -17,13 +17,12 @@ from crispy_forms.layout import Layout, Field, Fieldset, Submit, ButtonHolder
 from django.http import HttpResponseRedirect
 from django.db.models import Q, F
 from datetime import timedelta
-import logging
 from datetime import datetime
 from django.utils.timezone import utc
 
 from common import const
 
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 OPEN, CLOSE_OFFTOPIC, CLOSE_SPAM, DELETE, \
     DUPLICATE, MOVE_TO_COMMENT, MOVE_TO_ANSWER, CROSSPOST, TOGGLE_ACCEPT, BUMP_POST = map(str, range(10))

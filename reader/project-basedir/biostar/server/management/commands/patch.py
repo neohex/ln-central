@@ -9,14 +9,13 @@ from django.core.management.base import BaseCommand, CommandError
 import os, re, urllib2
 from optparse import make_option
 import random
-import logging
 from datetime import timedelta, datetime
 from django.db.models import signals, Q
 import string
 import json
 from itertools import *
 
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 
 class Command(BaseCommand):

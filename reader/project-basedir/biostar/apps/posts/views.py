@@ -14,7 +14,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.core.exceptions import ValidationError
 import re
-import logging
 
 import langdetect
 from django.template.loader import render_to_string
@@ -27,6 +26,7 @@ from common import validators
 from biostar.apps.util import ln
 from biostar.apps.users.models import User
 
+from common.log import logger
 
 def english_only(text):
     try:
@@ -42,9 +42,6 @@ def valid_language(text):
         if lang not in supported_languages:
             raise ValidationError(
                     'Language "{0}" is not one of the supported languages {1}!'.format(lang, supported_languages))
-
-
-logger = logging.getLogger(__name__)
 
 
 def valid_title(text):

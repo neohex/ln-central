@@ -1,6 +1,6 @@
 __author__ = 'ialbert'
 from django.conf import settings
-import hmac, logging, re
+import hmac, re
 from datetime import timedelta
 from django.contrib.auth import authenticate, login, logout
 from biostar.apps.users.models import User, Profile
@@ -12,7 +12,7 @@ from biostar.apps.messages.models import Message
 from collections import defaultdict
 from biostar.awards import create_user_award
 
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 
 def get_ip(request):

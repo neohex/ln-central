@@ -6,10 +6,10 @@ from django.db import connection, transaction
 from django.db.models.loading import get_app
 from StringIO import StringIO
 from django.core.management.base import BaseCommand, CommandError
-import os, logging
+import os
 from optparse import make_option
 
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 os.environ['DJANGO_COLORS'] = 'nocolor'
 

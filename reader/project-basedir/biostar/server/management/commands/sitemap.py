@@ -9,10 +9,9 @@ from biostar.apps.posts.models import Post
 from django.utils.encoding import smart_str
 from django.template import loader
 from django.core.management.base import BaseCommand, CommandError
-import logging
 from django.contrib import sitemaps
 
-logger = logging.getLogger("command")
+from common.log import logger
 
 class Command(BaseCommand):
     help = 'Creates a sitemap in the export folder of the site'

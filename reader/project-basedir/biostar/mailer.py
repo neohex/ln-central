@@ -9,10 +9,7 @@ from django.core.mail import get_connection
 
 from .celery import app
 
-#logger = logging.getLogger(__name__)
-
-from celery.utils.log import get_task_logger
-logger = get_task_logger(__name__)
+from common.log import logger
 
 # Based on django-celery-email
 # https://github.com/pmclanahan/django-celery-email

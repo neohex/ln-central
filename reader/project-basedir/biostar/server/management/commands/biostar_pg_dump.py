@@ -9,9 +9,7 @@ from datetime import datetime
 from optparse import make_option
 import biostar
 
-import logging
-
-logger = logging.getLogger("command")
+from common.log import logger
 
 
 def abspath(*args):

@@ -8,8 +8,7 @@ if django.VERSION[0] == 1:
 else:
     from django.urls import reverse
 
-import logging
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 # Create your models here.
 

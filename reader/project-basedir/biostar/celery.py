@@ -1,14 +1,13 @@
 from __future__ import absolute_import
 from django.conf import settings
-from celery.utils.log import get_task_logger
 import os
 
-from common import const
 from datetime import timedelta
-
-logger = get_task_logger(__name__)
-
 from celery import Celery
+from common import const
+
+from common.log import logger
+
 
 app = Celery('biostar')
 

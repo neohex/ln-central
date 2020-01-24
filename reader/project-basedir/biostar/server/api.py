@@ -1,5 +1,4 @@
 import json
-import logging
 from datetime import datetime, timedelta
 from calendar import timegm
 from os.path import join, normpath, isfile, exists
@@ -12,7 +11,7 @@ from ..apps.users.models import User
 from ..apps.posts.models import Vote, Post
 
 
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 
 def json_response(f):

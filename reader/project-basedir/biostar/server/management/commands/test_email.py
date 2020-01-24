@@ -1,12 +1,11 @@
 from __future__ import print_function, unicode_literals, absolute_import, division
-import logging
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.core.mail import send_mail
 
 
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 
 class Command(BaseCommand):

@@ -1,5 +1,5 @@
 __author__ = 'ialbert'
-import json, traceback, logging
+import json, traceback
 from braces.views import JSONResponseMixin
 from biostar.apps.posts.models import Post, Vote
 from biostar.apps.users.models import User
@@ -16,7 +16,7 @@ def json_response(adict, **kwd):
     return HttpResponse(json.dumps(adict), **kwd)
 
 
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 
 def ajax_msg(msg, status, **kwargs):

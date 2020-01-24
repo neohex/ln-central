@@ -6,9 +6,7 @@ from .celery import app
 import logging
 
 
-from celery.utils.log import get_task_logger
-
-logger = get_task_logger(__name__)
+from common.log import logger
 
 def init_awards():
     "Initializes the badges"

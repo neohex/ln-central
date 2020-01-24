@@ -1,6 +1,5 @@
 import re
 import bleach
-import logging
 
 # needs "requests" package
 import requests
@@ -12,7 +11,7 @@ from html5lib.tokenizer import HTMLTokenizer
 from django.conf import settings
 from django.template import loader, Context
 
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 ALLOWED_TAGS = bleach.ALLOWED_TAGS + settings.ALLOWED_TAGS
 ALLOWED_STYLES = bleach.ALLOWED_STYLES + settings.ALLOWED_STYLES

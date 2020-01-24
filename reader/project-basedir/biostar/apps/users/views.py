@@ -14,9 +14,9 @@ from common import const
 from django.contrib.auth import authenticate, login, logout
 from django.conf import settings
 from biostar.apps import util
-import logging, hmac
+import hmac
 
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 
 class UserEditForm(forms.Form):

@@ -1,5 +1,5 @@
 from __future__ import print_function, unicode_literals, absolute_import, division
-import logging
+
 from django import forms
 from django.db import models
 from django.conf import settings
@@ -27,7 +27,7 @@ ALLOWED_STYLES = bleach.ALLOWED_STYLES + settings.ALLOWED_STYLES
 ALLOWED_ATTRIBUTES = dict(bleach.ALLOWED_ATTRIBUTES)
 ALLOWED_ATTRIBUTES.update(settings.ALLOWED_ATTRIBUTES)
 
-logger = logging.getLogger(__name__)
+from common.log import logger
 
 
 class LocalManager(models.Manager):
