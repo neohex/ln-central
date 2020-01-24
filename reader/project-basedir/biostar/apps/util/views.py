@@ -10,16 +10,13 @@ from django.http import Http404
 from django.conf import settings
 
 from biostar.apps.util import ln
+from biostar.apps.posts.models import Post
 
 import qrcode
 import qrcode.image.svg
 import svgwrite
 
-import logging
-
-logger = logging.getLogger(__name__)
-
-
+from common.log import logger
 
 
 CHECKPOINT_DONE = 1
@@ -94,6 +91,8 @@ class PaymentCheck(TemplateView):
 
         if conclusion == CHECKPOINT_DONE:
             post_id = result["performed_action_id"]
+            post = Post.objects.get(id=post_id)
+            post_url = 'https://{}{}'.format(settings.SITE_DOMAIN, post.get_absolute_url())
 
             dwg_title = dwg.add(dwg.g(font_size=50))
             dwg_title.add(
@@ -111,17 +110,16 @@ class PaymentCheck(TemplateView):
                 )
             )
 
-            # dwg_link = dwg.add(dwg.g(font_size=14))
-            # dwg_link.add(
-            #     dwg.text(
-            #         post_url,
-            #         (120, 50),
-            #         text_decoration="underline"
-            #     )
-            # )
+            dwg_link = dwg.add(dwg.g(font_size=14))
+            dwg_link.add(
+                dwg.text(
+                    "{}".format(post_url),
+                    (70, 130),
+                )
+            )
 
-            # link = dwg.add(dwg.a(post_url, target="_top"))
-            # link.add(dwg_link)
+            link = dwg.add(dwg.a(post_url, target="_top"))
+            link.add(dwg_link)
         else:
             dwg_title = dwg.add(dwg.g(font_size=20))
             dwg_title.add(
