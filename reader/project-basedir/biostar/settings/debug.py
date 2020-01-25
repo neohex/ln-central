@@ -17,6 +17,21 @@ INSTALLED_APPS.append( "debug_toolbar")
 def show_toolbar(request):
     return True
 
-DEBUG_TOOLBAR_CONFIG ={
-    'SHOW_TOOLBAR_CALLBACK': "biostar.apps.util.always_true",
+DEBUG_TOOLBAR_CONFIG ={}
+
+
+# Reader users the writers database
+DATABASE_NAME = abspath(HOME_DIR, '..', '..', 'writer', 'project-basedir', 'live', 'db.sqlite3')
+DATABASES = {
+    'default': {
+        # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': DATABASE_NAME,
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+        'OPTIONS': {}
+    }
 }
+

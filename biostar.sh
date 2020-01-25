@@ -210,7 +210,7 @@ cd ../reader/project-basedir
 # Set defaults for environment variables.
 
 if [ -z "$DJANGO_SETTINGS_MODULE" ]; then
-    export DJANGO_SETTINGS_MODULE=biostar.settings.base
+    export DJANGO_SETTINGS_MODULE=biostar.settings.debug
 fi
 
 if [ -z "$JSON_DATA_FIXTURE" ]; then
@@ -276,7 +276,7 @@ while (( "$#" )); do
     fi
 
     if [ "$1" = "run" ]; then
-        echo "*** Run the development server with $DJANGO_SETTINGS_MODULE and DATABASE_NAME=$DATABASE_NAME"
+        echo "*** Run the development server with $DJANGO_SETTINGS_MODULE"
         $PYTHON manage.py runserver $BIOSTAR_HOSTNAME --settings=$DJANGO_SETTINGS_MODULE
 	shift
 	continue

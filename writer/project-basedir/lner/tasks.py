@@ -2,7 +2,9 @@ import logging
 import sys
 import time
 from datetime import datetime
+from datetime import timedelta
 
+from django.utils import timezone
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
@@ -17,6 +19,7 @@ from posts.models import Post
 from users.models import User
 from lner.models import LightningNode
 from lner.models import Invoice
+from lner.models import InvoiceRequest
 
 logger.info("Python version: {}".format(sys.version.replace("\n", " ")))
 
@@ -78,13 +81,37 @@ def run():
 
     # example of invoices_details: {"invoices": [], 'first_index_offset': '5', 'last_index_offset': '72'}
     invoices_list = invoices_details['invoices']
+
     if settings.MOCK_LN_CLIENT:
-        invoices_list += [
-            {
-                'settled': False,
-                'add_index': node.global_checkpoint + 1
-            }
-        ]
+        # Here the mock pulls invocies from DB Invoice model, while in prod invoices are pulled from the Lightning node
+        # 1. Moked lnclient.listinvoices returns an empty list
+        # 2. The web front end adds the InvoiceRequest to the DB before it creates the actial invoices with lnclient.addinvoice
+        # 3. Moked API lnclient.addinvoice simply fakes converting InvoiceRequest to Invoice and saves to DB
+        # 4. Here the mocked proces_tasks pulls invocies from DB Invoice model and pretends they came from lnclient.listinvoices
+        # 5. After X seconds passed based on Invoice created time, here Mock update the Invoice checkpoint to "done" faking a payment 
+
+        invoices_list = []
+        for invoice_obj in Invoice.objects.all():
+            invoice_request = InvoiceRequest.objects.get(id=invoice_obj.invoice_request.id)
+            if invoice_request.lightning_node.id != node.id:
+                continue
+
+            mock_setteled = (invoice_obj.created + timedelta(seconds=3) < timezone.now())
+
+            creation_unixtime = int(time.mktime(invoice_obj.created.timetuple()))
+            invoices_list.append(
+                {
+                    "settled": mock_setteled,
+                    "settle_date": str(int(time.time())) if mock_setteled else 0,
+                    "state": "SETTLED" if mock_setteled else "OPEN",
+                    "memo": invoice_request.memo,
+                    "add_index": invoice_obj.add_index,
+                    "payment_request": invoice_obj.pay_req,
+                    "r_hash": invoice_obj.r_hash,
+                    "creation_date": str(creation_unixtime),
+                    "expiry": str(creation_unixtime + 120)
+                }
+            )
 
     logger.info("Got {} invoices".format(len(invoices_list)))
 

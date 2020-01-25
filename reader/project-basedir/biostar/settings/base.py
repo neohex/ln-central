@@ -131,25 +131,6 @@ READER_TO_WRITER_AUTH_TOKEN = None
 
 MANAGERS = ADMINS
 
-DATABASES = {
-    'default': {
-        # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DATABASE_NAME,
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-        'OPTIONS': {}
-    }
-}
-
-if os.path.isfile(DATABASE_NAME):
-    current_permissions = stat.S_IMODE(os.lstat(DATABASE_NAME).st_mode)
-    os.chmod(DATABASE_NAME, current_permissions & ~stat.S_IWUSR & ~stat.S_IWGRP & ~stat.S_IWOTH)
-    print("Database file {} exist, changed permission to read-only".format(
-        DATABASE_NAME))
-
 # admin site may fail if this setting is active
 TEMPLATE_STRING_IF_INVALID = "*** MISSING ***"
 
