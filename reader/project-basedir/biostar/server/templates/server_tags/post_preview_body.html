@@ -34,14 +34,16 @@
         {# The body of the post #}
         <div class="content" >
 
-            <div class="col-xs-3 col-md-2 box pull-right text-center visible-lg visible-md">
-                    <div>Avatar not yet known</div>
-                    <div class="ago">{{ post.date|time_ago }} by</div>
-                    <div class="uname">Pen name not yet known</div>
+            <div class="col-xs-3 col-md-3 box pull-right text-center visible-lg visible-md">
+                <div><a href="{{ user.get_absolute_url }}">{% avataaar user 82 %}</a></div>
+                <div class="ago">{{ date|time_ago }} by</div>
+                <div class="uname">{% userlink user %}</div>
+                <div>&nbsp;</div>
+                <div>(This avatar and pen name is used for all unsigned posts)</div>
             </div>
-
             <div class="box text-center visible-sm visible-xs">
-                <div class="uname">Pen name not yet known:</div>
+                <div>(This avatar and pen name is used for all unsigned posts)</div>
+                <div class="uname"><a href="{{ user.get_absolute_url }}">{% avataaar user 40 %}</a>{% userlink user %} wrote:</div>
             </div>
 
             <span itemprop="text">{{ post.html|safe }}</span>
@@ -162,17 +164,16 @@ Payment of <b>{{ payment_amount }} satoshi</b> is required.
 
 <h1>Regarding privacy</h1>
 
-<div>First, please read our short <nobr><a href="{% url 'info-policy' %}">User Agreement and Privacy Policy</a></nobr>.</div>
+<div style="margin-top: 1em">This website does not use cookies. You can also hide your IP address by using Tor or a VPN service. All the information that you entered is encoded in the URL of this webpage.</div>
 
-<div style="margin-top: 1em">This website does not set cookies. You can also hide your IP address from us by using a VPN service. The website gets information from you only via <b>URLs</b> (links) and <b>invoices</b> (requests of payments on the Lightning Network). Payments of invoices are required for all actions on the website such as posting, commenting, and upvoting.</div>
+<div style="margin-top: 1em">The website gets information from you only via <b>HTML forms</b>, and <b>Lightning payments</b> (not Java Script or Cookies). Data collected via HTML forms is only used for generating Lightning invoices. Payments of invoices are required for all actions on the website such as posting, commenting, and upvoting. Data is published only when you make a <b>Lightning payment</b>. All data published here is publicly accessible.</div>
 
 <h4>What information is saved in the URL and invoice?</h4>
 <div>
-The URL of this page encodes the work in-progress. The URL encodes only what's visible on this page. Specifically, the content of the post and timestamp. It does not contain your wallet's pubkey, IP address, or any other data about the person or people involved in writing the post. A part of this URL is going to be
-included in the invoice which when payed publishes the post.</div>
+The URL of this page encodes the work in-progress. The URL encodes only what's visible on this page. Specifically, the content of the post and timestamp. It does not contain your IP address, or any other data that can identify the person or people involved in writing the post. If you choose to sign this post, then the URL will also contain your wallet's pubkey. This URL and the lightning invoice (created in next step) contain the same information about what is going to be published.</div>
 
-<h4>How can I know what you're saying about the URL and invoice is true?</h4>
-<div>You can decode the URL with python3 like so</div>
+<h4>How can I verify what information is encoded in the URL and invoice?</h4>
+<div>You can decode the URL with python 3 like so</div>
 <code>
 echo PUT_URL_HERE   | python3 -c 'import zlib, binascii, urllib.parse, sys;
 url = sys.stdin.readline();
@@ -187,7 +188,7 @@ print(decoded);
 </code>
 <p><br /></p>
 
-<div style="margin-top: 1em">... and decode the payment invoice with Lightning CLI like so</div>
+<div style="margin-top: 1em">You can decode the payment invoice with lnd command line like so</div>
 <code>lncli decodepayreq PUT_INVOICE_HERE</code>
 <p><br /></p>
 </div>

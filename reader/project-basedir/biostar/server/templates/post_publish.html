@@ -44,7 +44,9 @@
     <div><img src="/payment_check/{{ memo }}/payment_check.svg" /></div>
 
     <h2>Pay to publish</h2>
-    Your invoice is:
+    <p>The post will be published after a payment is made on the Lightning Network using the invoice. 
+    Payment of <b>{{ payment_amount }} satoshi</b> is required.</p>
+    <p>Your invoice is:</p>
     <pre>{{ pay_req }}</pre>
     <img src="/qr/{{ pay_req }}/qr.svg" />
 {% else %}

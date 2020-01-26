@@ -409,6 +409,8 @@ class PostPreviewView(TemplateView):
         context['post'] = post_preview
         context['publish_url'] = post_preview.get_publish_url(post_preview.memo)
 
+        context['user'] = User.objects.get(pubkey="Unknown")
+
         return context
 
 class PostPublishView(TemplateView):
@@ -432,6 +434,7 @@ class PostPublishView(TemplateView):
             )
 
         context['pay_req'] = details['pay_req']
+        context['payment_amount'] = settings.PAYMENT_AMOUNT
 
         return context
 

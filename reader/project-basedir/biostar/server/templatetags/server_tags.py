@@ -264,7 +264,9 @@ def post_preview_body(context, post_preview):
         request=context['request'],
         payment_amount=settings.PAYMENT_AMOUNT,
         memo_json=json.dumps(json_util.deserialize_memo(memo)),
-        signmessage_form=SignMessageForm()
+        signmessage_form=SignMessageForm(),
+        user=context['user'],
+        date=post_preview.date
     )
 
 @register.inclusion_tag('server_tags/search_bar.html', takes_context=True)
