@@ -89,7 +89,8 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
                 invoice_stdout = lnclient.addinvoice(
                     request.POST["memo"],
                     node.rpcserver,
-                    amt=settings.PAYMENT_AMOUNT
+                    amt=settings.PAYMENT_AMOUNT,
+                    expiry=settings.INVOICE_EXPIRY,
                 )
 
                 serializer = InvoiceSerializer(data=invoice_stdout, many=False)  # re-serialize

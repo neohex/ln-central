@@ -25,11 +25,11 @@ def _auth_args(rpcserver):
     return [arg.format(rpcserver=rpcserver) for arg in AUTH_ARGS]
 
 
-def addinvoice(memo, rpcserver, amt):
+def addinvoice(memo, rpcserver, amt, expiry):
     """
     TODO (2019-??-??): check for [lncli] rpc error: code = Unknown desc = memo too large: 1192 bytes (maxsize=1024)
     """
-    cmd = [LNCLI_BIN] + _auth_args(rpcserver) + ["addinvoice", "--memo", memo, "--amt", str(amt)]
+    cmd = [LNCLI_BIN] + _auth_args(rpcserver) + ["addinvoice", "--memo", memo, "--amt", str(amt), "--expiry", str(expiry)]
     output = cli.run(cmd)
     print("Command finished, addinvoice json stdout: {}".format(output))
     return output
