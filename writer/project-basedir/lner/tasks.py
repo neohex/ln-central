@@ -15,6 +15,8 @@ from common import lnclient
 from common.log import logger
 from common import validators
 from common import json_util
+from common import general_util
+
 from posts.models import Post
 from users.models import User
 from lner.models import LightningNode
@@ -66,9 +68,20 @@ class CheckpointHelper(object):
 
 @background(queue='queue-1', remove_existing_tasks=True)
 def run():
+    # Delete invoices that are passed retention
+    for invoice_obj in Invoice.objects.all():
+        if invoice_obj.created < timezone.now() - settings.INVOICE_RETENTION:
+            logger.info("Deleting invoice {} because it is older then retention {}".format(invoice_obj, settings.INVOICE_RETENTION))
+            invoice_request = InvoiceRequest.objects.get(id=invoice_obj.invoice_request.id)
+            if invoice_request:
+                invoice_request.delete()  # cascading delete also deletes the invoice
+            else:
+                logger.info("There was no invoice request, deleting just the invoice")
+                invoice_obj.delete()
+            continue
+
     node = LightningNode.objects.get()
     created = (node.global_checkpoint == -1)
-
     if created:
         logger.info("Global checkpoint does not exist")
         node.global_checkpoint = 0
@@ -83,11 +96,11 @@ def run():
     invoices_list = invoices_details['invoices']
 
     if settings.MOCK_LN_CLIENT:
-        # Here the mock pulls invocies from DB Invoice model, while in prod invoices are pulled from the Lightning node
-        # 1. Moked lnclient.listinvoices returns an empty list
-        # 2. The web front end adds the InvoiceRequest to the DB before it creates the actial invoices with lnclient.addinvoice
-        # 3. Moked API lnclient.addinvoice simply fakes converting InvoiceRequest to Invoice and saves to DB
-        # 4. Here the mocked proces_tasks pulls invocies from DB Invoice model and pretends they came from lnclient.listinvoices
+        # Here the mock pulls invoices from DB Invoice model, while in prod invoices are pulled from the Lightning node
+        # 1. Mocked lnclient.listinvoices returns an empty list
+        # 2. The web front end adds the InvoiceRequest to the DB before it creates the actual invoices with lnclient.addinvoice
+        # 3. Mocked API lnclient.addinvoice simply fakes converting InvoiceRequest to Invoice and saves to DB
+        # 4. Here the mocked proces_tasks pulls invoices from DB Invoice model and pretends they came from lnclient.listinvoices
         # 5. After X seconds passed based on Invoice created time, here Mock update the Invoice checkpoint to "done" faking a payment 
 
         invoices_list = []
@@ -133,6 +146,14 @@ def run():
         # 'amt_paid_msat': '0', 'r_preimage': 'd...=', 'fallback_addr': '',
         # 'payment_request': 'lnbc...'
         # }
+        created = general_util.unixtime_to_datetime(int(raw_invoice["creation_date"]))
+        if created < general_util.now() - settings.INVOICE_RETENTION:
+            logger.info("Got old invoice from listinvoices, skipping... {} is older then retention {}".format(
+                created,
+                settings.INVOICE_RETENTION
+                )
+            )
+            continue
 
         try:
             invoice = Invoice.objects.get(add_index=int(raw_invoice["add_index"]))

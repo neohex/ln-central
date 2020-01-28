@@ -4,7 +4,17 @@ import hashlib
 from django.utils.timezone import utc
 
 def now():
+    """
+    TODO: check if this is equivalent to
+                from django.utils import timezone
+                timezone.now()
+          if so then replace all calls with timezone.now()
+    """
+
     return datetime.datetime.utcnow().replace(tzinfo=utc)
+
+def unixtime_to_datetime(unixtime):
+    return datetime.datetime.utcfromtimestamp(unixtime).replace(tzinfo=utc)
 
 def make_uuid(size=None):
     "Returns a unique id"
