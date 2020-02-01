@@ -18,7 +18,7 @@ def _sanitize_rpcserver(rpcserver):
     assert parts[0].isalnum(), "rpcserver host part in not alphanumeric"
     if len(parts) == 2:
         assert parts[1].isdigit(), "rpcserver port part is not a number"
-    
+
 
 def _auth_args(rpcserver):
     _sanitize_rpcserver(rpcserver)
@@ -44,10 +44,25 @@ def listinvoices(index_offset, rpcserver, max_invoices=100, mock=False):
             }
 
     cmd =  [LNCLI_BIN] + _auth_args(rpcserver) + [
-        "listinvoices", 
+        "listinvoices",
         "--index_offset", str(index_offset),
-        "--max_invoices", str(max_invoices), 
+        "--max_invoices", str(max_invoices),
         "--reversed=False"
     ]
-    
+
+    return cli.run(cmd, log_cmd=False)
+
+def verifymessage(msg, sig, mock=False):
+    if mock:
+        return {
+            "valid": true,
+            "pubkey": "FAKE"
+        }
+
+    cmd =  [LNCLI_BIN] + _auth_args(rpcserver) + [
+        "verifymessage",
+        "--msg", msg,
+        "--sig", sig
+    ]
+
     return cli.run(cmd, log_cmd=False)
