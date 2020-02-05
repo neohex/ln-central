@@ -26,6 +26,7 @@ class LightningNode(CustomModel):
         default=-1
     )
 
+
 class InvoiceRequest(CustomModel):
     lightning_node = models.ForeignKey(LightningNode, on_delete=models.CASCADE)
     memo = models.CharField(
@@ -33,6 +34,7 @@ class InvoiceRequest(CustomModel):
         unique=True,
         max_length=settings.MAX_MEMO_SIZE
     )
+
 
 class Invoice(CustomModel):
     invoice_request = models.ForeignKey(InvoiceRequest, null=True, default=None, on_delete=models.CASCADE)
@@ -50,3 +52,15 @@ class Invoice(CustomModel):
         default="no_action"
     )
     performed_action_id =  models.IntegerField(verbose_name='E.g. post.id', default=-1)
+
+
+class VerifyMessageResult(models.Model):
+    memo = models.CharField(
+        verbose_name='LN Invoice memo',
+        max_length=settings.MAX_MEMO_SIZE
+    )
+    valid = models.BooleanField(verbose_name="Is message valid against it's signature?")
+    identity_pubkey = models.CharField(verbose_name='LN Identity Pubkey', max_length=255)
+
+    class Meta:
+        managed = False

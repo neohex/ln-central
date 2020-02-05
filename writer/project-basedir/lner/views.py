@@ -13,14 +13,16 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions
 from rest_framework import mixins
 
-from .models import LightningNode
-from .models import Invoice
-from .models import InvoiceRequest
+from lner.models import LightningNode
+from lner.models import Invoice
+from lner.models import InvoiceRequest
+from lner.models import VerifyMessageResult
 
-from .serializers import LightningNodeSerializer
-from .serializers import InvoiceSerializer
-from .serializers import InvoiceRequestSerializer
-from .serializers import CheckPaymentSerializer
+from lner.serializers import LightningNodeSerializer
+from lner.serializers import InvoiceSerializer
+from lner.serializers import InvoiceRequestSerializer
+from lner.serializers import CheckPaymentSerializer
+from lner.serializers import VerifyMessageResponseSerializer
 
 from common import log
 from common import lnclient
@@ -116,9 +118,10 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
             serializer = InvoiceSerializer(invoice_obj)
             return Response(serializer.data)
 
+
 class CheckPaymentViewSet(viewsets.ModelViewSet):
     """
-    Check invoice to see if payment was setteled
+    Check invoice to see if payment was settled
     """
 
     queryset = []
@@ -132,3 +135,30 @@ class CheckPaymentViewSet(viewsets.ModelViewSet):
         invoice = get_object_or_404(Invoice, invoice_request=invoice_request)
 
         return [invoice]
+
+
+
+class VerifyMessageViewSet(viewsets.ModelViewSet):
+    """
+    Check memo (a.k.a) message against a signature
+    """
+
+    queryset = []
+    serializer_class = VerifyMessageResponseSerializer
+
+    def get_queryset(self):
+        memo = self.request.query_params.get("memo")
+        sig = self.request.query_params.get("sig")
+
+        assert re.match(MEMO_RE, memo), "Got invalid memo {}".format(memo)
+        assert memo, "Missing a required filed: memo"
+        assert sig, "Missing a required filed: sig"
+
+        result_json = lnclient.verifymessage(msg=memo, sig=sig, mock=settings.MOCK_LN_CLIENT)
+        pubkey = result_json["pubkey"]
+        valid = result_json["valid"]
+
+        verify_message_result = VerifyMessageResult(memo=memo, identity_pubkey=pubkey, valid=valid)
+
+        return [verify_message_result]
+

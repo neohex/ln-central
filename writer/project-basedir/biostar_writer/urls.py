@@ -25,6 +25,7 @@ router = routers.DefaultRouter()
 router.register(r'ln/list', lner.views.LightningNodeViewSet)
 router.register(r'ln/addinvoice', lner.views.CreateInvoiceViewSet, basename='invoice')
 router.register(r'ln/check', lner.views.CheckPaymentViewSet, basename='check')
+router.register(r'ln/verifymessage', lner.views.VerifyMessageViewSet, basename='verifymessage')
 
 urlpatterns = []
 
