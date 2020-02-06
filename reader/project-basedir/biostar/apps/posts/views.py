@@ -180,9 +180,9 @@ class ShortForm(forms.Form):
 
 
 class SignMessageForm(forms.Form):
-    FIELDS = ["signiture"]
+    FIELDS = ["signature"]
 
-    signiture = forms.CharField(
+    signature = forms.CharField(
         widget=forms.Textarea,
         label="Signature",
         required=False,
@@ -194,11 +194,17 @@ class SignMessageForm(forms.Form):
         super(SignMessageForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Field('signiture', rows="4"),
+            Field('signature', rows="4"),
             ButtonHolder(
                 Submit('submit', 'Check')
             )
         )
+
+        self.helper.form_action = reverse(
+            "post-preview",
+            kwargs=dict(memo=self.initial['memo'])
+        )
+
 
 def parse_tags(category, tag_val):
     pass
@@ -209,7 +215,7 @@ class NewPost(FormView):
     template_name = "post_edit.html"
 
     def get(self, request, *args, **kwargs):
-       
+
         initial = dict()
 
         if "memo" in kwargs:
@@ -234,10 +240,6 @@ class NewPost(FormView):
 
 
     def post(self, request, *args, **kwargs):
-        '''
-        Authenticated action
-        '''
-
         # Validating the form.
         form = self.form_class(request.POST)
         if not form.is_valid():
@@ -395,7 +397,7 @@ class EditPost(FormView):
         # if request.user == post.author:
         #     post.lastedit_date = datetime.utcnow().replace(tzinfo=utc)
         # post.save()
-        
+
         logger.info("Post updated (Request: %s)", request)
 
         return HttpResponseRedirect(post.get_absolute_url())

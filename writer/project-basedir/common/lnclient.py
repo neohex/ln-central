@@ -56,7 +56,7 @@ def verifymessage(msg, sig, mock=False):
     if mock:
         return {
             "valid": True,
-            "pubkey": "FAKE"
+            "pubkey": "FAKE2"
         }
 
     cmd =  [LNCLI_BIN] + _auth_args(rpcserver) + [

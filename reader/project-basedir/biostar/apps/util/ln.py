@@ -17,7 +17,7 @@ class CheckResponce(object):
 
 class LNUtilError(Exception):
     pass
-        
+
 def call_endpoint(path, args={}, as_post=False):
     if settings.READER_TO_WRITER_AUTH_TOKEN is not None:
         headers = {'Authorization': 'Token {}'.format(settings.READER_TO_WRITER_AUTH_TOKEN)}
@@ -47,7 +47,7 @@ def check_expected_key(response, expected_key, is_list=True):
         error_msg = "Got non-json from API server: {} status_code={}".format(
             response.reason, response.status_code
         )
-      
+
         logger.error(error_msg)
         raise LNUtilError(error_msg)
 
@@ -74,7 +74,7 @@ def check_expected_key(response, expected_key, is_list=True):
         raise LNUtilError(error_msg)
 
 
-def get_nodes_list():   
+def get_nodes_list():
     try:
         response = call_endpoint('ln/list')
         check_expected_key(response, "identity_pubkey")
@@ -90,7 +90,7 @@ def add_invoice(memo, node_id=1):
     response = call_endpoint('ln/addinvoice', args={"memo": memo, "node_id": node_id}, as_post=True)
 
     check_expected_key(response, "pay_req", is_list=False)
-        
+
     return response.json()
 
 
@@ -112,6 +112,7 @@ def gen_check_conclusion(checkpoint_value, node_id, memo):
         )
         return CHECKPOINT_ERROR
 
+
 def check_payment(memo, node_id=1):
     response = call_endpoint('ln/check', args={"memo": memo, "node_id": node_id})
     if response.status_code != 200:
@@ -127,6 +128,27 @@ def check_payment(memo, node_id=1):
         raise LNUtilError(error_msg)
 
     check_expected_key(response, "checkpoint_value", is_list=True)
+
+    response_parsed = response.json()[0]
+    return response_parsed
+
+
+def verifymessage(memo, sig):
+    response = call_endpoint('ln/verifymessage', args={"memo": memo, "sig": sig})
+    if response.status_code != 200:
+        error_msg = (
+            "Got API error when calling verifymessage, http_status={},memo={},sig={}".format(
+                response.status_code,
+                memo,
+                sig
+            )
+        )
+
+        logger.error(error_msg)
+        raise LNUtilError(error_msg)
+
+    check_expected_key(response, "valid", is_list=True)
+    check_expected_key(response, "identity_pubkey", is_list=True)
 
     response_parsed = response.json()[0]
     return response_parsed

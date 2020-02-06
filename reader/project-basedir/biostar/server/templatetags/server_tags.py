@@ -117,12 +117,12 @@ def coolname(user):
     else:
         pubkey = user.pubkey.encode('utf8')
     hash = hashlib.md5(pubkey).digest()
-    
+
     NUM_WORDS = 3
     max_seed = coolname_lib.get_combinations_count(NUM_WORDS)
     seed = int(hash.encode('hex'), 16) % max_seed
     name_list = coolname_lib.impl._default._lists[NUM_WORDS][seed]
-    
+
     return '-'.join(name_list)
 
 
@@ -256,15 +256,22 @@ def post_body(context, post, user, tree):
 @register.inclusion_tag('server_tags/post_preview_body.html', takes_context=True)
 def post_preview_body(context, post_preview):
     "Renders the post preview body"
+
     memo = post_preview.serialize_memo()
     return dict(
         post=post_preview,
         edit_url=post_preview.get_edit_url(memo),
         publish_url=post_preview.get_publish_url(memo),
+        preview_url=post_preview.get_preview_url(post_preview.memo),
         request=context['request'],
         payment_amount=settings.PAYMENT_AMOUNT,
         memo_json=json.dumps(json_util.deserialize_memo(memo)),
-        signmessage_form=SignMessageForm(),
+        signmessage_form=SignMessageForm(
+            initial={
+                'memo': memo,
+                'signature': context['request'].POST.get("signature")
+            }
+        ),
         user=context['user'],
         date=post_preview.date
     )

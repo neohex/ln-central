@@ -11,7 +11,7 @@ from common import html_util
 from common import json_util
 
 import bleach
-# TODO: remove version check after upgrading reader 
+# TODO: remove version check after upgrading reader
 import django
 if django.VERSION[0] == 1:
     from django.core.urlresolvers import reverse
@@ -106,6 +106,10 @@ class User(models.Model):
     @property
     def is_trusted(self):
         return self.status == User.TRUSTED
+
+    @property
+    def is_unsigned(self):
+        return self.pubkey == "Unknown"
 
     @property
     def is_suspended(self):

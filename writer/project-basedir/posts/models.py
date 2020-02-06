@@ -7,7 +7,7 @@ from django.contrib.sites.models import Site
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 
-# TODO: remove version check after upgrading reader 
+# TODO: remove version check after upgrading reader
 import django
 if django.VERSION[0] == 1:
     from django.core.urlresolvers import reverse
@@ -234,7 +234,7 @@ class Post(models.Model):
 
     # Rows used for testing
     is_fake_test_data = models.BooleanField(default=False)
-    
+
 
     def parse_tags(self):
         return html_util.split_tags(self.tag_val)
@@ -430,6 +430,10 @@ class PostPreview(models.Model):
 
     def get_edit_url(self, memo):
         url = reverse("post-preview-edit", kwargs=dict(memo=memo))
+        return url if self.is_toplevel else "%s#%s" % (url, self.id)
+
+    def get_preview_url(self, memo):
+        url = reverse("post-preview", kwargs=dict(memo=memo))
         return url if self.is_toplevel else "%s#%s" % (url, self.id)
 
     def get_publish_url(self, memo):

@@ -151,8 +151,8 @@ class VerifyMessageViewSet(viewsets.ModelViewSet):
         sig = self.request.query_params.get("sig")
 
         assert re.match(MEMO_RE, memo), "Got invalid memo {}".format(memo)
-        assert memo, "Missing a required filed: memo"
-        assert sig, "Missing a required filed: sig"
+        assert memo is not None, "Missing a required field: memo"
+        assert sig is not None, "Missing a required field: sig"
 
         result_json = lnclient.verifymessage(msg=memo, sig=sig, mock=settings.MOCK_LN_CLIENT)
         pubkey = result_json["pubkey"]

@@ -409,9 +409,31 @@ class PostPreviewView(TemplateView):
         context['post'] = post_preview
         context['publish_url'] = post_preview.get_publish_url(post_preview.memo)
 
-        context['user'] = User.objects.get(pubkey="Unknown")
+        unsigned = True
+        if kwargs.get("signature"):
+            result = ln.verifymessage(memo=context["memo"], sig=kwargs["signature"])
+            if result["valid"]:
+                identity_pubkey = result["identity_pubkey"]
+                print(result["identity_pubkey"])
+                context['user'] = User(id=1, pubkey=identity_pubkey)
+                unsigned = False
+
+        if unsigned:
+            context['user'] = User.objects.get(pubkey="Unknown")
 
         return context
+
+
+    def post(self, request, *args, **kwargs):
+        """
+        Post is used when checking signature
+        """
+
+        kwargs["signature"] = request.POST.get("signature")
+
+        return super(PostPreviewView, self).get(request, *args, **kwargs)
+
+
 
 class PostPublishView(TemplateView):
     """
@@ -422,7 +444,7 @@ class PostPublishView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(PostPublishView, self).get_context_data(**kwargs)
 
-        context['nodes_list'] = ln.get_nodes_list() 
+        context['nodes_list'] = ln.get_nodes_list()
 
         try:
             details = ln.add_invoice(context["memo"])
@@ -452,7 +474,6 @@ class PostPublishView(TemplateView):
             return post_redirect(pid=post_id, request=request, permanent=False)
 
         return super(PostPublishView, self).get(request, *args, **kwargs)
-
 
 
 class RateLimitedNewPost(NewPost):

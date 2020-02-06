@@ -34,17 +34,28 @@
         {# The body of the post #}
         <div class="content" >
 
-            <div class="col-xs-3 col-md-3 box pull-right text-center visible-lg visible-md">
-                <div><a href="{{ user.get_absolute_url }}">{% avataaar user 82 %}</a></div>
-                <div class="ago">{{ date|time_ago }} by</div>
-                <div class="uname">{% userlink user %}</div>
-                <div>&nbsp;</div>
-                <div>(This avatar and pen name is used for all unsigned posts)</div>
-            </div>
-            <div class="box text-center visible-sm visible-xs">
-                <div>(This avatar and pen name is used for all unsigned posts)</div>
-                <div class="uname"><a href="{{ user.get_absolute_url }}">{% avataaar user 40 %}</a>{% userlink user %} wrote:</div>
-            </div>
+            {% if user.is_unsigned %}
+                <div class="col-xs-3 col-md-3 box pull-right text-center visible-lg visible-md">
+                    <div><a href="{{ user.get_absolute_url }}">{% avataaar user 82 %}</a></div>
+                    <div class="ago">{{ date|time_ago }} by</div>
+                    <div class="uname">{% userlink user %}</div>
+                    <div>&nbsp;</div>
+                    <div>(This avatar and pen name is used for all unsigned posts)</div>
+                </div>
+                <div class="box text-center visible-sm visible-xs">
+                    <div>(This avatar and pen name is used for all unsigned posts)</div>
+                    <div class="uname"><a href="{{ user.get_absolute_url }}">{% avataaar user 40 %}</a>{% userlink user %} wrote:</div>
+                </div>
+            {% else %}
+                <div class="col-xs-3 col-md-3 box pull-right text-center visible-lg visible-md">
+                    <div>{% avataaar user 82 %}</div>
+                    <div class="ago">{{ date|time_ago }} by</div>
+                    <div class="uname">{% coolname user %}</div>
+                </div>
+                <div class="box text-center visible-sm visible-xs">
+                    <div class="uname">{% avataaar user 40 %} {% coolname user %} wrote:</div>
+                </div>
+            {% endif %}
 
             <span itemprop="text">{{ post.html|safe }}</span>
 
@@ -101,8 +112,8 @@
 
 <div style="clear: both">
 <h1>Next step</h1>
-<div>Now it's time to review, sign, and publish your post.</div>
-<h4>Review</h4>
+<div>Please (1) review, (2) sign, and (3) publish your post.</div>
+<h4>1/ Review</h4>
 <div style="margin-left: 5em; margin-bottom: 2em;">
 <p style="margin-bottom: 2em;">Click edit to make changes.</p>
 
@@ -110,25 +121,34 @@
 To save current work and continue later, make a <b>bookmark of this page</b> in your web browser.
 </div>
 
-<h4>Sign (optional)</h4>
+<h4>2/ Sign (optional)</h4>
 <div style="margin-left: 5em;">
 <div style="margin-bottom: 2em;">
-<p>1. Sign using <tt>LND</tt> run:
+<p>1. Sign using run:
 
 <pre>lncli signmessage '{{ memo_json }}'</pre>
 
-To sign using c-lightning instead of <tt>lncli</tt> put <tt>lightning-cli</tt>
+<ul>
+    <li>The command above shows how to sign with LND</li>
+    <li>To sign with c-lightning instead of <tt>lncli</tt> put <tt>lightning-cli</tt></li>
+    <li>To sign with Zap Desktop, go to <a href="https://github.com/LN-Zap/zap-desktop/pull/2696">Profile</a></li>
+</ul>
+
 </p>
 <p>2. Copy and paste the signature here:</p>
 {% crispy signmessage_form %}
 </div>
 
+<h4>How to maintain financial privacy?</h4>
+<div>Sign and Pay with two different wallets. The wallet used to sign will control your online identity. Since Lightning payments are anonymous, the wallet used for payment is not associated with your online identity actions.</div>
+
 <h4>What happens if I sign this post?</h4>
 <div>The following information is going to be associated with the post and made publicly visible.</div>
 <ul>
-    <li>Your wallet's <b>pubkey</b>
+    <li>Signing wallet's <b>pubkey</b>
         <ul>
             <li>by <b>pubkey</b> we mean the Lightning Network Node wallet <tt>identity_pubkey</tt></li>
+            <li>this can be a different <b>pubkey</b> then what will be used for payment. Because of the way Lightning network is designed, we cannot tell what <b>pubkey</b> was used to make the payment.
         </ul>
     </li>
     <li>Statistics such as number of posts, up-votes, and reputation score</li>
@@ -145,13 +165,13 @@ To sign using c-lightning instead of <tt>lncli</tt> put <tt>lightning-cli</tt>
 
 <h4>What are the disadvantages of signing?</h4>
 <ul>
-<li>Your wallet's <b>pubkey</b> becomes visible publicly on the Internet</li>
-<li>This post will associated with your wallet's <b>pubkey</b></li>
+<li>Your signing wallet's <b>pubkey</b> becomes visible publicly on the Internet</li>
+<li>This post will be associated with your signing wallet's <b>pubkey</b></li>
 <li>You may or may not like the random-looking "pen name" and an avatar image generated based on the <b>pubkey</b></li>
 </ul>
 </div>
 
-<h4>Publish</h4>
+<h4>3/ Publish</h4>
 <div style="margin-left: 5em;">
 Click "Get Invoice" button on the bottom of this page. The post will be published after a payment is made on the Lightning Network using the invoice.
 Payment of <b>{{ payment_amount }} satoshi</b> is required.
@@ -159,14 +179,11 @@ Payment of <b>{{ payment_amount }} satoshi</b> is required.
 
 
 
-
-
-
 <h1>Regarding privacy</h1>
 
 <div style="margin-top: 1em">This website does not use cookies. You can also hide your IP address by using Tor or a VPN service. All the information that you entered is encoded in the URL of this webpage.</div>
 
-<div style="margin-top: 1em">The website gets information from you only via <b>HTML forms</b>, and <b>Lightning payments</b> (not Java Script or Cookies). Data collected via HTML forms is only used for generating Lightning invoices. Payments of invoices are required for all actions on the website such as posting, commenting, and upvoting. Data is published only when you make a <b>Lightning payment</b>. All data published here is publicly accessible.</div>
+<div style="margin-top: 1em">The website gets information from you only via <b>HTML forms</b>, and <b>Lightning payments</b>. Not via Java Script or Cookies. Data collected via HTML forms is only used for generating Lightning invoices. Payments of invoices are required for all actions on the website such as posting, commenting, and upvoting. Data is published only when you make a <b>Lightning payment</b>. All data published here is publicly accessible.</div>
 
 <h4>What information is saved in the URL and invoice?</h4>
 <div>

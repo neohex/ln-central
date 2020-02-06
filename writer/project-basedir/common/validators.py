@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 
 def validate_checkpoint_name(value):
     """
-    Check that checkpoint_name is one of the valid formats: 
+    Check that checkpoint_name is one of the valid formats:
       - 'global-offset'
       - 'node-[0-9]+-add-index-[0-9]+'
     """
@@ -52,11 +52,11 @@ def validate_signable_field(value, key="unknown", no_auto_correct=False):
     if value is None:
         return None
 
-    new_value = value.strip(" \t\n\r\x0b\f") 
+    new_value = value.strip(" \t\n\r\x0b\f")
     if new_value != value:
         # since we're asking the user to sign text via CLI
         # it's very easy to accidently add an extra newline or space
-        # and change the signiture
+        # and change the signature
         if no_auto_correct:
             raise ValidationError(
                 (
