@@ -154,7 +154,9 @@ class VerifyMessageViewSet(viewsets.ModelViewSet):
         assert memo is not None, "Missing a required field: memo"
         assert sig is not None, "Missing a required field: sig"
 
-        result_json = lnclient.verifymessage(msg=memo, sig=sig, mock=settings.MOCK_LN_CLIENT)
+        node = LightningNode.objects.order_by("?").first()
+
+        result_json = lnclient.verifymessage(msg=memo, sig=sig, rpcserver=node.rpcserver, mock=settings.MOCK_LN_CLIENT)
         pubkey = result_json["pubkey"]
         valid = result_json["valid"]
 
