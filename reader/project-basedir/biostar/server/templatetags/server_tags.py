@@ -265,7 +265,7 @@ def post_preview_body(context, post_preview):
         preview_url=post_preview.get_preview_url(post_preview.memo),
         request=context['request'],
         payment_amount=settings.PAYMENT_AMOUNT,
-        memo_json=json.dumps(json_util.deserialize_memo(memo)),
+        memo_json=json.dumps(json_util.deserialize_memo(memo), sort_keys=True),
         signmessage_form=SignMessageForm(
             initial={
                 'memo': memo,

@@ -140,7 +140,7 @@ class CheckPaymentViewSet(viewsets.ModelViewSet):
 
 class VerifyMessageViewSet(viewsets.ModelViewSet):
     """
-    Check memo (a.k.a) message against a signature
+    Check message against a signature
     """
 
     queryset = []
@@ -150,7 +150,6 @@ class VerifyMessageViewSet(viewsets.ModelViewSet):
         memo = self.request.query_params.get("memo")
         sig = self.request.query_params.get("sig")
 
-        assert re.match(MEMO_RE, memo), "Got invalid memo {}".format(memo)
         assert memo is not None, "Missing a required field: memo"
         assert sig is not None, "Missing a required field: sig"
 

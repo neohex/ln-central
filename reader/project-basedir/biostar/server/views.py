@@ -411,7 +411,7 @@ class PostPreviewView(TemplateView):
 
         unsigned = True
         if kwargs.get("signature"):
-            result = ln.verifymessage(memo=context["memo"], sig=kwargs["signature"])
+            result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=kwargs["signature"])
             if result["valid"]:
                 identity_pubkey = result["identity_pubkey"]
                 print(result["identity_pubkey"])
