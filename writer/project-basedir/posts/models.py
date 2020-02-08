@@ -156,6 +156,7 @@ class Post(models.Model):
 
     TOP_LEVEL = set((QUESTION, META_QUESTION))
 
+    # TODO: make titles unique
     title = models.CharField(max_length=200, null=False, validators=[validators.validate_signable_field])
 
     # The user that originally created the post.

@@ -1,7 +1,6 @@
 # Create your views here.
 from django.shortcuts import render_to_response
 from django.views.generic import TemplateView, DetailView, ListView, FormView, UpdateView
-from .models import Post, PostPreview
 from django import forms
 from django.core.urlresolvers import reverse
 from crispy_forms.helper import FormHelper
@@ -25,6 +24,7 @@ from common import validators
 
 from biostar.apps.util import ln
 from biostar.apps.users.models import User
+from biostar.apps.posts.models import PostPreview, Post
 
 from common.log import logger
 
@@ -250,13 +250,13 @@ class NewPost(FormView):
             )
 
         # Valid forms start here.
-        data = form.cleaned_data.get
+        data = form.cleaned_data
 
         post_preview = PostPreview(
-              title=data('title'),
-              content=data('content'),
-              tag_val=data('tag_val'),
-              type=int(data('post_type')),
+              title=data.get('title'),
+              content=data.get('content'),
+              tag_val=data.get('tag_val'),
+              type=int(data.get('post_type')),
               date=general_util.now()
         )
 

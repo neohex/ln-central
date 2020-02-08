@@ -17,7 +17,11 @@ from common import const
 from common import general_util
 from common import json_util
 from biostar.server.views import LATEST
+from biostar.apps.posts.models import PostPreview
+
 import coolname as coolname_lib
+
+from common.log import logger
 
 register = template.Library()
 
@@ -256,6 +260,9 @@ def post_body(context, post, user, tree):
 @register.inclusion_tag('server_tags/post_preview_body.html', takes_context=True)
 def post_preview_body(context, post_preview):
     "Renders the post preview body"
+
+    if type(post_preview) != PostPreview:
+        logger.error("post_preview is {}".format(post_preview))
 
     memo = post_preview.serialize_memo()
     return dict(

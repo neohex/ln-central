@@ -55,7 +55,7 @@ def validate_signable_field(value, key="unknown", no_auto_correct=False):
     new_value = value.strip(" \t\n\r\x0b\f")
     if new_value != value:
         # since we're asking the user to sign text via CLI
-        # it's very easy to accidently add an extra newline or space
+        # it's very easy to accidentally add an extra newline or space
         # and change the signature
         if no_auto_correct:
             raise ValidationError(
@@ -67,6 +67,14 @@ def validate_signable_field(value, key="unknown", no_auto_correct=False):
             return new_value
     return value
 
+def pre_validate_signature(signature):
+    print("sig pre-val: {}".format(len(signature)))
+
+    if len(signature) == 0:
+        raise ValidationError(
+            "Signature is optional, yet you clicked \"Check\" and did not provide any Signature. "
+            "If you want to post unsigned then click on \"Get Invoice\" at the bottom of this page"
+        )
 
 def validate_memo(memo, no_auto_correct=False):
     new_memo = {}
