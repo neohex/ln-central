@@ -1,4 +1,8 @@
 # Create your views here.
+import re
+import json
+import langdetect
+
 from django.shortcuts import render_to_response
 from django.views.generic import TemplateView, DetailView, ListView, FormView, UpdateView
 from django import forms
@@ -12,14 +16,13 @@ from django.utils.timezone import utc
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.core.exceptions import ValidationError
-import re
 
-import langdetect
 from django.template.loader import render_to_string
 
 from common.const import OrderedDict
 from common import general_util
 from common import json_util
+from common import html_util
 from common import validators
 
 from biostar.apps.util import ln
@@ -185,12 +188,23 @@ class SignMessageForm(forms.Form):
     signature = forms.CharField(
         widget=forms.Textarea,
         label="Signature",
-        required=False,
+        required=True,
+        error_messages={
+            'required': (
+                "Signature is optional, yet you clicked \"Check\" and did not provide any Signature. "
+                "If you want to post unsigned then click on \"Get Invoice\" at the bottom of this page"
+            )
+        },
         max_length=200, min_length=10,
-        validators=[],
-        help_text="JSON output of the signmessage command")
+        validators=[validators.pre_validate_signature],
+        help_text="JSON output of the signmessage command or just text of the signature")
 
     def __init__(self, *args, **kwargs):
+        if "memo" in kwargs:
+            memo = kwargs.pop("memo")
+        else:
+            memo = kwargs.get("initial").get("memo")
+
         super(SignMessageForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -202,9 +216,8 @@ class SignMessageForm(forms.Form):
 
         self.helper.form_action = reverse(
             "post-preview",
-            kwargs=dict(memo=self.initial['memo'])
+            kwargs=dict(memo=memo)
         )
-
 
 def parse_tags(category, tag_val):
     pass
@@ -261,6 +274,101 @@ class NewPost(FormView):
         )
 
         return HttpResponseRedirect(post_preview.get_absolute_url(memo=post_preview.serialize_memo()))
+
+class PostPreviewView(FormView):
+    """
+    Shows preview of the post and takes an optional signature
+    """
+
+    template_name = "post_preview.html"
+    form_class = SignMessageForm
+
+
+    def get_form_kwargs(self):
+        view_obj = super(PostPreviewView, self).get_context_data().get("view")
+        memo = view_obj.kwargs["memo"]
+
+        return {"memo": memo}
+
+    def get_model(self, memo):
+
+        post_preview = PostPreview()
+        post_preview.title = memo["title"]
+        post_preview.status = Post.OPEN
+        post_preview.type = memo["post_type"]
+        post_preview.content = memo["content"]
+        post_preview.html = html_util.parse_html(memo["content"])
+        post_preview.tag_val = memo["tag_val"]
+        post_preview.tag_value = html_util.split_tags(memo["tag_val"])
+        post_preview.date = datetime.utcfromtimestamp(memo["unixtime"]).replace(tzinfo=utc)
+        post_preview.memo = post_preview.serialize_memo()
+
+        post_preview.clean_fields()
+
+        return post_preview
+
+    def get_context_data(self, **kwargs):
+
+        context = super(PostPreviewView, self).get_context_data(**kwargs)
+
+        view_obj = context.get("view")
+        memo_serialized = view_obj.kwargs["memo"]
+
+        memo = validators.validate_memo(
+            json_util.deserialize_memo(memo_serialized)
+        )
+
+        post_preview = self.get_model(memo)
+
+        context['post'] = post_preview
+        context['publish_url'] = post_preview.get_publish_url(post_preview.memo)
+
+        unsigned = True
+        if kwargs.get("signature"):
+            result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=kwargs["signature"])
+            if result["valid"]:
+                identity_pubkey = result["identity_pubkey"]
+                context['user'] = User(id=1, pubkey=identity_pubkey)
+                unsigned = False
+
+        if unsigned:
+            context['user'] = User.objects.get(pubkey="Unknown")
+
+        return context
+
+
+    def post(self, request, *args, **kwargs):
+        """
+        Post is used when checking signature
+        """
+
+        kwargs["signature"] = request.POST.get("signature")
+
+        view = super(PostPreviewView, self).get(request, *args, **kwargs)
+        view_obj = super(PostPreviewView, self).get_context_data().get("view")
+        memo_serialized = view_obj.kwargs["memo"]
+
+        form = self.form_class(request.POST, memo=memo_serialized)
+
+        if not form.is_valid():
+            # Invalid form submission.
+            memo = validators.validate_memo(
+                json_util.deserialize_memo(memo_serialized)
+            )
+
+            post_preview = self.get_model(memo)
+
+            context = {
+                'post': post_preview,
+                'form': form,
+                'user': User.objects.get(pubkey="Unknown")
+            }
+        else:
+            context = self.get_context_data(**kwargs)
+            context["form"] = form
+
+        return render(request, self.template_name, context)
+
 
 
 class NewAnswer(FormView):

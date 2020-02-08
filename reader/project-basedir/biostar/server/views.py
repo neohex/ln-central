@@ -379,61 +379,6 @@ class PostDetails(DetailView):
         context['form'] = ShortForm()
         return context
 
-class PostPreviewView(TemplateView):
-    """
-    """
-
-    template_name = "post_preview.html"
-
-    def get_context_data(self, **kwargs):
-
-        context = super(PostPreviewView, self).get_context_data(**kwargs)
-
-        memo = validators.validate_memo(
-            json_util.deserialize_memo(context["memo"])
-        )
-
-        post_preview = PostPreview()
-        post_preview.title = memo["title"]
-        post_preview.status = Post.OPEN
-        post_preview.type = memo["post_type"]
-        post_preview.content = memo["content"]
-        post_preview.html = html_util.parse_html(memo["content"])
-        post_preview.tag_val = memo["tag_val"]
-        post_preview.tag_value = html_util.split_tags(memo["tag_val"])
-        post_preview.date = datetime.utcfromtimestamp(memo["unixtime"]).replace(tzinfo=utc)
-        post_preview.memo = post_preview.serialize_memo()
-
-        post_preview.clean_fields()
-
-        context['post'] = post_preview
-        context['publish_url'] = post_preview.get_publish_url(post_preview.memo)
-
-        unsigned = True
-        if kwargs.get("signature"):
-            result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=kwargs["signature"])
-            if result["valid"]:
-                identity_pubkey = result["identity_pubkey"]
-                print(result["identity_pubkey"])
-                context['user'] = User(id=1, pubkey=identity_pubkey)
-                unsigned = False
-
-        if unsigned:
-            context['user'] = User.objects.get(pubkey="Unknown")
-
-        return context
-
-
-    def post(self, request, *args, **kwargs):
-        """
-        Post is used when checking signature
-        """
-
-        kwargs["signature"] = request.POST.get("signature")
-
-        return super(PostPreviewView, self).get(request, *args, **kwargs)
-
-
 
 class PostPublishView(TemplateView):
     """

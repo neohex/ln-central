@@ -7,7 +7,7 @@ admin.autodiscover()
 
 from django.views.generic import TemplateView
 from biostar.server import views, ajax, search, moderate, api
-from biostar.apps.posts.views import NewAnswer, NewPost, EditPost
+from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, PostPreviewView
 from biostar.apps.users.views import DigestManager
 from biostar.apps.util.views import QRCode
 from biostar.apps.util.views import PaymentCheck
@@ -47,14 +47,14 @@ urlpatterns = [
     # Payment check image
     url(
         r'^payment_check/(?P<memo>{})/payment_check.svg$'.format(MEMO_RE),
-        PaymentCheck.as_view(content_type='image/svg+xml'), 
+        PaymentCheck.as_view(content_type='image/svg+xml'),
         name="payment-check"
     ),
 
 
     # ==============================
     # User
-    # ============================== 
+    # ==============================
 
     # The list of users.
     url(r'^user/list/$', views.UserList.as_view(), name="user-list"),
@@ -68,7 +68,7 @@ urlpatterns = [
 
     # ==============================
     # Post
-    # ============================== 
+    # ==============================
 
     # Post details.
     url(r'^p/(?P<pk>\d+)/$', views.PostDetails.as_view(), name="post-details"),
@@ -80,14 +80,14 @@ urlpatterns = [
     url(r'^p/publish/preview/(?P<memo>{})/$'.format(MEMO_RE), views.PostPublishView.as_view(), name="post-publish"),
 
     # Post preview
-    url(r'^p/new/preview/(?P<memo>{})/$'.format(MEMO_RE), views.PostPreviewView.as_view(), name="post-preview"),
+    url(r'^p/new/preview/(?P<memo>{})/$'.format(MEMO_RE), PostPreviewView.as_view(), name="post-preview"),
 
     # A separate url for each post type.
     url(r'^p/new/post/$', views.RateLimitedNewPost.as_view(), name="new-post"),
 
     # A new answer
     url(r'^p/new/answer/(?P<pid>\d+)/$', views.RateLimitedNewAnswer.as_view(post_type="answer"), name="new-answer"),
-    
+
     # A new comment
     url(r'^p/new/comment/(?P<pid>\d+)/$', views.RateLimitedNewAnswer.as_view(post_type="comment"), name="new-comment"),
 
@@ -151,8 +151,8 @@ urlpatterns += [
     url(r'^info/policy/$', info.PolicyView.as_view(), name='info-policy'),
     url(r'^info/about/$', info.AboutView.as_view(), name='info-about'),
     url(r'^info/rss/$', info.RSSView.as_view(), name='info-rss'),
-   
-    # url(r'^info/help/$', views.InfoHelpView.as_view(), name='info-help'), 
+
+    # url(r'^info/help/$', views.InfoHelpView.as_view(), name='info-help'),
 ]
 
 # This is used only for the debug toolbar

@@ -1,7 +1,9 @@
 import re
 import sys
+import json
 
 from django.core.exceptions import ValidationError
+from common.log import logger
 
 
 def validate_checkpoint_name(value):
@@ -68,13 +70,23 @@ def validate_signable_field(value, key="unknown", no_auto_correct=False):
     return value
 
 def pre_validate_signature(signature):
-    print("sig pre-val: {}".format(len(signature)))
+    if re.match('^[a-z0-9]+$', signature):
+        return signature
 
-    if len(signature) == 0:
-        raise ValidationError(
-            "Signature is optional, yet you clicked \"Check\" and did not provide any Signature. "
-            "If you want to post unsigned then click on \"Get Invoice\" at the bottom of this page"
-        )
+    if re.match('^[a-z0-9"}{: \r\n,]+$', signature):
+        try:
+            parsed_signature = json.loads(signature)
+        except ValueError as msg:
+            logger.debug("Signature JSON is invalid: '{}' the error was {}".format(signature, msg))
+            raise ValidationError("Signature JSON is invalid")
+
+        if "signature" not in parsed_signature:
+            raise ValidationError("Signature JSON does look like the output for lncli signmessage")
+
+        if re.match('^[a-z0-9]+$', parsed_signature["signature"]):
+            return parsed_signature["signature"]
+
+    raise ValidationError("Signature is not JSON or has other characters then lower-case letters and numbers")
 
 def validate_memo(memo, no_auto_correct=False):
     new_memo = {}

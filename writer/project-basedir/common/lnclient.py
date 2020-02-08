@@ -1,6 +1,5 @@
 from common import cli
 
-import json
 import time
 import random
 
