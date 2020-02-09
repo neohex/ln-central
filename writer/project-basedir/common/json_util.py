@@ -26,20 +26,20 @@ def serialize_memo(simple_obj):
 
     See https://github.com/lightningnetwork/lnd/commit/b264ba198fc362505616c7b8e2decb8a62d5797d#diff-9f84ce21f17bb10010b2d2b19cb17e3cR39
     '''
-    json_str = json.dumps(simple_obj)
+    assert "_" not in settings.FRIENDLY_PREFIX, "cannot have spaces in FRIENDLY_PREFIX"
 
+    json_str = json.dumps(simple_obj)
 
     # TODO: Remove version check after reader is migrated to Python 3
     if sys.version_info >= (3, 0):
         compressed = zlib.compress(json_str.encode(encoding="utf-8", errors="strict"))
         serialized = binascii.b2a_base64(compressed).rstrip(b'\n')
+        serialized = "{}_{}".format(settings.FRIENDLY_PREFIX, serialized.decode('utf-8'))
 
     else:
         compressed = zlib.compress(json_str)
         serialized = binascii.b2a_base64(compressed).rstrip("\n")
-
-    assert "_" not in settings.FRIENDLY_PREFIX, "cannot have spaces in FRIENDLY_PREFIX"
-    serialized = "{}_{}".format(settings.FRIENDLY_PREFIX, serialized)
+        serialized = "{}_{}".format(settings.FRIENDLY_PREFIX, serialized)
 
     if len(serialized) > settings.MAX_MEMO_SIZE:
         raise MemoTooLarge(

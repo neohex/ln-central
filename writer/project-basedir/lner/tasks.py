@@ -1,6 +1,8 @@
 import logging
 import sys
 import time
+import json
+
 from datetime import datetime
 from datetime import timedelta
 
@@ -216,9 +218,9 @@ def run():
 
         if "sig" in post_details:
             sig = post_details.pop("sig")
-            sigless_memo = json_util.serialize_memo(post_details)
+
             verifymessage_detail = lnclient.verifymessage(
-                msg=sigless_memo,
+                msg=json.dumps(post_details, sort_keys=True),
                 sig=sig,
                 rpcserver=node.rpcserver,
                 mock=settings.MOCK_LN_CLIENT
