@@ -1,6 +1,7 @@
 import json, base64, hmac
 import binascii
 import zlib
+import sys
 
 from django.conf import settings
 
@@ -20,13 +21,22 @@ def serialize_memo(simple_obj):
     Requirements:
     - simple_obj must be convertible to json
     - after converting to json and compressing, there is a limit on bytes size
-    
+
     Check for serialized version not to exceed 1000 bytes (MAX_MEMO_SIZE)
 
     See https://github.com/lightningnetwork/lnd/commit/b264ba198fc362505616c7b8e2decb8a62d5797d#diff-9f84ce21f17bb10010b2d2b19cb17e3cR39
     '''
     json_str = json.dumps(simple_obj)
-    serialized = binascii.b2a_base64(zlib.compress(json_str)).rstrip("\n")
+
+
+    # TODO: Remove version check after reader is migrated to Python 3
+    if sys.version_info >= (3, 0):
+        compressed = zlib.compress(json_str.encode(encoding="utf-8", errors="strict"))
+        serialized = binascii.b2a_base64(compressed).rstrip(b'\n')
+
+    else:
+        compressed = zlib.compress(json_str)
+        serialized = binascii.b2a_base64(compressed).rstrip("\n")
 
     assert "_" not in settings.FRIENDLY_PREFIX, "cannot have spaces in FRIENDLY_PREFIX"
     serialized = "{}_{}".format(settings.FRIENDLY_PREFIX, serialized)

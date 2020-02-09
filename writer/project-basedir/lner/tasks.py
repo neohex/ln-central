@@ -213,7 +213,25 @@ def run():
             continue
 
         logger.info("Post details {}".format(post_details))
-        user, created = User.objects.get_or_create(pubkey='Unknown')
+
+        if "sig" in post_details:
+            sig = post_details.pop("sig")
+            sigless_memo = json_util.serialize_memo(post_details)
+            verifymessage_detail = lnclient.verifymessage(
+                msg=sigless_memo,
+                sig=sig,
+                rpcserver=node.rpcserver,
+                mock=settings.MOCK_LN_CLIENT
+            )
+            if not verifymessage_detail["valid"]:
+                checkpoint_helper.set_checkpoint("invalid_signiture")
+                continue
+            pubkey = verifymessage_detail["pubkey"]
+        else:
+            pubkey = "Unknown"
+
+        user, created = User.objects.get_or_create(pubkey=pubkey)
+
         post = Post(
             author=user,
             parent=None,

@@ -318,21 +318,21 @@ class PostPreviewView(FormView):
             json_util.deserialize_memo(memo_serialized)
         )
 
-        post_preview = self.get_model(memo)
-
-        context['post'] = post_preview
-        context['publish_url'] = post_preview.get_publish_url(post_preview.memo)
-
-        unsigned = True
         if kwargs.get("signature"):
             result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=kwargs["signature"])
             if result["valid"]:
                 identity_pubkey = result["identity_pubkey"]
                 context['user'] = User(id=1, pubkey=identity_pubkey)
-                unsigned = False
+                memo["sig"] = kwargs["signature"]  # add signature to memo
 
-        if unsigned:
+        if "sig" not in memo:
             context['user'] = User.objects.get(pubkey="Unknown")
+
+        post_preview = self.get_model(memo)
+        context['post'] = post_preview
+        context['publish_url'] = post_preview.get_publish_url(
+            memo=json_util.serialize_memo(memo)
+        )
 
         return context
 
@@ -350,8 +350,11 @@ class PostPreviewView(FormView):
 
         form = self.form_class(request.POST, memo=memo_serialized)
 
-        if not form.is_valid():
-            # Invalid form submission.
+        if form.is_valid():
+            context = self.get_context_data(**kwargs)
+            context["form"] = form
+        else:
+            # Form errors detected
             memo = validators.validate_memo(
                 json_util.deserialize_memo(memo_serialized)
             )
@@ -363,12 +366,8 @@ class PostPreviewView(FormView):
                 'form': form,
                 'user': User.objects.get(pubkey="Unknown")
             }
-        else:
-            context = self.get_context_data(**kwargs)
-            context["form"] = form
 
         return render(request, self.template_name, context)
-
 
 
 class NewAnswer(FormView):
