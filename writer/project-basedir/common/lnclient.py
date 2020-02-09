@@ -64,4 +64,4 @@ def verifymessage(msg, sig, rpcserver, mock=False):
         "--sig", sig
     ]
 
-    return cli.run(cmd, log_cmd=False)
+    return cli.run(cmd, log_cmd=True)

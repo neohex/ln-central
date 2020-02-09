@@ -48,7 +48,7 @@ class CheckpointHelper(object):
         )
 
     def __repr__(self):
-        return "node-{}-add-index-{}".format(self.node.pk, self.add_index)
+        return "node-{}-add-index-{}-value-{}".format(self.node.pk, self.add_index, self.invoice.checkpoint_value)
 
     def set_checkpoint(self, checkpoint_value, action_type=None, action_id=None):
         if self.invoice.checkpoint_value == checkpoint_value:
