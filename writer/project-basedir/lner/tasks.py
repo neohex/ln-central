@@ -68,6 +68,8 @@ class CheckpointHelper(object):
 
 @background(queue='queue-1', remove_existing_tasks=True)
 def run():
+    start_time = time.time()
+
     # Delete invoices that are passed retention
     for invoice_obj in Invoice.objects.all():
         if invoice_obj.created < timezone.now() - settings.INVOICE_RETENTION:
@@ -101,7 +103,7 @@ def run():
         # 2. The web front end adds the InvoiceRequest to the DB before it creates the actual invoices with lnclient.addinvoice
         # 3. Mocked API lnclient.addinvoice simply fakes converting InvoiceRequest to Invoice and saves to DB
         # 4. Here the mocked proces_tasks pulls invoices from DB Invoice model and pretends they came from lnclient.listinvoices
-        # 5. After X seconds passed based on Invoice created time, here Mock update the Invoice checkpoint to "done" faking a payment 
+        # 5. After X seconds passed based on Invoice created time, here Mock update the Invoice checkpoint to "done" faking a payment
 
         invoices_list = []
         for invoice_obj in Invoice.objects.all():
@@ -126,14 +128,12 @@ def run():
                 }
             )
 
-    logger.info("Got {} invoices".format(len(invoices_list)))
-
     retry_mini_map = {int(invoice['add_index']): False for invoice in invoices_list}
 
     for raw_invoice in invoices_list:
         # Example of raw_invoice:
         # {
-        # 'htlcs': [], 
+        # 'htlcs': [],
         # 'settled': False,
         # 'add_index': '5',
         # 'value': '1',
@@ -240,6 +240,11 @@ def run():
         node.global_checkpoint = new_global_checkpoint
         node.save()
         logger.info("Saved new global checkpoint {}".format(new_global_checkpoint))
+
+
+    processing_wall_time = time.time() - start_time
+    logger.info("Processed {} invoices in {:.3f} seconds".format(len(invoices_list), processing_wall_time))
+
 
 # schedule a new task after "repeat" number of seconds
 run(repeat=1)
