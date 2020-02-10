@@ -7,7 +7,7 @@ from django.core.cache import cache
 from biostar.apps.messages.models import Message
 from django.core.cache import cache
 from biostar.apps.users.models import User
-from biostar.apps.posts.models import Post, PostPreview, Vote, Tag, Subscription, ReplyToken
+from biostar.apps.posts.models import Post, Vote, Tag, Subscription, ReplyToken
 from biostar.apps.posts.views import NewPost, NewAnswer, ShortForm
 from biostar.apps.badges.models import Badge, Award
 from biostar.apps.posts.auth import post_permissions

@@ -24,6 +24,14 @@
 
 {% block content %}
 
+{% if errors_detected %}
+    <div>
+        <div style="background: #a94442; color: #ffffff; text-align: center; padding: 0.5em; font-size: 150%;">
+        Errors Detected
+        </div>
+    </div>
+{% endif %}
+
 {% if nodes_list|length > 0 %}
     <div class="row">
         <h2 class="col-md-4 col-xs-4" style="text-align: right;">
