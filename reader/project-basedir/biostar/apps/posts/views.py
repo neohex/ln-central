@@ -333,7 +333,7 @@ class PostPreviewView(FormView):
                 memo["sig"] = kwargs["signature"]  # add signature to memo
 
         if "sig" not in memo:
-            context['user'] = User.objects.get(pubkey="Unknown")
+            context['user'] = User(id=1, pubkey="Unknown")
 
         post_preview = self.get_model(memo)
         context['post'] = post_preview

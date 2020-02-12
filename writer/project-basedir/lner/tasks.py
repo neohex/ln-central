@@ -85,6 +85,22 @@ def run():
             continue
 
     # TODO: Handle duplicates (e.g. payments to different nodes), first come first serve
+
+    # Get all invoices that are not checkpointed
+    invoices_by_node = {}
+    invoices_from_db = Invoice.objects.filter(checkpoint_value="no_checkpoint")
+    invoice_count_from_db = len(invoices_from_db)
+
+    for invoice_obj in invoices_from_db:
+        invoice_request = InvoiceRequest.objects.get(id=invoice_obj.invoice_request.id)
+
+        if invoice_request.lightning_node not in invoices_by_node:
+            invoices_by_node[invoice_request.lightning_node] = {}
+
+        invoices_by_node[invoice_request.lightning_node][invoice_obj.add_index] = invoice_obj
+
+    # Process each node
+    invoice_count_from_nodes = 0
     node_list = LightningNode.objects.all()
     for node in node_list:
         created = (node.global_checkpoint == -1)
@@ -98,8 +114,15 @@ def run():
             mock=settings.MOCK_LN_CLIENT
         )
 
+        if node not in invoices_by_node:
+            invoice_list_from_db = {}
+            logger.info("DB has not invoices for this node")
+        else:
+            invoice_list_from_db = invoices_by_node[node]
+
         # example of invoices_details: {"invoices": [], 'first_index_offset': '5', 'last_index_offset': '72'}
-        invoices_list = invoices_details['invoices']
+        invoice_list_from_node = invoices_details['invoices']
+        invoice_count_from_nodes += len(invoice_list_from_node)
 
         if settings.MOCK_LN_CLIENT:
             # Here the mock pulls invoices from DB Invoice model, while in prod invoices are pulled from the Lightning node
@@ -109,8 +132,8 @@ def run():
             # 4. Here the mocked proces_tasks pulls invoices from DB Invoice model and pretends they came from lnclient.listinvoices
             # 5. After X seconds passed based on Invoice created time, here Mock update the Invoice checkpoint to "done" faking a payment
 
-            invoices_list = []
-            for invoice_obj in Invoice.objects.all():
+            invoice_list_from_node = []
+            for invoice_obj in Invoice.objects.filter(checkpoint_value="no_checkpoint"):
                 invoice_request = InvoiceRequest.objects.get(id=invoice_obj.invoice_request.id)
                 if invoice_request.lightning_node.id != node.id:
                     continue
@@ -118,7 +141,7 @@ def run():
                 mock_setteled = (invoice_obj.created + timedelta(seconds=3) < timezone.now())
 
                 creation_unixtime = int(time.mktime(invoice_obj.created.timetuple()))
-                invoices_list.append(
+                invoice_list_from_node.append(
                     {
                         "settled": mock_setteled,
                         "settle_date": str(int(time.time())) if mock_setteled else 0,
@@ -132,9 +155,9 @@ def run():
                     }
                 )
 
-        retry_mini_map = {int(invoice['add_index']): False for invoice in invoices_list}
+        retry_mini_map = {int(invoice['add_index']): False for invoice in invoice_list_from_node}
 
-        for raw_invoice in invoices_list:
+        for raw_invoice in invoice_list_from_node:
             # Example of raw_invoice:
             # {
             # 'htlcs': [],
@@ -159,12 +182,14 @@ def run():
                 )
                 continue
 
-            try:
-                # TODO: Handle multiple nodes, instead of Invoice.objects.get lookup by invoice request
-                invoice = Invoice.objects.get(add_index=int(raw_invoice["add_index"]))
-            except Invoice.DoesNotExist:
-                logger.error("Unknown add_index. Skipping invoice...")
+            add_index_from_node = int(raw_invoice["add_index"])
+
+            if add_index_from_node in invoice_list_from_db:
+                invoice = invoice_list_from_db[add_index_from_node]
+            else:
+                logger.error("Unknown add_index {}. Skipping invoice...".format(add_index_from_node))
                 logger.error("Raw invoice was: {}".format(raw_invoice))
+                logger.error("invoice_list_from_db was: {}".format(invoice_list_from_db))
                 continue
 
             # Validate
@@ -245,6 +270,8 @@ def run():
                 content=post_details["content"],
                 tag_val=post_details["tag_val"],
             )
+
+            # TODO: Catch failures when post title is duplicate (e.g. another node already saved post)
             post.save()
 
             checkpoint_helper.set_checkpoint("done", action_type="post", action_id=post.id)
@@ -266,7 +293,15 @@ def run():
 
 
     processing_wall_time = time.time() - start_time
-    logger.info("Processed {} invoices in {:.3f} seconds".format(len(invoices_list), processing_wall_time))
+    logger.info(
+        (
+            "Processed {} invoices from nodes and {} from db in {:.3f} seconds"
+        ).format(
+            invoice_count_from_nodes,
+            invoice_count_from_db,
+            processing_wall_time
+        )
+    )
 
 
 # schedule a new task after "repeat" number of seconds

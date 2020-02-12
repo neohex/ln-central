@@ -334,7 +334,6 @@ class PostDetails(DetailView):
 
         tree = OrderedDict()
         for post in thread:
-
             if post.type == Post.COMMENT:
                 tree.setdefault(post.parent_id, []).append(post)
 
