@@ -46,7 +46,7 @@ urlpatterns = [
 
     # Payment check image
     url(
-        r'^payment_check/(?P<memo>{})/payment_check.svg$'.format(MEMO_RE),
+        r'^payment_check/(?P<node_id>\d+)/(?P<memo>{})/payment_check.svg$'.format(MEMO_RE),
         PaymentCheck.as_view(content_type='image/svg+xml'),
         name="payment-check"
     ),
@@ -77,7 +77,7 @@ urlpatterns = [
     url(r'^p/edit/preview/(?P<memo>{})/$'.format(MEMO_RE), views.RateLimitedNewPost.as_view(), name="post-preview-edit"),
 
     # Post publish
-    url(r'^p/publish/preview/(?P<memo>{})/$'.format(MEMO_RE), views.PostPublishView.as_view(), name="post-publish"),
+    url(r'^p/publish/preview/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), views.PostPublishView.as_view(), name="post-publish"),
 
     # Post preview
     url(r'^p/new/preview/(?P<memo>{})/$'.format(MEMO_RE), PostPreviewView.as_view(), name="post-preview"),

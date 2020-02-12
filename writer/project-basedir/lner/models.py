@@ -31,7 +31,6 @@ class InvoiceRequest(CustomModel):
     lightning_node = models.ForeignKey(LightningNode, on_delete=models.CASCADE)
     memo = models.CharField(
         verbose_name='LN Invoice memo',
-        unique=True,
         max_length=settings.MAX_MEMO_SIZE
     )
 

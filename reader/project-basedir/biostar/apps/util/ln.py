@@ -74,6 +74,10 @@ def check_expected_key(response, expected_key, is_list=True):
         raise LNUtilError(error_msg)
 
 
+def by_name(x):
+    return x["name"]
+
+
 def get_nodes_list():
     try:
         response = call_endpoint('ln/list')
@@ -83,7 +87,12 @@ def get_nodes_list():
         return []
 
     else:
-        return [n["identity_pubkey"] for n in response.json()]
+        # reader only needs to know the id and name
+        return_list = [
+            {"id": n["id"], "name": n["identity_pubkey"]} for n in response.json()
+        ]
+
+        return sorted(return_list, key=by_name)
 
 
 def add_invoice(memo, node_id=1):

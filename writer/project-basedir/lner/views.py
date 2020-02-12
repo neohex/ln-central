@@ -129,9 +129,11 @@ class CheckPaymentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         memo = self.request.query_params.get("memo")
+        node_id = self.request.query_params.get("node_id")
+
         assert re.match(MEMO_RE, memo), "Got invalid memo {}".format(memo)
 
-        invoice_request = get_object_or_404(InvoiceRequest, memo=memo)
+        invoice_request = get_object_or_404(InvoiceRequest, memo=memo, lightning_node_id=node_id)
         invoice = get_object_or_404(Invoice, invoice_request=invoice_request)
 
         return [invoice]

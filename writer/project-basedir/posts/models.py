@@ -438,7 +438,8 @@ class PostPreview(models.Model):
         return url if self.is_toplevel else "%s#%s" % (url, self.id)
 
     def get_publish_url(self, memo):
-        url = reverse("post-publish", kwargs=dict(memo=memo))
+        # TODO: Instead of node_id=1 pick a random inital node
+        url = reverse("post-publish", kwargs=dict(memo=memo, node_id=1))
         return url if self.is_toplevel else "%s#%s" % (url, self.id)
 
 

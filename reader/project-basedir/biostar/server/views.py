@@ -1,17 +1,33 @@
+import os
+import markdown
+import pyzmail
+import random
+from datetime import datetime, timedelta
+
 from django.views.generic import DetailView, ListView, TemplateView, UpdateView, View
 from django.conf import settings
+from django.core.cache import cache
+from django.core.cache import cache
+from django import shortcuts
+from django.http import HttpResponseRedirect
+from django.core.paginator import Paginator
+from django.http import Http404
+from django.core.urlresolvers import reverse
+from django.utils.timezone import utc
+
+from . import moderate
+from braces.views import LoginRequiredMixin, JSONResponseMixin
+
 from biostar.apps.users import auth
 from biostar.apps.users.views import EditUser
-import os, random
-from django.core.cache import cache
 from biostar.apps.messages.models import Message
-from django.core.cache import cache
 from biostar.apps.users.models import User
 from biostar.apps.posts.models import Post, Vote, Tag, Subscription, ReplyToken
 from biostar.apps.posts.views import NewPost, NewAnswer, ShortForm
 from biostar.apps.badges.models import Badge, Award
 from biostar.apps.posts.auth import post_permissions
-
+from biostar.apps.util import ln
+from biostar.apps.util.email_reply_parser import EmailReplyParser
 
 from common import general_util
 from common import html_util
@@ -20,24 +36,6 @@ from common.const import OrderedDict
 from common import const
 from common import validators
 from common.cli import RunCommandException
-
-from biostar.apps.util import ln
-
-from datetime import datetime, timedelta
-from braces.views import LoginRequiredMixin, JSONResponseMixin
-from django import shortcuts
-from django.http import HttpResponseRedirect
-from django.core.paginator import Paginator
-import logging
-
-from haystack.query import SearchQuerySet
-from . import moderate
-from django.http import Http404
-import markdown, pyzmail
-from biostar.apps.util.email_reply_parser import EmailReplyParser
-from django.core.urlresolvers import reverse
-from django.utils.timezone import utc
-
 from common.log import logger
 
 
@@ -388,11 +386,26 @@ class PostPublishView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(PostPublishView, self).get_context_data(**kwargs)
+        node_id = int(context["node_id"])
 
-        context['nodes_list'] = ln.get_nodes_list()
+        nodes_list = ln.get_nodes_list()
+
+        # Lookup the node name
+        node_name = "Unknown"
+        list_pos = 0
+        for pos, n in enumerate(nodes_list):
+            if n["id"] == node_id:
+                node_name = n["name"]
+                list_pos = pos
+
+
+        context["node_name"] = node_name
+
+        next_node_id = nodes_list[(list_pos + 1) % len(nodes_list)]["id"]
+        context["next_node_url"] = reverse("post-publish", kwargs=dict(memo=context["memo"], node_id=next_node_id))
 
         try:
-            details = ln.add_invoice(context["memo"])
+            details = ln.add_invoice(context["memo"], node_id=context["node_id"])
         except RunCommandException as e:
             logger.excetion(e)
             return HttpResponseNotFound(

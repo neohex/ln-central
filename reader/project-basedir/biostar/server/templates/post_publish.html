@@ -27,24 +27,30 @@
 
 
 
-{% if nodes_list|length > 0 %}
+{% if node_name %}
     <div class="row">
         <h2 class="col-md-4 col-xs-4" style="text-align: right;">
-            LN Nodes available:
+            LN Node: {{ node_name }}
         </h2>
-        <div class="col-md-6 col-xs-6" style="padding: 2em">
-            <ul>
-                {% for node in nodes_list %}
-                    <li>{{ node }}</li>
-                {% endfor %}
-            </ul>
+    </div>
+    <div class="row">
+        <p class="col-md-4 col-xs-4" style="text-align: right;">
+            Payment not going through?<br />
+            ln.support has multiple nodes you can pay to:
+        </p>
+        <div class="btn-group">
+            <a href="{{ next_node_url }}" class="btn btn-primary">
+                    Pay to a different node
+            </a>
+
         </div>
+
     </div>
 
-    <div><img src="/payment_check/{{ memo }}/payment_check.svg" /></div>
+    <div><img src="/payment_check/{{ node_id }}/{{ memo }}/payment_check.svg" /></div>
 
     <h2>Pay to publish</h2>
-    <p>The post will be published after a payment is made on the Lightning Network using the invoice. 
+    <p>The post will be published after a payment is made on the Lightning Network using the invoice.
     Payment of <b>{{ payment_amount }} satoshi</b> is required.</p>
     <p>Your invoice is:</p>
     <pre>{{ pay_req }}</pre>

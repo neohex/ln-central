@@ -246,7 +246,7 @@ class NewPost(FormView):
         form = self.form_class(initial=initial)
         context = {
             'form': form,
-            'nodes_list': ln.get_nodes_list(),   # Get LN Nodes list
+            'nodes_list': [n["name"] for n in ln.get_nodes_list()],   # Get LN Nodes list
             'errors_detected': False,
         }
 

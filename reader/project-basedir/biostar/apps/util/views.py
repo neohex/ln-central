@@ -49,10 +49,10 @@ class PaymentCheck(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(PaymentCheck, self).get_context_data(**kwargs)
         memo = context["memo"]
+        node_id = context["node_id"]
 
         count = 0
         while True:
-            node_id = 1
             result = ln.check_payment(memo, node_id=node_id)
             checkpoint_value = result["checkpoint_value"]
             conclusion = ln.gen_check_conclusion(checkpoint_value, node_id=node_id, memo=memo)
