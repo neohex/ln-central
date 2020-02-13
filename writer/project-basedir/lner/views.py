@@ -26,6 +26,7 @@ from lner.serializers import VerifyMessageResponseSerializer
 
 from common import log
 from common import lnclient
+from common import validators
 
 from common.const import MEMO_RE
 
@@ -154,6 +155,8 @@ class VerifyMessageViewSet(viewsets.ModelViewSet):
 
         assert memo is not None, "Missing a required field: memo"
         assert sig is not None, "Missing a required field: sig"
+
+        sig = validators.pre_validate_signature(sig)
 
         node = LightningNode.objects.order_by("?").first()
 

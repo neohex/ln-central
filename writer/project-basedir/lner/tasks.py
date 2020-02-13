@@ -184,9 +184,9 @@ def run():
 
             add_index_from_node = int(raw_invoice["add_index"])
 
-            if add_index_from_node in invoice_list_from_db:
-                invoice = invoice_list_from_db[add_index_from_node]
-            else:
+            invoice = invoice_list_from_db.get(add_index_from_node)
+
+            if invoice is None:
                 logger.error("Unknown add_index {}. Skipping invoice...".format(add_index_from_node))
                 logger.error("Raw invoice was: {}".format(raw_invoice))
                 logger.error("invoice_list_from_db was: {}".format(invoice_list_from_db))
