@@ -54,7 +54,7 @@ def listinvoices(index_offset, rpcserver, max_invoices=100, mock=False):
 def verifymessage(msg, sig, rpcserver, mock=False):
     if mock:
         return {
-            "valid": True,
+            "valid": False,
             "pubkey": "FAKE2"
         }
 

@@ -325,12 +325,13 @@ class PostPreviewView(FormView):
             json_util.deserialize_memo(memo_serialized)
         )
 
-        if kwargs.get("signature"):
-            result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=kwargs["signature"])
+        signature = kwargs.get("signature")
+        if signature:
+            result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=signature)
             if result["valid"]:
                 identity_pubkey = result["identity_pubkey"]
                 context['user'] = User(id=1, pubkey=identity_pubkey)
-                memo["sig"] = kwargs["signature"]  # add signature to memo
+                memo["sig"] = signature  # add signature to memo
 
         if "sig" not in memo:
             context['user'] = User(id=1, pubkey="Unknown")
@@ -349,24 +350,53 @@ class PostPreviewView(FormView):
         Post is used when checking signature
         """
 
-        kwargs["signature"] = request.POST.get("signature")
+        signature = request.POST.get("signature")
+        kwargs["signature"] = signature
 
         view = super(PostPreviewView, self).get(request, *args, **kwargs)
         view_obj = super(PostPreviewView, self).get_context_data().get("view")
         memo_serialized = view_obj.kwargs["memo"]
 
+        memo = validators.validate_memo(
+            json_util.deserialize_memo(memo_serialized)
+        )
+
         form = self.form_class(request.POST, memo=memo_serialized)
 
         if form.is_valid():
-            context = self.get_context_data(**kwargs)
-            context["form"] = form
-            context["errors_detected"] = False
+            if signature:
+                result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=signature)
+                if not result["valid"]:
+                    # Signature is invalid
+
+                    ## See: https://github.com/alevchuk/ln-central/issues/27
+                    # self.form_class.add_error(
+                    #     "signature",
+                    #     ValidationError("Signature is invalid. Try signing latest preview data or delete signature to be anonymous.")
+                    # )
+
+                    post_preview = self.get_model(memo)
+
+                    context = {
+                        "post": post_preview,
+                        "form": form,
+                        "user": User.objects.get(pubkey="Unknown"),
+                        "errors_detected": True,
+                        "show_error_summary": True,
+                        "error_summary_list": [
+                            "Signature is invalid. Try signing latest preview data or delete signature to be anonymous."
+                        ]
+                    }
+                else:
+                    context = self.get_context_data(**kwargs)
+                    context["form"] = form
+                    context["errors_detected"] = False
+            else:
+                context = self.get_context_data(**kwargs)
+                context["form"] = form
+                context["errors_detected"] = False
         else:
             # Form errors detected
-            memo = validators.validate_memo(
-                json_util.deserialize_memo(memo_serialized)
-            )
-
             post_preview = self.get_model(memo)
 
             context = {

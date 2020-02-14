@@ -23,11 +23,20 @@
 {% block content %}
 
     {% if errors_detected %}
-        <div>
-            <div style="background: #a94442; color: #ffffff; text-align: center; padding: 0.5em; font-size: 150%;">
-            Errors Detected
-            </div>
+        <div style="background: #a94442; color: #ffffff; text-align: center; padding: 0.5em; font-size: 150%;">
+        Errors Detected
         </div>
+
+        {% if show_error_summary %}
+            <div style="background: #a94442; color: #ffffff; text-align: left; padding: 0.5em; font-size: 150%;">
+            <ul>
+                {% for e in error_summary_list %}
+                    <li>{{ e }}</li>
+                {% endfor %}
+            </ul>
+            </div>
+        {% endif %}
+
     {% endif %}
 
     <div class="row" itemscope itemtype="http://schema.org/QAPage">
