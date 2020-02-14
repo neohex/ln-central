@@ -394,7 +394,7 @@ class PostPublishView(TemplateView):
         list_pos = 0
         for pos, n in enumerate(nodes_list):
             if n["id"] == node_id:
-                node_name = n["name"]
+                node_name = n["node_name"]
                 list_pos = pos
 
 

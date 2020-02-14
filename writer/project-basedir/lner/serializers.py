@@ -15,7 +15,7 @@ from common import validators
 class LightningNodeSerializer(HyperlinkedModelSerializer):
     class Meta:
         model = LightningNode
-        fields = ['id', 'identity_pubkey', 'rpcserver']
+        fields = ['id', 'node_name', 'rpcserver', 'qos_score']
 
 
 class InvoiceRequestSerializer(HyperlinkedModelSerializer):

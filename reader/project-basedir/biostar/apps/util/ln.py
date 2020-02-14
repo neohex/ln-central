@@ -75,13 +75,13 @@ def check_expected_key(response, expected_key, is_list=True):
 
 
 def by_name(x):
-    return x["name"]
+    return x["node_name"]
 
 
 def get_nodes_list():
     try:
         response = call_endpoint('ln/list')
-        check_expected_key(response, "identity_pubkey")
+        check_expected_key(response, "node_name")
 
     except LNUtilError:
         return []
@@ -89,13 +89,13 @@ def get_nodes_list():
     else:
         # reader only needs to know the id and name
         return_list = [
-            {"id": n["id"], "name": n["identity_pubkey"]} for n in response.json()
+            {"id": n["id"], "node_name": n["node_name"], "qos_score": n["qos_score"]} for n in response.json()
         ]
 
         return sorted(return_list, key=by_name)
 
 
-def add_invoice(memo, node_id=1):
+def add_invoice(memo, node_id):
     response = call_endpoint('ln/addinvoice', args={"memo": memo, "node_id": node_id}, as_post=True)
 
     check_expected_key(response, "pay_req", is_list=False)
@@ -122,7 +122,7 @@ def gen_check_conclusion(checkpoint_value, node_id, memo):
         return CHECKPOINT_ERROR
 
 
-def check_payment(memo, node_id=1):
+def check_payment(memo, node_id):
     response = call_endpoint('ln/check', args={"memo": memo, "node_id": node_id})
     if response.status_code != 200:
         error_msg = (

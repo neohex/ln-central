@@ -32,6 +32,14 @@ except ImportError:
     # reader
     from biostar.apps.users.models import User
 
+try:
+    # only reader needs this, only reader has this
+    from biostar.apps.util import ln
+except  ImportError:
+    # writer
+    pass
+
+
 # HTML sanitization parameters.
 import json
 import binascii
@@ -437,8 +445,15 @@ class PostPreview(models.Model):
         return url if self.is_toplevel else "%s#%s" % (url, self.id)
 
     def get_publish_url(self, memo):
-        # TODO: Instead of node_id=1 pick a random inital node
-        url = reverse("post-publish", kwargs=dict(memo=memo, node_id=1))
+        # Pick default inital node
+        nodes_list = ln.get_nodes_list()
+        node_with_top_score = nodes_list[0]
+        for node in nodes_list:
+            if node["qos_score"] > node_with_top_score["qos_score"]:
+                node_with_top_score = node
+
+        node_id = node_with_top_score["id"]
+        url = reverse("post-publish", kwargs=dict(memo=memo, node_id=node_id))
         return url if self.is_toplevel else "%s#%s" % (url, self.id)
 
 

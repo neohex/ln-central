@@ -43,7 +43,7 @@ class CheckpointHelper(object):
                 (
                     "Processing invoice of node={} at add_index={} creation_date={}"
                 ).format(
-                    self.node.identity_pubkey,
+                    self.node.node_name,
                     self.add_index,
                     human_time(self.creation_date)
                 )
