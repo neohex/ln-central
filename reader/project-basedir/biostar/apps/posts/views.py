@@ -227,6 +227,12 @@ class NewPost(FormView):
     form_class = LongForm
     template_name = "post_edit.html"
 
+
+    def get_context_data(self, **kwargs):
+        context = super(NewPost, self).get_context_data(**kwargs)
+        context['nodes_list'] = [n["node_name"] for n in ln.get_nodes_list()]
+        return context
+
     def get(self, request, *args, **kwargs):
 
         initial = dict()
@@ -242,13 +248,9 @@ class NewPost(FormView):
                 if value:
                     initial[key] = value
 
-        # here, there used to be code to prefill from external session
-        form = self.form_class(initial=initial)
-        context = {
-            'form': form,
-            'nodes_list': [n["node_name"] for n in ln.get_nodes_list()],   # Get LN Nodes list
-            'errors_detected': False,
-        }
+        context = self.get_context_data(**kwargs)
+        context['form'] = self.form_class(initial=initial)
+        context['errors_detected'] = False
 
         return render(request, self.template_name, context)
 
@@ -257,14 +259,14 @@ class NewPost(FormView):
         # Validating the form.
         form = self.form_class(request.POST)
         if not form.is_valid():
+            context = self.get_context_data(**kwargs)
+            context['form'] = form
+            context['errors_detected'] = True
+
             return render(
                 request,
                 self.template_name,
-                {
-                    'form': form,
-                    'errors_detected': True,
-                    'nodes_list': ln.get_nodes_list(),
-                }
+                context
             )
 
         # Valid forms start here.
@@ -399,12 +401,9 @@ class PostPreviewView(FormView):
             # Form errors detected
             post_preview = self.get_model(memo)
 
-            context = {
-                "post": post_preview,
-                "form": form,
-                "user": User.objects.get(pubkey="Unknown"),
-                "errors_detected": True
-            }
+            context = self.get_context_data(**kwargs)
+            context["form"] = form
+            context["errors_detected"] = True
 
         return render(request, self.template_name, context)
 
