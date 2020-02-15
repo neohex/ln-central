@@ -422,7 +422,7 @@ class PostPublishView(TemplateView):
         memo = context["memo"]
 
         # Check payment and redirect if payment is confirmed
-        node_id = 1
+        node_id = int(context["node_id"])
         result = ln.check_payment(memo, node_id=node_id)
         checkpoint_value = result["checkpoint_value"]
         conclusion = ln.gen_check_conclusion(checkpoint_value, node_id=node_id, memo=memo)
