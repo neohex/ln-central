@@ -122,13 +122,17 @@
    padding: 0.5em 0em 0.5em 0em;
    border-top: 1px solid #ECECEC;
 }
- .post-row .count-box-sm {
-   float: left;
-}
+
  .post-row .count-box {
    float: left;
-   width: 12.4em;
+   width: 9em;
 }
+
+ .post-row .count-box-sm {
+   float: left;
+   width: 9em;
+ }
+
  .post-row .count-box .book_count {
    font-size: smaller;
    color: #762C90;
@@ -607,4 +611,4 @@
    float: left;
    width: 285px;
 }
- 
+

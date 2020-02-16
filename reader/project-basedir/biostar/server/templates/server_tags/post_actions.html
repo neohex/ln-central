@@ -13,7 +13,7 @@
 
     <span class="userlink muted">
             {% if post.creation_date != post.lastedit_date %}
-            modified {{ post.lastedit_date|time_ago }}
+                modified {{ post.lastedit_date|time_ago }}
             {%  if post.author != post.lastedit_user %}
                 by {% userlink post.lastedit_user %}
             {%  endif %}

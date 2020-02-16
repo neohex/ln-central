@@ -44,9 +44,6 @@
         <a href="{% url 'user-list' %}">
             <i class="fa fa-heart fa-1x" style="margin-left:5px"></i> Community
         </a>
-        <a href="{% url 'topic-list' topic='bookmarks' %}" style="margin-left:5px">
-            <i class="fa fa-book fa-1x"></i> Bookmarks
-        </a>
         <a href="{% url 'badge-list' %}" style="margin-left:5px">
             <i class="fa fa-trophy fa-1x"></i> Badges
         </a>
@@ -84,13 +81,6 @@
                 <div><i class="fa fa-heart"></i>
                 </div>
                 <div>Community</div>
-            </a>
-        </div>
-
-        <div class="col-sm-1 mid {% active 'bookmarks' topic %}">
-            <a href="{% url 'topic-list' topic='bookmarks' %}" class="navitem">
-                <div><i class="fa fa-book"></i></div>
-                <div>Bookmarks</div>
             </a>
         </div>
 
