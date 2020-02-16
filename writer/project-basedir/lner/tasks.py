@@ -9,6 +9,7 @@ from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework import serializers
 from background_task import background
@@ -260,15 +261,34 @@ def run():
             else:
                 pubkey = "Unknown"
 
+
+            if "parent_post_id" in post_details:
+                # Find the parent.
+                try:
+                    parent_post_id = int(post_details["parent_post_id"])
+                    parent = Post.objects.get(pk=parent_post_id)
+                except (ObjectDoesNotExist, ValueError):
+                    logger.error("The post parent does not exist: {}".format(post_details))
+                    checkpoint_helper.set_checkpoint("invalid_parent_post")
+                    continue
+
+                title = parent.title
+                tag_val = parent.tag_val
+            else:
+                title = post_details["title"]
+                tag_val = post_details["tag_val"]
+                parent = None
+
             user, created = User.objects.get_or_create(pubkey=pubkey)
 
+            print(parent_post_id)
             post = Post(
                 author=user,
-                parent=None,
+                parent=parent,
                 type=post_details["post_type"],
-                title=post_details["title"],
+                title=title,
                 content=post_details["content"],
-                tag_val=post_details["tag_val"],
+                tag_val=tag_val,
             )
 
             # TODO: Catch failures when post title is duplicate (e.g. another node already saved post)

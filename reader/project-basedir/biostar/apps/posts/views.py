@@ -239,7 +239,13 @@ class NewPost(FormView):
 
         if "memo" in kwargs:
             memo = json_util.deserialize_memo(kwargs["memo"])
-            for key in "title post_type tag_val content".split():
+
+            if "parent_post_id" in memo:
+                expected_memo_keys = ["parent_post_id", "post_type", "content"]
+            else:
+                expected_memo_keys = ["title", "post_type", "tag_val", "content"]
+
+            for key in expected_memo_keys:
                 initial[key] = memo[key]
         else:
             # Attempt to prefill from GET parameters
@@ -290,7 +296,6 @@ class PostPreviewView(FormView):
     template_name = "post_preview.html"
     form_class = SignMessageForm
 
-
     def get_form_kwargs(self):
         view_obj = super(PostPreviewView, self).get_context_data().get("view")
         memo = view_obj.kwargs["memo"]
@@ -302,14 +307,32 @@ class PostPreviewView(FormView):
     def get_model(self, memo):
 
         post_preview = PostPreview()
-        post_preview.title = memo["title"]
+        if "parent_post_id" in memo:
+            parent_post_id = memo["parent_post_id"]
+
+            # Find the parent.
+            try:
+                parent = Post.objects.get(pk=parent_post_id)
+            except ObjectDoesNotExist, exc:
+                logger.error("The post does not exist. Perhaps it was deleted request (Request: %s)", request)
+                return HttpResponseRedirect("/")
+
+            post_preview.parent_post_id = parent_post_id
+            post_preview.title = parent.title
+            post_preview.tag_val = parent.tag_val
+            post_preview.tag_value = html_util.split_tags(parent.tag_val)
+
+        else:
+            post_preview.title = memo["title"]
+            post_preview.tag_val = memo["tag_val"]
+            post_preview.tag_value = html_util.split_tags(memo["tag_val"])
+
         post_preview.status = Post.OPEN
         post_preview.type = memo["post_type"]
         post_preview.content = memo["content"]
         post_preview.html = html_util.parse_html(memo["content"])
-        post_preview.tag_val = memo["tag_val"]
-        post_preview.tag_value = html_util.split_tags(memo["tag_val"])
         post_preview.date = datetime.utcfromtimestamp(memo["unixtime"]).replace(tzinfo=utc)
+
         post_preview.memo = post_preview.serialize_memo()
 
         post_preview.clean_fields()
@@ -412,28 +435,34 @@ class NewAnswer(FormView):
     """
     Creates a new post.
     """
+
     form_class = ShortForm
     template_name = "post_edit.html"
     type_map = dict(answer=Post.ANSWER, comment=Post.COMMENT)
     post_type = None
 
-    def get(self, request, *args, **kwargs):
-        initial = {}
-
-        # The parent id.
-        pid = int(self.kwargs['pid'])
-        # form_class = ShortForm if pid else LongForm
-        form = self.form_class(initial=initial)
-
-        return render(request, self.template_name, {'form': form})
+    def get_context_data(self, **kwargs):
+        context = super(NewAnswer, self).get_context_data(**kwargs)
+        context['nodes_list'] = [n["node_name"] for n in ln.get_nodes_list()]
+        return context
 
     def post(self, request, *args, **kwargs):
+        """
+        This gets the initial "new answer" request, before the get method
+        if everything looks good then we generate the memo (with parent post id)
+        and re-direct to preview. If there are errors, we also render this
+        back to the user directly from here. See `if not form.is_valid()`
+        """
 
-        pid = int(self.kwargs['pid'])
+        parent_post_id = int(self.kwargs['pid'])
+
+        # URL sets the type for this new post
+        post_type = self.type_map.get(self.post_type)
+        assert post_type == Post.ANSWER, "Currently we only support Answer type"
 
         # Find the parent.
         try:
-            parent = Post.objects.get(pk=pid)
+            parent = Post.objects.get(pk=parent_post_id)
         except ObjectDoesNotExist, exc:
             logger.error("The post does not exist. Perhaps it was deleted request (Request: %s)", request)
             return HttpResponseRedirect("/")
@@ -441,26 +470,30 @@ class NewAnswer(FormView):
         # Validating the form.
         form = self.form_class(request.POST)
         if not form.is_valid():
-            return render(request, self.template_name, {'form': form})
+            context = self.get_context_data(**kwargs)
+            context["form"] = form
+            context["errors_detected"] = True
+            return render(request, self.template_name, context)
 
-        # Valid forms start here.
-        data = form.cleaned_data.get
+        # Valid forms start here
+        content = form.cleaned_data.get("content")
 
-        # Figure out the right type for this new post
-        post_type = self.type_map.get(self.post_type)
+        post_preview = PostPreview()
+        post_preview.parent_post_id = parent_post_id
+        post_preview.title = parent.title
+        post_preview.tag_val = parent.tag_val
+        post_preview.tag_value = html_util.split_tags(parent.tag_val)
+        post_preview.status = Post.OPEN
+        post_preview.type = post_type
+        post_preview.content = content
+        post_preview.html = html_util.parse_html(content)
+        post_preview.date = general_util.now()
+        post_preview.memo = post_preview.serialize_memo()
 
-        # Create a new post.
+        post_preview.clean_fields()
 
-        # TODO
-        # post = Post(
-        #     title=parent.title, content=data('content'), author=request.user, type=post_type,
-        #     parent=parent,
-        # )
+        return HttpResponseRedirect(post_preview.get_absolute_url(memo=post_preview.memo))
 
-        # logger.info("%s created request (Request: %s)", post.get_type_display(), request)
-        # post.save()
-
-        return HttpResponseRedirect(post.get_absolute_url())
 
 
 class EditPost(FormView):

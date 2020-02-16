@@ -335,7 +335,7 @@ class Post(models.Model):
             self.lastedit_date = self.creation_date
 
             # Set the timestamps on the parent
-            if self.type == Post.ANSWER:
+            if self.type == Post.ANSWER and self.parent:
                 self.parent.lastedit_date = self.lastedit_date
                 self.parent.lastedit_user = self.lastedit_user
                 self.parent.save()
@@ -400,6 +400,9 @@ class PostPreview(models.Model):
     # The type of the post: question, answer, comment.
     type = models.IntegerField(choices=Post.TYPE_CHOICES, null=False, blank=False)
 
+    # All posts other than Questions, and Meta Questions, have a parent post id
+    parent_post_id = models.IntegerField(blank=True, null=True)
+
     # This is the HTML that the user enters.
     content = models.TextField(default='', null=False, blank=False, validators=[validators.validate_signable_field])
 
@@ -418,8 +421,9 @@ class PostPreview(models.Model):
 
     def serialize_memo(self):
         assert self.date.tzinfo == utc, "date must be in UTC"
-        memo = json_util.serialize_memo(
-            dict(
+
+        if self.is_toplevel:
+            obj = dict(
                 title=validators.validate_signable_field(self.title),
                 post_type=self.type,
                 tag_val=self.tag_val,
@@ -428,21 +432,31 @@ class PostPreview(models.Model):
                     (self.date - datetime.datetime(1970,1,1).replace(tzinfo=utc)).total_seconds()
                 )
             )
-        )
+        else:
+            obj = dict(
+                parent_post_id=self.parent_post_id,
+                post_type=self.type,
+                content=validators.validate_signable_field(self.content),
+                unixtime=int(
+                    (self.date - datetime.datetime(1970,1,1).replace(tzinfo=utc)).total_seconds()
+                )
+            )
+
+        memo = json_util.serialize_memo(obj)
 
         return memo
 
     def get_absolute_url(self, memo):
         url = reverse("post-preview", kwargs=dict(memo=memo))
-        return url if self.is_toplevel else "%s#%s" % (url, self.id)
+        return url
 
     def get_edit_url(self, memo):
         url = reverse("post-preview-edit", kwargs=dict(memo=memo))
-        return url if self.is_toplevel else "%s#%s" % (url, self.id)
+        return url
 
     def get_preview_url(self, memo):
         url = reverse("post-preview", kwargs=dict(memo=memo))
-        return url if self.is_toplevel else "%s#%s" % (url, self.id)
+        return url
 
     def get_publish_url(self, memo):
         # Pick default inital node
@@ -454,7 +468,7 @@ class PostPreview(models.Model):
 
         node_id = node_with_top_score["id"]
         url = reverse("post-publish", kwargs=dict(memo=memo, node_id=node_id))
-        return url if self.is_toplevel else "%s#%s" % (url, self.id)
+        return url
 
 
 

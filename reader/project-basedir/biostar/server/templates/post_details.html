@@ -59,8 +59,7 @@
                         </div>
                     {% endif %}
 
-                    {#  Authenticated users on an open post #}
-                    {% if user.is_authenticated and post.is_open %}
+                    {% if post.is_open %}
                         <div class="form-group">
                         <h3>Add your answer</h3>
 
