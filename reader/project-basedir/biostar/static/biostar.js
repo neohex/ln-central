@@ -59,14 +59,6 @@ function mod_votecount(elem, k) {
     elem.siblings('.count').text(count)
 }
 
-function add_comment_anon(elem) {
-    container = elem.closest("div")
-    elem.css("background-color", "red");
-    $("#comment-box").remove();
-    container.append('' +
-        '<div id="comment-box" class="alert alert-warning">Please <a class="alert-link" href="/accounts/login/">log in</a> to comment</div>'
-     )
-}
 
 VOTE = "vote"
 
@@ -193,39 +185,26 @@ $(document).ready(function () {
     // Register tooltips.
     $('.tip').tooltip(tooltip_options)
 
-    // Register comment adding.
-    if (USER_ID) {
-
-        // Authenticated user actions.
-        $('.add-comment').each(function () {
-            $(this).click(function () {
-                add_comment($(this));
-            });
+    // Authenticated user actions.
+    $('.add-comment').each(function () {
+        $(this).click(function () {
+            add_comment($(this));
         });
+    });
 
-        // Moderator actions.
-        $('.mod-post').each(function () {
-            $(this).click(function () {
-                moderate_post($(this));
-            });
+    // Moderator actions.
+    $('.mod-post').each(function () {
+        $(this).click(function () {
+            moderate_post($(this));
         });
+    });
 
-        // Moderator actions.
-        $('.mod-user').each(function () {
-            $(this).click(function () {
-                moderate_user($(this));
-            });
+    // Moderator actions.
+    $('.mod-user').each(function () {
+        $(this).click(function () {
+            moderate_user($(this));
         });
-
-    } else {
-
-        // Anonymous user actions.
-        $('.add-comment').each(function () {
-            $(this).click(function () {
-                add_comment_anon($(this));
-            });
-        });
-    }
+    });
 
     // Vote submission.
     $('.vote').each(function () {

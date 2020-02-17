@@ -520,7 +520,7 @@ class NewAnswer(FormView):
 
         # URL sets the type for this new post
         post_type = self.type_map.get(self.post_type)
-        assert post_type == Post.ANSWER, "Currently we only support Answer type"
+        assert post_type in [Post.ANSWER, Post.COMMENT], "I only support Answers and Comment types, got: {}".format(post_type)
 
         # Find the parent.
         try:
