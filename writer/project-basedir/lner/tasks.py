@@ -117,7 +117,7 @@ def run():
 
         if node not in invoices_by_node:
             invoice_list_from_db = {}
-            logger.info("DB has not invoices for this node")
+            logger.info("DB has no invoices for this node")
         else:
             invoice_list_from_db = invoices_by_node[node]
 
@@ -281,7 +281,6 @@ def run():
 
             user, created = User.objects.get_or_create(pubkey=pubkey)
 
-            print(parent_post_id)
             post = Post(
                 author=user,
                 parent=parent,

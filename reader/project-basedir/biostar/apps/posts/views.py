@@ -136,13 +136,37 @@ class LongForm(forms.Form):
     def clean(self):
         cleaned_data = super(LongForm, self).clean()
 
-        post_preview = PostPreview(
-              title=cleaned_data.get('title'),
-              content=cleaned_data.get('content'),
-              tag_val=cleaned_data.get('tag_val'),
-              type=int(cleaned_data.get('post_type')),
-              date=general_util.now()
-        )
+        parent_post_id = cleaned_data.get("parent_post_id")
+
+        if parent_post_id:
+
+            # Find the parent.
+            try:
+                parent = Post.objects.get(pk=parent_post_id)
+            except ObjectDoesNotExist, exc:
+                raise ValidationError(
+                    "Parent post {} does not exist. Perhaps it was deleted request".format(
+                        parent_post_id
+                    )
+                )
+
+            post_preview = PostPreview(
+                parent_post_id = parent_post_id,
+                title = parent.title,
+                tag_val = parent.tag_val,
+                tag_value = html_util.split_tags(parent.tag_val),
+                content=cleaned_data.get('content'),
+                type=int(cleaned_data.get('post_type')),
+                date=general_util.now()
+            )
+        else:
+            post_preview = PostPreview(
+                title=cleaned_data.get('title'),
+                content=cleaned_data.get('content'),
+                tag_val=cleaned_data.get('tag_val'),
+                type=int(cleaned_data.get('post_type')),
+                date=general_util.now()
+            )
 
         try:
             serialized = post_preview.serialize_memo()
@@ -164,7 +188,7 @@ class LongForm(forms.Form):
 
 
 class ShortForm(forms.Form):
-    FIELDS = ["content"]
+    FIELDS = ["content", "parent_post_id"]
 
     content = forms.CharField(widget=PagedownWidget, min_length=20, max_length=5000,)
 
@@ -242,6 +266,7 @@ class NewPost(FormView):
 
             if "parent_post_id" in memo:
                 expected_memo_keys = ["parent_post_id", "post_type", "content"]
+                self.form_class = ShortForm
             else:
                 expected_memo_keys = ["title", "post_type", "tag_val", "content"]
 
@@ -262,6 +287,37 @@ class NewPost(FormView):
 
 
     def post(self, request, *args, **kwargs):
+        if "memo" in kwargs:
+            post_preview = PostPreview()
+
+            # Some data comes from memo
+            memo = json_util.deserialize_memo(kwargs["memo"])
+
+            if "parent_post_id" in memo:
+                self.form_class = ShortForm
+
+                parent_post_id = memo["parent_post_id"]
+
+                # Find the parent.
+                try:
+                    parent = Post.objects.get(pk=parent_post_id)
+                except ObjectDoesNotExist, exc:
+                    logger.error("The post does not exist. Perhaps it was deleted request (Request: %s)", request)
+                    return HttpResponseRedirect("/")
+
+                post_preview.parent_post_id = parent_post_id
+                post_preview.title = parent.title
+                post_preview.tag_val = parent.tag_val
+                post_preview.tag_value = html_util.split_tags(parent.tag_val)
+            else:
+                post_preview.title = memo["title"]
+                post_preview.tag_val = memo["tag_val"]
+                post_preview.tag_value = html_util.split_tags(memo["tag_val"])
+
+            post_preview.status = Post.OPEN
+            post_preview.type = memo["post_type"]
+            post_preview.date = datetime.utcfromtimestamp(memo["unixtime"]).replace(tzinfo=utc)
+
         # Validating the form.
         form = self.form_class(request.POST)
         if not form.is_valid():
@@ -275,16 +331,22 @@ class NewPost(FormView):
                 context
             )
 
-        # Valid forms start here.
-        data = form.cleaned_data
+        if "memo" in kwargs:
+            # Only new data comes from the HTML form
+            post_preview.content = form.cleaned_data.get("content")
+            post_preview.html = html_util.parse_html(post_preview.content)
+        else:
+            # Valid forms start here.
+            data = form.cleaned_data
 
-        post_preview = PostPreview(
-              title=data.get('title'),
-              content=data.get('content'),
-              tag_val=data.get('tag_val'),
-              type=int(data.get('post_type')),
-              date=general_util.now()
-        )
+            # All data comes from the HTML form
+            post_preview = PostPreview(
+                  title=data.get('title'),
+                  content=data.get('content'),
+                  tag_val=data.get('tag_val'),
+                  type=int(data.get('post_type')),
+                  date=general_util.now()
+            )
 
         return HttpResponseRedirect(post_preview.get_absolute_url(memo=post_preview.serialize_memo()))
 
