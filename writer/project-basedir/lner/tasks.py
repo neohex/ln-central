@@ -72,10 +72,8 @@ class CheckpointHelper(object):
         return self.invoice.checkpoint_value != "no_checkpoint"
 
 
-@background(queue='queue-1', remove_existing_tasks=True)
 def run():
     start_time = time.time()
-
     # Delete invoices that are passed retention
     for invoice_obj in Invoice.objects.all():
         if invoice_obj.created < timezone.now() - settings.INVOICE_RETENTION:
@@ -386,5 +384,12 @@ def run():
     )
 
 
+@background(queue='queue-1', remove_existing_tasks=True)
+def run_many():
+    for _ in range(200):
+        run()
+        time.sleep(0.5)
+    logger.info("Finished 200 runs")
+
 # schedule a new task after "repeat" number of seconds
-run(repeat=1)
+run_many(repeat=1)
