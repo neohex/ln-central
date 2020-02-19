@@ -146,7 +146,7 @@ class User(models.Model):
     @property
     def scaled_score(self):
         "People like to see big scores."
-        return self.score * 10
+        return self.score * settings.PAYMENT_AMOUNT
 
     def __unicode__(self):
         return "%s (id=%s, last_login: %s)" % (self.pubkey, self.id, self.last_login)

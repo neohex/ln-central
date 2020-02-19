@@ -1,0 +1,68 @@
+{% extends "starbase_refresh.html" %}
+{% load server_tags %}
+{% load cache %}
+{% load more_like_this %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block page_title %}
+    Publish Post
+{% endblock %}
+
+{% block extras %}
+
+    <script type="text/javascript"
+            src="{% static "lib/pagedown/Markdown.Converter.js" %}"></script>
+    <script type="text/javascript"
+            src="{% static "lib/pagedown/Markdown.Sanitizer.js" %}"></script>
+    <script type="text/javascript"
+            src="{% static "lib/pagedown/Markdown.Editor.js" %}"></script>
+
+    {#  Markdown editor style #}
+    <link rel="stylesheet" href={% static "lib/pagedown/markdown.css" %}>
+
+{% endblock %}
+
+{% block content %}
+
+
+
+{% if node_name %}
+    <div class="row">
+        <h2 class="col-md-4 col-xs-4" style="text-align: right;">
+            LN Node: {{ node_name }}
+        </h2>
+    </div>
+    <div class="row">
+        <p class="col-md-4 col-xs-4" style="text-align: right;">
+            Payment not going through?<br />
+            ln.support has multiple nodes you can pay to:
+        </p>
+        <div class="btn-group">
+            <a href="{{ next_node_url }}" class="btn btn-primary">
+                    Pay to a different node
+            </a>
+
+        </div>
+
+    </div>
+
+    <div><img src="/payment_check/{{ node_id }}/{{ memo }}/payment_check.svg" /></div>
+
+    <h2>Pay to vote</h2>
+    <p>The vote will be published after a payment is made on the Lightning Network using the invoice.
+    Payment of <b>{{ payment_amount }} satoshi</b> is required.</p>
+    <p>Your invoice is:</p>
+    <pre>{{ pay_req }}</pre>
+    <img src="/qr/{{ pay_req }}/qr.svg" />
+{% else %}
+    <div>
+        <h2>Sorry, no LN Nodes are currently available</h2>
+        <p>Please try again later. If the problem persists please contact the site owners.</p>
+    </div>
+{% endif %}
+
+
+{% regarding_privacy %}
+
+{% endblock %}

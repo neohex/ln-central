@@ -255,7 +255,13 @@ def page_bar_sort_users(context):
 @register.inclusion_tag('server_tags/post_body.html', takes_context=True)
 def post_body(context, post, user, tree):
     "Renders the post body"
-    return dict(post=post, user=user, tree=tree, request=context['request'])
+    return dict(
+        post=post,
+        user=user,
+        tree=tree,
+        request=context['request'],
+        vote_url=post.get_vote_url()
+    )
 
 @register.inclusion_tag('server_tags/post_preview_body.html', takes_context=True)
 def post_preview_body(context, post_preview):
@@ -298,6 +304,11 @@ def post_actions(post, user, label="COMMENT"):
     "Renders post actions"
     return dict(post=post, user=user, label=label)
 
+
+@register.inclusion_tag('server_tags/regarding_privacy.html')
+def regarding_privacy():
+    "Renders post actions"
+    return dict()
 
 @register.inclusion_tag('server_tags/user_link.html')
 def userlink(user):

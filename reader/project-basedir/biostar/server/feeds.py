@@ -61,7 +61,7 @@ class LatestFeed(PostBase):
     def items(self):
         # Delay posts hours.
         delay_time = general_util.now() - timedelta(hours=2)
-        posts = Post.objects.filter(type__in=Post.TOP_LEVEL, status=Post.OPEN, creation_date__lt=delay_time).exclude(type=Post.BLOG).order_by('-creation_date')
+        posts = Post.objects.filter(type__in=Post.TOP_LEVEL, status=Post.OPEN, creation_date__lt=delay_time).order_by('-creation_date')
         return posts[:FEED_COUNT]
 
 class PostTypeFeed(PostBase):

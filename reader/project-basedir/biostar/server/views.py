@@ -35,7 +35,6 @@ from common import json_util
 from common.const import OrderedDict
 from common import const
 from common import validators
-from common.cli import RunCommandException
 from common.log import logger
 
 
@@ -370,7 +369,6 @@ class PostDetails(DetailView):
         return obj
 
     def get_context_data(self, **kwargs):
-
         context = super(PostDetails, self).get_context_data(**kwargs)
         context['request'] = self.request
         context['form'] = ShortForm()
@@ -405,7 +403,7 @@ class PostPublishView(TemplateView):
 
         try:
             details = ln.add_invoice(context["memo"], node_id=context["node_id"])
-        except RunCommandException as e:
+        except ln.LNUtilError as e:
             logger.excetion(e)
             return HttpResponseNotFound(
                 "<h1>Command for <b>addinvoice</b> failed or timed-out. "

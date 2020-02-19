@@ -1,5 +1,8 @@
 from __future__ import print_function, unicode_literals, absolute_import, division
-import logging, datetime, string
+import logging
+import datetime
+import string
+import time
 from django.db import models
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -359,6 +362,17 @@ class Post(models.Model):
         url = reverse("post-details", kwargs=dict(pk=self.root_id))
         return url if self.is_toplevel else "%s#%s" % (url, self.id)
 
+    def get_vote_url(self):
+        obj = dict(
+            post_id=self.id,
+            unixtime=int(time.time())
+        )
+        memo = json_util.serialize_memo(obj)
+        url = reverse("vote-publish", kwargs=dict(memo=memo))
+        print(url)  # TODO: remove
+
+        return url
+
     @staticmethod
     def check_root(sender, instance, created, *args, **kwargs):
         "We need to ensure that the parent and root are set on object creation."
@@ -469,7 +483,6 @@ class PostPreview(models.Model):
         node_id = node_with_top_score["id"]
         url = reverse("post-publish", kwargs=dict(memo=memo, node_id=node_id))
         return url
-
 
 
 class ReplyToken(models.Model):

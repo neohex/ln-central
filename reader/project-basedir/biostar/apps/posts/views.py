@@ -645,3 +645,67 @@ class EditPost(FormView):
     def get_success_url(self):
         return reverse("user_details", kwargs=dict(pk=self.kwargs['pk']))
 
+
+class VotePublishView(TemplateView):
+    """
+    """
+
+    template_name = "vote_publish.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(VotePublishView, self).get_context_data(**kwargs)
+        nodes_list = ln.get_nodes_list()
+
+        if 'node_id' not in context:
+            node_with_top_score = nodes_list[0]
+            for node in nodes_list:
+                if node["qos_score"] > node_with_top_score["qos_score"]:
+                    node_with_top_score = node
+
+            node_id = node_with_top_score["id"]
+
+            context["node_id"] = str(node_id)
+        else:
+            node_id = int(context["node_id"])
+
+
+
+        # Lookup the node name
+        node_name = "Unknown"
+        list_pos = 0
+        for pos, n in enumerate(nodes_list):
+            if n["id"] == node_id:
+                node_name = n["node_name"]
+                list_pos = pos
+
+
+        context["node_name"] = node_name
+
+        next_node_id = nodes_list[(list_pos + 1) % len(nodes_list)]["id"]
+        context["next_node_url"] = reverse(
+            "vote-publish-node-selected",
+            kwargs=dict(
+                memo=context["memo"],
+                node_id=next_node_id
+            )
+        )
+
+        try:
+            details = ln.add_invoice(context["memo"], node_id=node_id)
+        except ln.LNUtilError as e:
+            logger.excetion(e)
+            return HttpResponseNotFound(
+                "<h1>Command for <b>addinvoice</b> failed or timed-out. "
+                "Please refresh this page.</h1>"
+            )
+
+        context['pay_req'] = details['pay_req']
+        context['payment_amount'] = settings.PAYMENT_AMOUNT
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        memo = context["memo"]
+
+        return super(VotePublishView, self).get(request, *args, **kwargs)

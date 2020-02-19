@@ -20,12 +20,3 @@ class PolicyView(TemplateView):
 
 class RSSView(TemplateView):
     template_name = "rss_info.html"
-
-
-# class InfoHelpView(TemplateView):
-#     template_name = "rss_info.html"
-
-
-# class InfoRSSView(TemplateView):
-#     template_name = "rss_info.html"
-

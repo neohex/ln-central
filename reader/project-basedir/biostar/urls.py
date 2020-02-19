@@ -7,7 +7,7 @@ admin.autodiscover()
 
 from django.views.generic import TemplateView
 from biostar.server import views, ajax, search, moderate, api
-from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, PostPreviewView
+from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, PostPreviewView, VotePublishView
 from biostar.apps.users.views import DigestManager
 from biostar.apps.util.views import QRCode
 from biostar.apps.util.views import PaymentCheck
@@ -94,6 +94,14 @@ urlpatterns = [
     # Edit an existing post.
     url(r'^p/edit/(?P<pk>\d+)/$', EditPost.as_view(), name="post-edit"),
 
+    # ==============================
+    # Vote
+    # ==============================
+
+    # Post publish
+    url(r'^p/publish/vote/best_node/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="vote-publish"),
+    url(r'^p/publish/vote/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="vote-publish-node-selected"),
+
 
     # ==============================
     # Moderator
@@ -107,7 +115,7 @@ urlpatterns = [
 
 
     # ==============================
-    # Search, Vote
+    # Vote
     # ==============================
 
     # Search the body.
@@ -118,9 +126,6 @@ urlpatterns = [
 
      # Returns suggested tags
     url(r'^local/search/tags/', search.suggest_tags, name="suggest-tags"),
-
-    # Vote submission.
-    url(r'^x/vote/$', ajax.vote_handler, name="vote-submit"),
 
     # Local robots.txt.
     url(r'^robots\.txt$', TemplateView.as_view(template_name="robots.txt", content_type='text/plain'), name='robots'),
