@@ -11,6 +11,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
+from django.db.models import Q, F
+
 from rest_framework import serializers
 from background_task import background
 
@@ -21,6 +23,7 @@ from common import json_util
 from common import general_util
 
 from posts.models import Post
+from posts.models import Vote
 from users.models import User
 from lner.models import LightningNode
 from lner.models import Invoice
@@ -194,8 +197,14 @@ def run():
                 continue
 
             # Validate
-            assert invoice.invoice_request.memo == raw_invoice["memo"]
-            assert invoice.pay_req == raw_invoice["payment_request"]
+            assert invoice.invoice_request.memo == raw_invoice["memo"], "Memo in DB does not match the one in invocie request: db=({}) invoice_request=({})".format(
+                invoice.invoice_request.memo,
+                raw_invoice["memo"]
+            )
+            assert invoice.pay_req == raw_invoice["payment_request"], "Payment request does not match the one in invocie request: db=({}) invoice_request=({})".format(
+                invoice.pay_req,
+                raw_invoice["payment_request"]
+            )
 
             checkpoint_helper = CheckpointHelper(
                 node=node,
@@ -231,69 +240,123 @@ def run():
 
             memo = raw_invoice["memo"]
             try:
-                post_details = json_util.deserialize_memo(memo)
+                action_details = json_util.deserialize_memo(memo)
             except json_util.JsonUtilException:
                 checkpoint_helper.set_checkpoint("deserialize_failure")
                 continue
 
             try:
-                validators.validate_memo(post_details)
+                validators.validate_memo(action_details)
             except ValidationError as e:
                 logger.exception(e)
                 checkpoint_helper.set_checkpoint("memo_invalid")
                 continue
 
-            logger.info("Post details {}".format(post_details))
+            if "action" in action_details:
+                if action_details["action"] == "upvote":
 
-            if "sig" in post_details:
-                sig = post_details.pop("sig")
+                    post_id = action_details["post_id"]
+                    post = Post.objects.get(pk=post_id)
 
-                verifymessage_detail = lnclient.verifymessage(
-                    msg=json.dumps(post_details, sort_keys=True),
-                    sig=sig,
-                    rpcserver=node.rpcserver,
-                    mock=settings.MOCK_LN_CLIENT
+                    user, created = User.objects.get_or_create(pubkey="Unknown")
+
+                    vote_type = Vote.UP
+                    change = settings.PAYMENT_AMOUNT
+                    print(change)
+
+                    # Only maintain one vote for each user/post pair.
+                    votes = Vote.objects.filter(author=user, post=post, type=vote_type)
+                    vote = Vote.objects.create(author=user, post=post, type=vote_type)
+
+                    # Update user reputation
+                    User.objects.filter(pk=post.author.id).update(score=F('score') + change)
+
+                    # The thread score represents all votes in a thread
+                    Post.objects.filter(pk=post.root_id).update(thread_score=F('thread_score') + change)
+
+                    if vote.type == Vote.BOOKMARK:
+                        # Apply the vote
+                        Post.objects.filter(pk=post.id).update(book_count=F('book_count') + change, vote_count=F('vote_count') + change)
+                        Post.objects.filter(pk=post.id).update(subs_count=F('subs_count') + change)
+                        Post.objects.filter(pk=post.root_id).update(subs_count=F('subs_count') + change)
+
+                    elif vote_type == Vote.ACCEPT:
+                        if change > 0:
+                            # There does not seem to be a negation operator for F objects.
+                            Post.objects.filter(pk=post.id).update(vote_count=F('vote_count') + change, has_accepted=True)
+                            Post.objects.filter(pk=post.root_id).update(has_accepted=True)
+                        else:
+                            Post.objects.filter(pk=post.id).update(vote_count=F('vote_count') + change, has_accepted=False)
+
+                            # Only set root as not accepted if there are no accepted siblings
+                            if Post.objects.exclude(pk=post.root_id).filter(root_id=post.root_id, has_accepted=True).count() == 0:
+                                Post.objects.filter(pk=post.root_id).update(has_accepted=False)
+                    else:
+                        Post.objects.filter(pk=post.id).update(vote_count=F('vote_count') + change)
+
+                    # Clear old votes.
+                    if votes:
+                        votes.delete()
+
+                    checkpoint_helper.set_checkpoint("done", action_type="upvote", action_id=post.id)
+                else:
+                    logger.error("Invalid action: {}".format(action_details))
+                    checkpoint_helper.set_checkpoint("invalid_action")
+                    continue
+            else:
+
+                logger.info("Action details {}".format(action_details))
+
+                if "sig" in action_details:
+                    sig = action_details.pop("sig")
+
+                    verifymessage_detail = lnclient.verifymessage(
+                        msg=json.dumps(action_details, sort_keys=True),
+                        sig=sig,
+                        rpcserver=node.rpcserver,
+                        mock=settings.MOCK_LN_CLIENT
+                    )
+
+                    if not verifymessage_detail["valid"]:
+                        checkpoint_helper.set_checkpoint("invalid_signiture")
+                        continue
+                    pubkey = verifymessage_detail["pubkey"]
+                else:
+                    pubkey = "Unknown"
+
+
+                if "parent_post_id" in action_details:
+                    # Find the parent.
+                    try:
+                        parent_post_id = int(action_details["parent_post_id"])
+                        parent = Post.objects.get(pk=parent_post_id)
+                    except (ObjectDoesNotExist, ValueError):
+                        logger.error("The post parent does not exist: {}".format(action_details))
+                        checkpoint_helper.set_checkpoint("invalid_parent_post")
+                        continue
+
+                    title = parent.title
+                    tag_val = parent.tag_val
+                else:
+                    title = action_details["title"]
+                    tag_val = action_details["tag_val"]
+                    parent = None
+
+                user, created = User.objects.get_or_create(pubkey=pubkey)
+
+                post = Post(
+                    author=user,
+                    parent=parent,
+                    type=action_details["post_type"],
+                    title=title,
+                    content=action_details["content"],
+                    tag_val=tag_val,
                 )
-                if not verifymessage_detail["valid"]:
-                    checkpoint_helper.set_checkpoint("invalid_signiture")
-                    continue
-                pubkey = verifymessage_detail["pubkey"]
-            else:
-                pubkey = "Unknown"
 
+                # TODO: Catch failures when post title is duplicate (e.g. another node already saved post)
+                post.save()
 
-            if "parent_post_id" in post_details:
-                # Find the parent.
-                try:
-                    parent_post_id = int(post_details["parent_post_id"])
-                    parent = Post.objects.get(pk=parent_post_id)
-                except (ObjectDoesNotExist, ValueError):
-                    logger.error("The post parent does not exist: {}".format(post_details))
-                    checkpoint_helper.set_checkpoint("invalid_parent_post")
-                    continue
-
-                title = parent.title
-                tag_val = parent.tag_val
-            else:
-                title = post_details["title"]
-                tag_val = post_details["tag_val"]
-                parent = None
-
-            user, created = User.objects.get_or_create(pubkey=pubkey)
-
-            post = Post(
-                author=user,
-                parent=parent,
-                type=post_details["post_type"],
-                title=title,
-                content=post_details["content"],
-                tag_val=tag_val,
-            )
-
-            # TODO: Catch failures when post title is duplicate (e.g. another node already saved post)
-            post.save()
-
-            checkpoint_helper.set_checkpoint("done", action_type="post", action_id=post.id)
+                checkpoint_helper.set_checkpoint("done", action_type="post", action_id=post.id)
 
         # advance global checkpoint
         new_global_checkpoint = None

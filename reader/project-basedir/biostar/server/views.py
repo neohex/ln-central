@@ -375,62 +375,6 @@ class PostDetails(DetailView):
         return context
 
 
-class PostPublishView(TemplateView):
-    """
-    """
-
-    template_name = "post_publish.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(PostPublishView, self).get_context_data(**kwargs)
-        node_id = int(context["node_id"])
-
-        nodes_list = ln.get_nodes_list()
-
-        # Lookup the node name
-        node_name = "Unknown"
-        list_pos = 0
-        for pos, n in enumerate(nodes_list):
-            if n["id"] == node_id:
-                node_name = n["node_name"]
-                list_pos = pos
-
-
-        context["node_name"] = node_name
-
-        next_node_id = nodes_list[(list_pos + 1) % len(nodes_list)]["id"]
-        context["next_node_url"] = reverse("post-publish", kwargs=dict(memo=context["memo"], node_id=next_node_id))
-
-        try:
-            details = ln.add_invoice(context["memo"], node_id=context["node_id"])
-        except ln.LNUtilError as e:
-            logger.excetion(e)
-            return HttpResponseNotFound(
-                "<h1>Command for <b>addinvoice</b> failed or timed-out. "
-                "Please refresh this page.</h1>"
-            )
-
-        context['pay_req'] = details['pay_req']
-        context['payment_amount'] = settings.PAYMENT_AMOUNT
-
-        return context
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        memo = context["memo"]
-
-        # Check payment and redirect if payment is confirmed
-        node_id = int(context["node_id"])
-        result = ln.check_payment(memo, node_id=node_id)
-        checkpoint_value = result["checkpoint_value"]
-        conclusion = ln.gen_check_conclusion(checkpoint_value, node_id=node_id, memo=memo)
-        if conclusion == ln.CHECKPOINT_DONE:
-            post_id = result["performed_action_id"]
-            return post_redirect(pid=post_id, request=request, permanent=False)
-
-        return super(PostPublishView, self).get(request, *args, **kwargs)
-
-
 class RateLimitedNewPost(NewPost):
     "Applies limits to the number of top level posts that can be made"
 
@@ -585,21 +529,6 @@ if os.path.isfile(POST_REMAP_FILE):
 else:
     REMAP = {}
 
-
-def post_redirect(request, pid, permanent=True):
-    """
-    Redirect to a post
-
-    Permanent means that the browser will remember the request,
-    and will redirect instantly without re-checking with the server.
-    It can speed things up for the user, may not be the correct
-    thing to do in some cases, and makes debugging much harder.
-    """
-    try:
-        post = Post.objects.get(id=pid)
-    except Post.DoesNotExist:
-        raise Http404
-    return shortcuts.redirect(post.get_absolute_url(), permanent=permanent)
 
 
 def post_remap_redirect(request, pid):

@@ -112,12 +112,17 @@ def validate_memo(memo, no_auto_correct=False):
     # TODO: check types of other fields
 
     # signable fields that are strings
-    signable_fields = ["content"]
+    signable_fields = []
+
+    if "content" in memo:
+        signable_fields += ["content"]
+
     if "parent_post_id" in memo:
         if "title" in memo:
             raise ValidationError("memo with parent_post_id should not have titles")
     else:
-        signable_fields += ["title"]
+        if "title" in memo:
+            signable_fields += ["title"]
 
     for key in signable_fields:
         value = memo[key]

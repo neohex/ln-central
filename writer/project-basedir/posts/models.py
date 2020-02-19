@@ -364,6 +364,7 @@ class Post(models.Model):
 
     def get_vote_url(self):
         obj = dict(
+            action="upvote",
             post_id=self.id,
             unixtime=int(time.time())
         )

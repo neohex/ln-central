@@ -7,7 +7,7 @@ admin.autodiscover()
 
 from django.views.generic import TemplateView
 from biostar.server import views, ajax, search, moderate, api
-from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, PostPreviewView, VotePublishView
+from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, PostPreviewView, VotePublishView, PostPublishView
 from biostar.apps.users.views import DigestManager
 from biostar.apps.util.views import QRCode
 from biostar.apps.util.views import PaymentCheck
@@ -77,7 +77,7 @@ urlpatterns = [
     url(r'^p/edit/preview/(?P<memo>{})/$'.format(MEMO_RE), views.RateLimitedNewPost.as_view(), name="post-preview-edit"),
 
     # Post publish
-    url(r'^p/publish/preview/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), views.PostPublishView.as_view(), name="post-publish"),
+    url(r'^p/publish/preview/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), PostPublishView.as_view(), name="post-publish"),
 
     # Post preview
     url(r'^p/new/preview/(?P<memo>{})/$'.format(MEMO_RE), PostPreviewView.as_view(), name="post-preview"),
@@ -99,8 +99,8 @@ urlpatterns = [
     # ==============================
 
     # Post publish
-    url(r'^p/publish/vote/best_node/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="vote-publish"),
-    url(r'^p/publish/vote/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="vote-publish-node-selected"),
+    url(r'^p/publish_vote/best_node/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="vote-publish"),
+    url(r'^p/publish_vote/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="vote-publish-node-selected"),
 
 
     # ==============================

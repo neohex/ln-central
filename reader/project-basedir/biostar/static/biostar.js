@@ -84,29 +84,6 @@ function pop_over(elem, msg, cls) {
     });
 }
 
-function ajax_vote(elem, post_id, vote_type) {
-    // Pre-emptitively toggle the button to provide feedback
-    toggle_button(elem, vote_type)
-
-    $.ajax('/x/vote/', {
-        type: 'POST',
-        dataType: 'json',
-        data: {post_id: post_id, vote_type: vote_type},
-        success: function (data) {
-            if (data.status == 'error') { // Soft failure, like not logged in
-                pop_over(elem, data.msg, data.status) // Display popover only if there was an error
-                toggle_button(elem, vote_type) // Untoggle the button if there was an error
-            } else {
-                //pop_over(elem, data.msg, data.status)
-            }
-
-        },
-        error: function () { // Hard failure, like network error
-            pop_over(elem, 'Unable to submit vote!', 'error');
-            toggle_button(elem, vote_type);
-        }
-    });
-}
 
 function title_format(row) {
     link = '<a href="' + row.url + '"/>' + row.text + '</a><div class="in">' + row.context + ' by <i>' + row.author + '</i></div>';
@@ -203,17 +180,6 @@ $(document).ready(function () {
     $('.mod-user').each(function () {
         $(this).click(function () {
             moderate_user($(this));
-        });
-    });
-
-    // Vote submission.
-    $('.vote').each(function () {
-
-        $($(this)).click(function () {
-            var elem = $(this);
-            var post_id = elem.parent().attr('data-post_id');
-            var vote_type = elem.attr('data-type')
-            ajax_vote(elem, post_id, vote_type);
         });
     });
 

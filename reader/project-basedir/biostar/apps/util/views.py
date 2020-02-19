@@ -70,6 +70,17 @@ class PaymentCheck(TemplateView):
 
         if conclusion == ln.CHECKPOINT_DONE:
             post_id = result["performed_action_id"]
+            print(post_id)
+
+            action_type = result["performed_action_type"]
+
+            if action_type == "post":
+                action_title = "Post published"
+            elif action_type == "upvote":
+                action_title = "Vote casted"
+            else:
+                action_title = "Action compleated"
+
             post = Post.objects.get(id=post_id)
             post_url = 'https://{}{}'.format(settings.SITE_DOMAIN, post.get_absolute_url())
 
@@ -84,7 +95,7 @@ class PaymentCheck(TemplateView):
             dwg_subtitle = dwg.add(dwg.g(font_size=14))
             dwg_subtitle.add(
                 dwg.text(
-                    "Post published ---> Post ID is {}".format(post_id),
+                    "{} ---> Post ID is {}".format(action_title, post_id),
                     (10, 100),
                 )
             )
