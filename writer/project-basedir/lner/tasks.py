@@ -383,13 +383,24 @@ def run():
         )
     )
 
+    return processing_wall_time
+
 
 @background(queue='queue-1', remove_existing_tasks=True)
 def run_many():
-    for _ in range(200):
-        run()
+    processing_times_array = []
+    start_time = time.time()
+
+    for _ in range(100):
+        t = run()
+        processing_times_array.append(t)
         time.sleep(0.5)
-    logger.info("Finished 200 runs")
+
+    processing_wall_time = time.time() - start_time
+    logger.info("Finished 200 runs in {:.3f} seconds".format(processing_wall_time))
+    logger.info("Min was {:.3f} seconds".format(min(processing_times_array)))
+    logger.info("Avg was {:.3f} seconds".format(sum(processing_times_array) / len(processing_times_array)))
+    logger.info("Max was {:.3f} seconds".format(max(processing_times_array)))
 
 # schedule a new task after "repeat" number of seconds
 run_many(repeat=1)
