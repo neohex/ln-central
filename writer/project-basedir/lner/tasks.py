@@ -24,6 +24,7 @@ from common import general_util
 
 from posts.models import Post
 from posts.models import Vote
+from posts.models import Tag
 from users.models import User
 from lner.models import LightningNode
 from lner.models import Invoice
@@ -353,6 +354,19 @@ def run():
 
                 # TODO: Catch failures when post title is duplicate (e.g. another node already saved post)
                 post.save()
+
+                # Save tags
+                tags = action_details["tag_val"].split(",")
+                for tag in tags:
+                    tag_obj, created = Tag.objects.get_or_create(name=tag)
+                    if created:
+                        logger.info("Created a new tag: {}".format(tag))
+
+                    tag_obj.count += 1
+                    post.tag_set.add(tag_obj)
+
+                    tag_obj.save()
+                    post.save()
 
                 checkpoint_helper.set_checkpoint("done", action_type="post", action_id=post.id)
 
