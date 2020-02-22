@@ -19,7 +19,7 @@
                     <tr>
                         <td>
                             <a href="{% url 'badge-view' pk=badge.id %}" class="tag">
-                                {{ badge.name }} <i class="{{ badge.icon }}"></i></a> &times; {{ badge.count }}
+                                <i class="{{ badge.icon }}"></i> {{ badge.name }}</a> &times; {{ badge.count }}
                         </td>
                         <td>
                             {{ badge.desc }}</td>

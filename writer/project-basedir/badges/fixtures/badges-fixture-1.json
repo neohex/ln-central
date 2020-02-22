@@ -1,0 +1,779 @@
+[
+    {
+        "fields": {
+            "count": 26,
+            "desc": "asked a question earning 1 sat of up-votes",
+            "icon": "fa fa-certificate",
+            "is_fake_test_data": false,
+            "name": "Student",
+            "type": 0,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 1
+    },
+    {
+        "fields": {
+            "count": 1,
+            "desc": "asked a question earning 5 sats of up-votes",
+            "icon": "fa fa-question",
+            "is_fake_test_data": false,
+            "name": "Good Question",
+            "type": 0,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 2
+    },
+    {
+        "fields": {
+            "count": 14,
+            "desc": "asked a question earning 100 sats of up-votes",
+            "icon": "fa fa-eye",
+            "is_fake_test_data": false,
+            "name": "Popular",
+            "type": 2,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 3
+    },
+    {
+        "fields": {
+            "count": 0,
+            "desc": "created a question earning 10,000 sats of up-votes",
+            "icon": "fa fa-bullseye",
+            "is_fake_test_data": false,
+            "name": "Epic Question",
+            "type": 2,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 4
+    },
+    {
+        "fields": {
+            "count": 64,
+            "desc": "created an answer arning 1 sat of up-votes",
+            "icon": "fa fa-smile-o",
+            "is_fake_test_data": false,
+            "name": "Teacher",
+            "type": 0,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 5
+    },
+    {
+        "fields": {
+            "count": 2,
+            "desc": "created an answer earning 5 sats of up-votes",
+            "icon": "fa fa-pencil-square-o",
+            "is_fake_test_data": false,
+            "name": "Good Answer",
+            "type": 0,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 6
+    },
+    {
+        "fields": {
+            "count": 0,
+            "desc": "created an answer that has been accepted",
+            "icon": "fa fa-check-circle-o",
+            "is_fake_test_data": false,
+            "name": "Scholar",
+            "type": 0,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 7
+    },
+    {
+        "fields": {
+            "count": 0,
+            "desc": "created a comment earning 3 sats of up-votes",
+            "icon": "fa fa-comment",
+            "is_fake_test_data": false,
+            "name": "Commentator",
+            "type": 0,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 8
+    },
+    {
+        "fields": {
+            "count": 0,
+            "desc": "created a comment earning 10 sats of up-votes",
+            "icon": "fa fa-comments-o",
+            "is_fake_test_data": false,
+            "name": "Pundit",
+            "type": 1,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 9
+    },
+    {
+        "fields": {
+            "count": 0,
+            "desc": "created more than 1,000 posts (questions + answers + comments)",
+            "icon": "fa fa-sun-o",
+            "is_fake_test_data": false,
+            "name": "Oracle",
+            "type": 2,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 10
+    },
+    {
+        "fields": {
+            "count": 0,
+            "desc": "created 100 posts",
+            "icon": "fa fa-bolt",
+            "is_fake_test_data": false,
+            "name": "Centurion",
+            "type": 1,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 11
+    },
+    {
+        "fields": {
+            "count": 3,
+            "desc": "created a post earning 5 sats of up-votes",
+            "icon": "fa fa-heart",
+            "is_fake_test_data": false,
+            "name": "Appreciated",
+            "type": 1,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 12
+    },
+    {
+        "fields": {
+            "count": 0,
+            "desc": "created a post earning 10,000 sats of up-votes",
+            "icon": "fa fa-music",
+            "is_fake_test_data": false,
+            "name": "Bitcoin Standard",
+            "type": 2,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 13
+    },
+    {
+        "fields": {
+            "count": 0,
+            "desc": "created posts earning 100 sats of up-votes total",
+            "icon": "fa fa-beer",
+            "is_fake_test_data": false,
+            "name": "Guru",
+            "type": 1,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 14
+    },
+    {
+        "fields": {
+            "count": 0,
+            "desc": "created posts that received 10,000 sats of up-votes total",
+            "icon": "fa fa-pagelines",
+            "is_fake_test_data": false,
+            "name": "Prophet",
+            "type": 0,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 15
+    },
+    {
+        "fields": {
+            "count": 0,
+            "desc": "created posts that received 100,000 sats of up-votes total",
+            "icon": "fa fa-rocket",
+            "is_fake_test_data": false,
+            "name": "Moon",
+            "type": 2,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 16
+    },
+    {
+        "fields": {
+            "count": 0,
+            "desc": "payed more than 100 sats in votes",
+            "icon": "fa fa-thumbs-o-up",
+            "is_fake_test_data": false,
+            "name": "Voter",
+            "type": 0,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 17
+    },
+    {
+        "fields": {
+            "count": 0,
+            "desc": "payed more than 10,000 sats in votes",
+            "icon": "fa fa-thumbs-up",
+            "is_fake_test_data": false,
+            "name": "Supporter",
+            "type": 1,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 18
+    },
+    {
+        "fields": {
+            "count": 0,
+            "desc": "created 50 posts within first three months of joining",
+            "icon": "fa fa-star",
+            "is_fake_test_data": false,
+            "name": "Rising Star",
+            "type": 2,
+            "unique": false
+        },
+        "model": "badges.badge",
+        "pk": 19
+    },
+    {
+        "fields": {
+            "badge": 1,
+            "context": "",
+            "date": "2014-07-11T14:19:18.323Z",
+            "user": 3
+        },
+        "model": "badges.award",
+        "pk": 1
+    },
+    {
+        "fields": {
+            "badge": 3,
+            "context": "",
+            "date": "2014-07-11T14:19:18.323Z",
+            "user": 3
+        },
+        "model": "badges.award",
+        "pk": 2
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2014-07-11T14:19:18.323Z",
+            "user": 3
+        },
+        "model": "badges.award",
+        "pk": 3
+    },
+    {
+        "fields": {
+            "badge": 1,
+            "context": "",
+            "date": "2009-10-05T21:43:12.173Z",
+            "user": 4
+        },
+        "model": "badges.award",
+        "pk": 4
+    },
+    {
+        "fields": {
+            "badge": 3,
+            "context": "",
+            "date": "2009-10-05T21:43:12.173Z",
+            "user": 4
+        },
+        "model": "badges.award",
+        "pk": 5
+    },
+    {
+        "fields": {
+            "badge": 1,
+            "context": "",
+            "date": "2011-11-04T20:45:04.227Z",
+            "user": 5
+        },
+        "model": "badges.award",
+        "pk": 6
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-11-04T20:45:04.227Z",
+            "user": 5
+        },
+        "model": "badges.award",
+        "pk": 7
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-07-06T23:44:55.723Z",
+            "user": 6
+        },
+        "model": "badges.award",
+        "pk": 8
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2009-10-01T01:32:29.033Z",
+            "user": 7
+        },
+        "model": "badges.award",
+        "pk": 9
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-07-07T09:32:47.793Z",
+            "user": 8
+        },
+        "model": "badges.award",
+        "pk": 10
+    },
+    {
+        "fields": {
+            "badge": 1,
+            "context": "",
+            "date": "2013-04-22T18:30:22.763Z",
+            "user": 11
+        },
+        "model": "badges.award",
+        "pk": 11
+    },
+    {
+        "fields": {
+            "badge": 3,
+            "context": "",
+            "date": "2013-04-22T18:30:22.763Z",
+            "user": 11
+        },
+        "model": "badges.award",
+        "pk": 12
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2013-04-22T18:30:22.763Z",
+            "user": 11
+        },
+        "model": "badges.award",
+        "pk": 13
+    },
+    {
+        "fields": {
+            "badge": 1,
+            "context": "",
+            "date": "2009-10-07T07:45:15.080Z",
+            "user": 13
+        },
+        "model": "badges.award",
+        "pk": 14
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2009-10-07T19:04:30.217Z",
+            "user": 14
+        },
+        "model": "badges.award",
+        "pk": 15
+    },
+    {
+        "fields": {
+            "badge": 1,
+            "context": "",
+            "date": "2011-10-29T04:18:27.637Z",
+            "user": 15
+        },
+        "model": "badges.award",
+        "pk": 16
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-10-29T04:18:27.637Z",
+            "user": 15
+        },
+        "model": "badges.award",
+        "pk": 17
+    },
+    {
+        "fields": {
+            "badge": 1,
+            "context": "",
+            "date": "2010-02-21T03:13:56.363Z",
+            "user": 17
+        },
+        "model": "badges.award",
+        "pk": 18
+    },
+    {
+        "fields": {
+            "badge": 3,
+            "context": "",
+            "date": "2010-02-21T03:13:56.363Z",
+            "user": 17
+        },
+        "model": "badges.award",
+        "pk": 19
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2009-12-01T22:51:54.427Z",
+            "user": 19
+        },
+        "model": "badges.award",
+        "pk": 20
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2009-12-09T03:45:54.220Z",
+            "user": 20
+        },
+        "model": "badges.award",
+        "pk": 21
+    },
+    {
+        "fields": {
+            "badge": 1,
+            "context": "",
+            "date": "2011-11-08T18:23:58.050Z",
+            "user": 21
+        },
+        "model": "badges.award",
+        "pk": 22
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-11-08T18:23:58.050Z",
+            "user": 21
+        },
+        "model": "badges.award",
+        "pk": 23
+    },
+    {
+        "fields": {
+            "badge": 1,
+            "context": "",
+            "date": "2011-11-08T19:37:21.753Z",
+            "user": 24
+        },
+        "model": "badges.award",
+        "pk": 24
+    },
+    {
+        "fields": {
+            "badge": 3,
+            "context": "",
+            "date": "2011-11-08T19:37:21.753Z",
+            "user": 24
+        },
+        "model": "badges.award",
+        "pk": 25
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-11-08T19:37:21.753Z",
+            "user": 24
+        },
+        "model": "badges.award",
+        "pk": 26
+    },
+    {
+        "fields": {
+            "badge": 6,
+            "context": "",
+            "date": "2011-11-08T19:37:21.753Z",
+            "user": 24
+        },
+        "model": "badges.award",
+        "pk": 27
+    },
+    {
+        "fields": {
+            "badge": 12,
+            "context": "",
+            "date": "2011-11-08T19:37:21.753Z",
+            "user": 24
+        },
+        "model": "badges.award",
+        "pk": 28
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-11-08T05:26:49.263Z",
+            "user": 25
+        },
+        "model": "badges.award",
+        "pk": 29
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2010-01-27T06:38:35.550Z",
+            "user": 26
+        },
+        "model": "badges.award",
+        "pk": 30
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-10-28T12:58:08.517Z",
+            "user": 27
+        },
+        "model": "badges.award",
+        "pk": 31
+    },
+    {
+        "fields": {
+            "badge": 1,
+            "context": "",
+            "date": "2010-03-11T08:42:46.730Z",
+            "user": 28
+        },
+        "model": "badges.award",
+        "pk": 32
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2010-03-11T08:42:46.730Z",
+            "user": 28
+        },
+        "model": "badges.award",
+        "pk": 33
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2010-02-20T01:35:30.157Z",
+            "user": 29
+        },
+        "model": "badges.award",
+        "pk": 34
+    },
+    {
+        "fields": {
+            "badge": 1,
+            "context": "",
+            "date": "2011-11-08T20:35:24.150Z",
+            "user": 31
+        },
+        "model": "badges.award",
+        "pk": 35
+    },
+    {
+        "fields": {
+            "badge": 2,
+            "context": "",
+            "date": "2011-11-08T20:35:24.150Z",
+            "user": 31
+        },
+        "model": "badges.award",
+        "pk": 36
+    },
+    {
+        "fields": {
+            "badge": 3,
+            "context": "",
+            "date": "2011-11-08T20:35:24.150Z",
+            "user": 31
+        },
+        "model": "badges.award",
+        "pk": 37
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-11-08T20:35:24.150Z",
+            "user": 31
+        },
+        "model": "badges.award",
+        "pk": 38
+    },
+    {
+        "fields": {
+            "badge": 12,
+            "context": "",
+            "date": "2011-11-08T20:35:24.150Z",
+            "user": 31
+        },
+        "model": "badges.award",
+        "pk": 39
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-08-12T02:05:42.993Z",
+            "user": 32
+        },
+        "model": "badges.award",
+        "pk": 40
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2010-02-26T06:09:01.270Z",
+            "user": 34
+        },
+        "model": "badges.award",
+        "pk": 41
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-11-02T04:06:55.930Z",
+            "user": 36
+        },
+        "model": "badges.award",
+        "pk": 42
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-11-08T16:47:47.327Z",
+            "user": 39
+        },
+        "model": "badges.award",
+        "pk": 43
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-11-08T20:33:26.513Z",
+            "user": 40
+        },
+        "model": "badges.award",
+        "pk": 44
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-11-08T01:51:55.693Z",
+            "user": 41
+        },
+        "model": "badges.award",
+        "pk": 45
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2010-02-26T20:26:41.170Z",
+            "user": 43
+        },
+        "model": "badges.award",
+        "pk": 46
+    },
+    {
+        "fields": {
+            "badge": 1,
+            "context": "",
+            "date": "2011-11-07T20:16:10.883Z",
+            "user": 45
+        },
+        "model": "badges.award",
+        "pk": 47
+    },
+    {
+        "fields": {
+            "badge": 3,
+            "context": "",
+            "date": "2011-11-07T20:16:10.883Z",
+            "user": 45
+        },
+        "model": "badges.award",
+        "pk": 48
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2010-03-10T04:07:11.900Z",
+            "user": 46
+        },
+        "model": "badges.award",
+        "pk": 49
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-11-08T14:54:56.163Z",
+            "user": 48
+        },
+        "model": "badges.award",
+        "pk": 50
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-11-08T01:33:32.650Z",
+            "user": 54
+        },
+        "model": "badges.award",
+        "pk": 51
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-11-08T19:25:04.193Z",
+            "user": 56
+        },
+        "model": "badges.award",
+        "pk": 52
+    },
+    {
+        "fields": {
+            "badge": 5,
+            "context": "",
+            "date": "2011-11-08T17:49:49.013Z",
+            "user": 60
+        },
+        "model": "badges.award",
+        "pk": 53
+    }
+]

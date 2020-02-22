@@ -1,0 +1,208 @@
+from badges.models import Award, AwardDef, Badge
+from posts.models import Post, Vote
+
+from django.utils.timezone import utc
+from datetime import datetime, timedelta
+from common import general_util
+
+
+def wrap_list(obj, cond):
+    return [obj] if cond else []
+
+# Award definitions
+
+# Questions
+
+STUDENT = AwardDef(
+    name="Student",
+    desc="asked a question earning 1 sat of up-votes",
+    func=lambda user: Post.objects.filter(vote_count__gte=1, author=user, type=Post.QUESTION),
+    icon="fa fa-certificate"
+)
+
+GOOD_QUESTION = AwardDef(
+    name="Good Question",
+    desc="asked a question earning 5 sats of up-votes",
+    func=lambda user: Post.objects.filter(vote_count__gte=5, author=user, type=Post.QUESTION),
+    icon="fa fa-question"
+)
+
+POPULAR = AwardDef(
+    name="Popular",
+    desc="asked a question earning 100 sats of up-votes",
+    func=lambda user: Post.objects.filter(author=user, view_count__gte=100),
+    icon="fa fa-eye",
+    type=Badge.GOLD,
+)
+
+EPIC_QUESTION = AwardDef(
+    name="Epic Question",
+    desc="created a question earning 10,000 sats of up-votes",
+    func=lambda user: Post.objects.filter(vote_count__gte=10000, author=user, type=Post.QUESTION),
+    icon="fa fa-bullseye",
+    type=Badge.GOLD,
+)
+
+
+# Answers
+
+TEACHER = AwardDef(
+    name="Teacher",
+    desc="created an answer arning 1 sat of up-votes",
+    func=lambda user: Post.objects.filter(vote_count__gte=1, author=user, type=Post.ANSWER),
+    icon="fa fa-smile-o"
+)
+
+GOOD_ANSWER = AwardDef(
+    name="Good Answer",
+    desc="created an answer earning 5 sats of up-votes",
+    func=lambda user: Post.objects.filter(vote_count__gte=5, author=user, type=Post.ANSWER),
+    icon="fa fa-pencil-square-o"
+)
+
+SCHOLAR = AwardDef(
+    name="Scholar",
+    desc="created an answer that has been accepted",
+    func=lambda user: Post.objects.filter(author=user, type=Post.ANSWER, has_accepted=True),
+    icon="fa fa-check-circle-o"
+)
+
+
+
+# Comments
+
+COMMENTATOR = AwardDef(
+    name="Commentator",
+    desc="created a comment earning 3 sats of up-votes",
+    func=lambda user: Post.objects.filter(vote_count__gte=3, author=user, type=Post.COMMENT),
+    icon="fa fa-comment"
+)
+
+PUNDIT = AwardDef(
+    name="Pundit",
+    desc="created a comment earning 10 sats of up-votes",
+    func=lambda user: Post.objects.filter(vote_count__gte=10, author=user, type=Post.COMMENT),
+    icon="fa fa-comments-o",
+    type=Badge.SILVER,
+)
+
+ORACLE = AwardDef(
+    name="Oracle",
+    desc="created more than 1,000 posts (questions + answers + comments)",
+    func=lambda user: wrap_list(user, Post.objects.filter(author=user).count() > 1000),
+    icon="fa fa-sun-o",
+    type=Badge.GOLD,
+)
+
+
+# Posts
+
+CENTURION = AwardDef(
+    name="Centurion",
+    desc="created 100 posts",
+    func=lambda user: wrap_list(user, Post.objects.filter(author=user).count() > 100),
+    icon="fa fa-bolt",
+    type=Badge.SILVER,
+)
+
+
+# Quality
+
+APPRECIATED = AwardDef(
+    name="Appreciated",
+    desc="created a post with more than 5 votes",
+    func=lambda user: Post.objects.filter(author=user, vote_count__gte=5),
+    icon="fa fa-heart",
+    type=Badge.SILVER,
+)
+
+
+GOLD_STANDARD = AwardDef(
+    name="Bitcoin Standard",
+    desc="created a post with more than 10,000 up-votes",
+    func=lambda user: Post.objects.filter(author=user, book_count__gte=10000),
+    icon="fa fa-music",
+    type=Badge.GOLD,
+)
+
+
+# Quantity
+
+GURU = AwardDef(
+    name="Guru",
+    desc="created posts that received 100 sats of up-votes total",
+    func=lambda user: wrap_list(user, Vote.objects.filter(post__author=user).count() > 100),
+    icon="fa fa-beer",
+    type=Badge.SILVER,
+)
+
+PROPHET = AwardDef(
+    name="Prophet",
+    desc="created posts that received 10,000 sats of up-votes total",
+    func=lambda user: wrap_list(user, Vote.objects.filter(post__author=user).count() > 10000),
+    icon="fa fa-pagelines"
+)
+
+MOON = AwardDef(
+    name="Moon",
+    desc="created posts that received 100,000 sats of up-votes total",
+    func=lambda user: wrap_list(user, Vote.objects.filter(post__author=user).count() > 100000),
+    icon="fa fa-rocket",
+    type=Badge.GOLD,
+)
+
+
+# Casting Votes
+
+VOTER = AwardDef(
+    name="Voter",
+    desc="payed more than 100 sats in votes",
+    func=lambda user: wrap_list(user, Vote.objects.filter(author=user).count() > 100),
+    icon="fa fa-thumbs-o-up"
+)
+
+SUPPORTER = AwardDef(
+    name="Supporter",
+    desc="payed more than 10,000 sats in votes",
+    func=lambda user: wrap_list(user, Vote.objects.filter(author=user).count() > 10000),
+    icon="fa fa-thumbs-up",
+    type=Badge.SILVER,
+)
+
+
+def rising_star(user):
+    # The user joined no more than three months ago
+    cond = general_util.now() < user.profile.date_joined + timedelta(weeks=15)
+    cond = cond and Post.objects.filter(author=user).count() > 50
+    return wrap_list(user, cond)
+
+RISING_STAR = AwardDef(
+    name="Rising Star",
+    desc="created 50 posts within first three months of joining",
+    func=rising_star,
+    icon="fa fa-star",
+    type=Badge.GOLD,
+)
+
+# These awards can only be earned once
+ALL_AWARDS = [
+    STUDENT,
+    GOOD_QUESTION,
+    POPULAR,
+    EPIC_QUESTION,
+    TEACHER,
+    GOOD_ANSWER,
+    SCHOLAR,
+    COMMENTATOR,
+    PUNDIT,
+    ORACLE,
+    CENTURION,
+    APPRECIATED,
+    GOLD_STANDARD,
+    GURU,
+    PROPHET,
+    MOON,
+    VOTER,
+    SUPPORTER,
+    RISING_STAR,
+]

@@ -1,17 +1,17 @@
 from __future__ import absolute_import
 from django.conf import settings
 
-from .celery import app
-
 import logging
 
-
 from common.log import logger
+from users.models import User
+from posts.models import Post
+from badges.models import Badge, Award
+from badges.award_defs import ALL_AWARDS
+
 
 def init_awards():
     "Initializes the badges"
-    from biostar.apps.badges.models import Badge
-    from biostar.apps.badges.award_defs import ALL_AWARDS
 
     for obj in ALL_AWARDS:
         badge, created = Badge.objects.get_or_create(name=obj.name)
@@ -27,15 +27,10 @@ def init_awards():
             logger.info("initializing badge %s" % badge)
 
 
-@app.task
 # Tries to award a badge to the user
 def create_user_award(user):
-    from biostar.apps.users.models import User
-    from biostar.apps.posts.models import Post
-    from biostar.apps.badges.models import Badge, Award
-    from biostar.apps.badges.award_defs import ALL_AWARDS
 
-    logger.info("award check for %s" % user)
+    logger.info("Award check for %s" % user.id)
 
     # Update user status.
     if (user.status == User.NEW_USER) and (user.score > 10):
@@ -44,6 +39,9 @@ def create_user_award(user):
 
     # Debug only
     #Award.objects.all().delete()
+
+
+    Award.objects.filter(user=user)
 
     # The awards the user has won at this point
     awards = dict()
@@ -71,15 +69,10 @@ def create_user_award(user):
         for target in valid_targets:
             # Update the badge counts.
             badge = Badge.objects.get(name=obj.name)
-            badge.count += 1
-            badge.save()
-
-            if isinstance(target, Post):
-                context = '<a href="%s">%s</a>' % (target.get_absolute_url(), target.title)
-            else:
-                context = ""
 
             date = user.profile.last_login
-            award = Award.objects.create(user=user, badge=badge, date=date, context=context)
-            logger.info("award %s created for %s" % (award.badge.name, user.pubkey))
-
+            award, created = Award.objects.get_or_create(user=user, badge=badge, date=date, context="")
+            if created:
+                badge.count += 1
+                badge.save()
+                logger.info("award %s created for %s" % (award.badge.name, user.pubkey))

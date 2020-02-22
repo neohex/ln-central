@@ -11,8 +11,8 @@
     <div class="row">
 
         <div class="col-md-12">
-            <h3>Badge: {{ badge.name }} <i class="{{ badge.icon }}"></i> &bull; <a
-                    href="{% url 'badge-list' %}">All &raquo;</a></h3>
+            <h1> <i class="{{ badge.icon }}"></i> {{ badge.name }}  &bull; <a
+                    href="{% url 'badge-list' %}">All &raquo;</a></h1>
 
             <h4>Awarded {{ badge.count }} time{{ badge.count|pluralize }} for: <em>{{ badge.desc }}</em></h4>
 

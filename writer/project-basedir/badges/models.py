@@ -1,12 +1,19 @@
 from django.db import models
-
 from django.conf import settings
-
 import django
+
 if django.VERSION[0] == 1:
     from django.core.urlresolvers import reverse
 else:
     from django.urls import reverse
+
+try:
+    # writer
+    from users.models import User
+except ImportError:
+    # reader
+    from biostar.apps.users.models import User
+
 
 from common.log import logger
 
@@ -51,7 +58,7 @@ class Award(models.Model):
     because some may be earned multiple times
     '''
     badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     date = models.DateTimeField()
     context = models.CharField(max_length=1000, default='')
 

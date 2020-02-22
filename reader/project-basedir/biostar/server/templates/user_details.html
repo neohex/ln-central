@@ -40,7 +40,7 @@
                 </div>
 
                 <div style="font-size: smaller; padding:0px 0px 20px 20px;">
-                    Pen name and portrait are generated from identity_pubkey of the LN wallet that was used to make actions on this website. 
+                    Pen name and portrait are generated from identity_pubkey of the LN wallet that was used to make actions on this website.
                 </div>
 
             </div>
@@ -95,6 +95,34 @@
             </div>
 
 
+            {% cache 500 "award" target.id %}
+                {#  Award list goes here #}
+                <div class="col-md-12">
+                    <h4 class="text-center">Latest awards to {% coolname target %}</h4>
+                </div>
+                <div class="col-md-12">
+                    <div id="award-list">
+                        {% for award in awards %}
+                            <div class="col-xs-4 award">
+                                <span style="font-size: 2em">
+                                    <i class="{{ award.badge.icon }}"></i>
+                                    <a href="{% url "badge-view" award.badge.id %}">{{ award.badge.name }}</a>
+                                </span>
+                                <span class="ago">{{ award.date|time_ago }}</span>,
+                                {{ award.badge.desc }}.
+                                {% if award.context %}
+                                    For {{ award.context|safe }}
+                                {% endif %}
+
+                            </div>
+                            {% empty %}
+                            <div class="alert alert-info">No awards yet. Soon to come :-)</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endcache %}
+
+
             {#  Post list goes here #}
             <div class="col-md-12">
                 <h4 class="text-center">Posts by {% coolname target %}</h4>
@@ -112,31 +140,6 @@
                 </div>
             </div>
 
-            {% cache 500 "award" target.id %}
-                {#  Award list goes here #}
-                <div class="col-md-12">
-                    <h4 class="text-center">Latest awards to {% coolname target %}</h4>
-                </div>
-                <div class="col-md-12">
-                    <div id="award-list">
-                        {% for award in awards %}
-                            <div class="col-xs-4 award">
-
-                                <a href="{% url "badge-view" award.badge.id %}">{{ award.badge.name }}
-                                    <i class="{{ award.badge.icon }}"></i></a>
-                                <span class="ago">{{ award.date|time_ago }}</span>,
-                                {{ award.badge.desc }}.
-                                {% if award.context %}
-                                    For {{ award.context|safe }}
-                                {% endif %}
-
-                            </div>
-                            {% empty %}
-                            <div class="alert alert-info">No awards yet. Soon to come :-)</div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endcache %}
         </div>
     </div>
 
