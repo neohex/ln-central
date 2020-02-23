@@ -451,45 +451,52 @@ class PostPreviewView(FormView):
 
         form = self.form_class(request.POST, memo=memo_serialized)
 
-        if form.is_valid():
-            if signature:
+        skip_all_other_checks = False
+        if signature:
+            try:
                 result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=signature)
-                if not result["valid"]:
-                    # Signature is invalid
+            except ln.LNUtilError as msg:
+                result = {
+                    "valid": False,
+                }
 
-                    ## See: https://github.com/alevchuk/ln-central/issues/27
-                    # self.form_class.add_error(
-                    #     "signature",
-                    #     ValidationError("Signature is invalid. Try signing latest preview data or delete signature to be anonymous.")
-                    # )
+            if not result["valid"]:
+                # Signature is invalid
 
-                    post_preview = self.get_model(memo)
+                ## See: https://github.com/alevchuk/ln-central/issues/27
+                # self.form_class.add_error(
+                #     "signature",
+                #     ValidationError("Signature is invalid. Try signing latest preview data or delete signature to be anonymous.")
+                # )
 
-                    context = {
-                        "post": post_preview,
-                        "form": form,
-                        "user": User.objects.get(pubkey="Unknown"),
-                        "errors_detected": True,
-                        "show_error_summary": True,
-                        "error_summary_list": [
-                            "Signature is invalid. Try signing latest preview data or delete signature to be anonymous."
-                        ]
-                    }
-                else:
-                    context = self.get_context_data(**kwargs)
-                    context["form"] = form
-                    context["errors_detected"] = False
-            else:
-                context = self.get_context_data(**kwargs)
+                post_preview = self.get_model(memo)
+
+                context = {
+                    "post": post_preview,
+                    "form": form,
+                    "user": User.objects.get(pubkey="Unknown"),
+                    "errors_detected": True,
+                    "show_error_summary": True,
+                    "error_summary_list": [
+                        "Signature is invalid. Try signing latest preview data or delete signature to be anonymous."
+                    ]
+                }
+
+                skip_all_other_checks = True
+
+
+        if not skip_all_other_checks:
+            context = self.get_context_data(**kwargs)
+
+            if form.is_valid():
                 context["form"] = form
                 context["errors_detected"] = False
-        else:
-            # Form errors detected
-            post_preview = self.get_model(memo)
+            else:
+                # Form errors detected
+                post_preview = self.get_model(memo)
 
-            context = self.get_context_data(**kwargs)
-            context["form"] = form
-            context["errors_detected"] = True
+                context["form"] = form
+                context["errors_detected"] = True
 
         return render(request, self.template_name, context)
 
@@ -671,9 +678,23 @@ class PostPublishView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(PostPublishView, self).get_context_data(**kwargs)
-        node_id = int(context["node_id"])
-
         nodes_list = ln.get_nodes_list()
+
+        if len(nodes_list) == 0:
+            return context
+
+        if 'node_id' not in context:
+            node_with_top_score = nodes_list[0]
+            for node in nodes_list:
+                if node["qos_score"] > node_with_top_score["qos_score"]:
+                    node_with_top_score = node
+
+            node_id = node_with_top_score["id"]
+
+            context["node_id"] = str(node_id)
+        else:
+            node_id = int(context["node_id"])
+
 
         # Lookup the node name
         node_name = "Unknown"
@@ -687,7 +708,7 @@ class PostPublishView(TemplateView):
         context["node_name"] = node_name
 
         next_node_id = nodes_list[(list_pos + 1) % len(nodes_list)]["id"]
-        context["next_node_url"] = reverse("post-publish", kwargs=dict(memo=context["memo"], node_id=next_node_id))
+        context["next_node_url"] = reverse("post-publish-node-selected", kwargs=dict(memo=context["memo"], node_id=next_node_id))
 
         try:
             details = ln.add_invoice(context["memo"], node_id=context["node_id"])
@@ -707,14 +728,15 @@ class PostPublishView(TemplateView):
         context = self.get_context_data(**kwargs)
         memo = context["memo"]
 
-        # Check payment and redirect if payment is confirmed
-        node_id = int(context["node_id"])
-        result = ln.check_payment(memo, node_id=node_id)
-        checkpoint_value = result["checkpoint_value"]
-        conclusion = ln.gen_check_conclusion(checkpoint_value, node_id=node_id, memo=memo)
-        if conclusion == ln.CHECKPOINT_DONE:
-            post_id = result["performed_action_id"]
-            return post_redirect(pid=post_id, request=request, permanent=False)
+        if "node_id" in context:
+            # Check payment and redirect if payment is confirmed
+            node_id = int(context["node_id"])
+            result = ln.check_payment(memo, node_id=node_id)
+            checkpoint_value = result["checkpoint_value"]
+            conclusion = ln.gen_check_conclusion(checkpoint_value, node_id=node_id, memo=memo)
+            if conclusion == ln.CHECKPOINT_DONE:
+                post_id = result["performed_action_id"]
+                return post_redirect(pid=post_id, request=request, permanent=False)
 
         return super(PostPublishView, self).get(request, *args, **kwargs)
 

@@ -77,7 +77,8 @@ urlpatterns = [
     url(r'^p/edit/preview/(?P<memo>{})/$'.format(MEMO_RE), views.RateLimitedNewPost.as_view(), name="post-preview-edit"),
 
     # Post publish
-    url(r'^p/publish/preview/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), PostPublishView.as_view(), name="post-publish"),
+    url(r'^p/publish/preview/best_node/(?P<memo>{})/$'.format(MEMO_RE), PostPublishView.as_view(), name="post-publish"),
+    url(r'^p/publish/preview/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), PostPublishView.as_view(), name="post-publish-node-selected"),
 
     # Post preview
     url(r'^p/new/preview/(?P<memo>{})/$'.format(MEMO_RE), PostPreviewView.as_view(), name="post-preview"),

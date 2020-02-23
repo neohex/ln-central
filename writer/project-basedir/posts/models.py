@@ -474,15 +474,7 @@ class PostPreview(models.Model):
         return url
 
     def get_publish_url(self, memo):
-        # Pick default inital node
-        nodes_list = ln.get_nodes_list()
-        node_with_top_score = nodes_list[0]
-        for node in nodes_list:
-            if node["qos_score"] > node_with_top_score["qos_score"]:
-                node_with_top_score = node
-
-        node_id = node_with_top_score["id"]
-        url = reverse("post-publish", kwargs=dict(memo=memo, node_id=node_id))
+        url = reverse("post-publish", kwargs=dict(memo=memo))
         return url
 
 
