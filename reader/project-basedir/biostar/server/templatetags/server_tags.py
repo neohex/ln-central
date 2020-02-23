@@ -341,9 +341,13 @@ def traverse_comments(request, post, tree):
 
     def traverse(node):
         data = ['<div class="indent">']
-        cont = Context({"post": node, 'request': request})
+        context = Context({
+            "post": node,
+            'request': request,
+            'vote_url': node.get_vote_url(),
+        })
 
-        html = COMMENT_BODY.render(cont)
+        html = COMMENT_BODY.render(context)
         data.append(html)
         for child in tree.get(node.id, []):
             data.append(traverse(child))
