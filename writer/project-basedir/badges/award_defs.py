@@ -152,24 +152,6 @@ MOON = AwardDef(
 )
 
 
-# Casting Votes
-
-VOTER = AwardDef(
-    name="Voter",
-    desc="payed more than 100 sats in votes",
-    func=lambda user: wrap_list(user, Vote.objects.filter(author=user).count() > 100),
-    icon="fa fa-thumbs-o-up"
-)
-
-SUPPORTER = AwardDef(
-    name="Supporter",
-    desc="payed more than 10,000 sats in votes",
-    func=lambda user: wrap_list(user, Vote.objects.filter(author=user).count() > 10000),
-    icon="fa fa-thumbs-up",
-    type=Badge.SILVER,
-)
-
-
 def rising_star(user):
     # The user joined no more than three months ago
     cond = general_util.now() < user.profile.date_joined + timedelta(weeks=15)
@@ -202,7 +184,5 @@ ALL_AWARDS = [
     GURU,
     PROPHET,
     MOON,
-    VOTER,
-    SUPPORTER,
     RISING_STAR,
 ]

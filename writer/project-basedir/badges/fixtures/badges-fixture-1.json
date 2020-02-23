@@ -1,7 +1,7 @@
 [
     {
         "fields": {
-            "count": 26,
+            "count": 12,
             "desc": "asked a question earning 1 sat of up-votes",
             "icon": "fa fa-certificate",
             "is_fake_test_data": false,
@@ -27,7 +27,7 @@
     },
     {
         "fields": {
-            "count": 14,
+            "count": 7,
             "desc": "asked a question earning 100 sats of up-votes",
             "icon": "fa fa-eye",
             "is_fake_test_data": false,
@@ -53,7 +53,7 @@
     },
     {
         "fields": {
-            "count": 64,
+            "count": 30,
             "desc": "created an answer earning 1 sat of up-votes",
             "icon": "fa fa-smile-o",
             "is_fake_test_data": false,
@@ -66,7 +66,7 @@
     },
     {
         "fields": {
-            "count": 2,
+            "count": 1,
             "desc": "created an answer earning 5 sats of up-votes",
             "icon": "fa fa-pencil-square-o",
             "is_fake_test_data": false,
@@ -144,7 +144,7 @@
     },
     {
         "fields": {
-            "count": 3,
+            "count": 2,
             "desc": "created a post earning 5 sats of up-votes",
             "icon": "fa fa-heart",
             "is_fake_test_data": false,
@@ -210,32 +210,6 @@
     {
         "fields": {
             "count": 0,
-            "desc": "payed more than 100 sats in votes",
-            "icon": "fa fa-thumbs-o-up",
-            "is_fake_test_data": false,
-            "name": "Voter",
-            "type": 0,
-            "unique": false
-        },
-        "model": "badges.badge",
-        "pk": 17
-    },
-    {
-        "fields": {
-            "count": 0,
-            "desc": "payed more than 10,000 sats in votes",
-            "icon": "fa fa-thumbs-up",
-            "is_fake_test_data": false,
-            "name": "Supporter",
-            "type": 1,
-            "unique": false
-        },
-        "model": "badges.badge",
-        "pk": 18
-    },
-    {
-        "fields": {
-            "count": 0,
             "desc": "created 50 posts within first three months of joining",
             "icon": "fa fa-star",
             "is_fake_test_data": false,
@@ -244,7 +218,7 @@
             "unique": false
         },
         "model": "badges.badge",
-        "pk": 19
+        "pk": 17
     },
     {
         "fields": {
