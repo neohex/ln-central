@@ -193,6 +193,8 @@ def run():
                 logger.error("Unknown add_index {}. Skipping invoice...".format(add_index_from_node))
                 logger.error("Raw invoice was: {}".format(raw_invoice))
                 logger.error("invoice_list_from_db was: {}".format(invoice_list_from_db))
+
+                retry_mini_map[add_index_from_node] = True  # try again later
                 continue
 
             # Validate
@@ -228,8 +230,8 @@ def run():
 
             if not raw_invoice['settled']:
                 logger.info("Skipping invoice at {}: Not yet settled".format(checkpoint_helper))
-                retry_mini_map[checkpoint_helper.add_index] = True
-                continue  # try again later
+                retry_mini_map[checkpoint_helper.add_index] = True  # try again later
+                continue
 
             #
             # Invoice is settled
