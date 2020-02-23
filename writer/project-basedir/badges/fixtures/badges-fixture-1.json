@@ -54,7 +54,7 @@
     {
         "fields": {
             "count": 64,
-            "desc": "created an answer arning 1 sat of up-votes",
+            "desc": "created an answer earning 1 sat of up-votes",
             "icon": "fa fa-smile-o",
             "is_fake_test_data": false,
             "name": "Teacher",
@@ -119,7 +119,7 @@
     {
         "fields": {
             "count": 0,
-            "desc": "created more than 1,000 posts (questions + answers + comments)",
+            "desc": "created 1,000 posts (questions + answers + comments)",
             "icon": "fa fa-sun-o",
             "is_fake_test_data": false,
             "name": "Oracle",
@@ -132,7 +132,7 @@
     {
         "fields": {
             "count": 0,
-            "desc": "created 100 posts",
+            "desc": "created 100 posts (questions + answers + comments)",
             "icon": "fa fa-bolt",
             "is_fake_test_data": false,
             "name": "Centurion",
@@ -171,7 +171,7 @@
     {
         "fields": {
             "count": 0,
-            "desc": "created posts earning 100 sats of up-votes total",
+            "desc": "created posts that received 100 sats of up-votes total",
             "icon": "fa fa-beer",
             "is_fake_test_data": false,
             "name": "Guru",

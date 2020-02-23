@@ -48,7 +48,7 @@ EPIC_QUESTION = AwardDef(
 
 TEACHER = AwardDef(
     name="Teacher",
-    desc="created an answer arning 1 sat of up-votes",
+    desc="created an answer earning 1 sat of up-votes",
     func=lambda user: Post.objects.filter(vote_count__gte=1, author=user, type=Post.ANSWER),
     icon="fa fa-smile-o"
 )
@@ -86,31 +86,13 @@ PUNDIT = AwardDef(
     type=Badge.SILVER,
 )
 
-ORACLE = AwardDef(
-    name="Oracle",
-    desc="created more than 1,000 posts (questions + answers + comments)",
-    func=lambda user: wrap_list(user, Post.objects.filter(author=user).count() > 1000),
-    icon="fa fa-sun-o",
-    type=Badge.GOLD,
-)
-
-
-# Posts
-
-CENTURION = AwardDef(
-    name="Centurion",
-    desc="created 100 posts",
-    func=lambda user: wrap_list(user, Post.objects.filter(author=user).count() > 100),
-    icon="fa fa-bolt",
-    type=Badge.SILVER,
-)
 
 
 # Quality
 
 APPRECIATED = AwardDef(
     name="Appreciated",
-    desc="created a post with more than 5 votes",
+    desc="created a post earning 5 sats of up-votes",
     func=lambda user: Post.objects.filter(author=user, vote_count__gte=5),
     icon="fa fa-heart",
     type=Badge.SILVER,
@@ -119,7 +101,7 @@ APPRECIATED = AwardDef(
 
 GOLD_STANDARD = AwardDef(
     name="Bitcoin Standard",
-    desc="created a post with more than 10,000 up-votes",
+    desc="created a post earning 10,000 sats of up-votes",
     func=lambda user: Post.objects.filter(author=user, book_count__gte=10000),
     icon="fa fa-music",
     type=Badge.GOLD,
@@ -127,6 +109,24 @@ GOLD_STANDARD = AwardDef(
 
 
 # Quantity
+
+
+CENTURION = AwardDef(
+    name="Centurion",
+    desc="created 100 posts (questions + answers + comments)",
+    func=lambda user: wrap_list(user, Post.objects.filter(author=user).count() > 100),
+    icon="fa fa-bolt",
+    type=Badge.SILVER,
+)
+
+
+ORACLE = AwardDef(
+    name="Oracle",
+    desc="created 1,000 posts (questions + answers + comments)",
+    func=lambda user: wrap_list(user, Post.objects.filter(author=user).count() > 1000),
+    icon="fa fa-sun-o",
+    type=Badge.GOLD,
+)
 
 GURU = AwardDef(
     name="Guru",
