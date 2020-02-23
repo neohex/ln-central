@@ -201,8 +201,8 @@
    color: white;
 }
  .post-row .accepted {
-   background-color: var(--ACCEPTED_POST);
-   color: #E1E818;
+   background-color: black;
+   color: #FFD700;
 }
  .post-row .unanswered {
    background-color: var(--UNANSWERED_POST);
