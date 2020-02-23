@@ -349,7 +349,7 @@ class PostDetails(DetailView):
         upvotes = store[Vote.UP]
 
         # Can the current user accept answers
-        can_accept = False
+        can_accept = True
 
         def decorate(post):
             post.has_bookmark = post.id in bookmarks

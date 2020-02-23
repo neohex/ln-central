@@ -362,17 +362,22 @@ class Post(models.Model):
         url = reverse("post-details", kwargs=dict(pk=self.root_id))
         return url if self.is_toplevel else "%s#%s" % (url, self.id)
 
-    def get_vote_url(self):
+    def _vote_url(self, action):
         obj = dict(
-            action="upvote",
+            action=action,
             post_id=self.id,
             unixtime=int(time.time())
         )
         memo = json_util.serialize_memo(obj)
         url = reverse("vote-publish", kwargs=dict(memo=memo))
-        print(url)  # TODO: remove
 
         return url
+
+    def get_accept_url(self):
+        return self._vote_url("Accept")
+
+    def get_vote_url(self):
+        return self._vote_url("Upvote")
 
     @staticmethod
     def check_root(sender, instance, created, *args, **kwargs):
@@ -524,7 +529,14 @@ class EmailEntry(models.Model):
 class Vote(models.Model):
     # Post statuses.
     UP, DOWN, BOOKMARK, ACCEPT = range(4)
+    VOTE_TYPE_MAP = {
+        "Upvote": UP,
+        "Accept": ACCEPT,
+        "Downvote": DOWN,
+        "Bookmark": BOOKMARK,
+    }
     TYPE_CHOICES = [(UP, "Upvote"), (DOWN, "DownVote"), (BOOKMARK, "Bookmark"), (ACCEPT, "Accept")]
+
 
     # TODO: Remove
     # author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

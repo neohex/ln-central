@@ -4,6 +4,7 @@ import re
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 from django.conf import settings
+from django.db.models import Max
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -73,7 +74,7 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
 
                 invoice_stdout["pay_req"] = "FAKE"
                 invoice_stdout["r_hash"] = "FAKE"
-                invoice_stdout["add_index"] = node.global_checkpoint + 1
+                invoice_stdout["add_index"] = Invoice.objects.aggregate(Max('add_index'))["add_index__max"] + 1
 
                 serializer = InvoiceSerializer(data=invoice_stdout, many=False)  # re-serialize
                 serializer.is_valid(raise_exception=True)  # validate data going into the database

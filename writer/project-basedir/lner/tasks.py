@@ -25,7 +25,10 @@ from common import general_util
 from posts.models import Post
 from posts.models import Vote
 from posts.models import Tag
+from posts.models import Vote
+
 from users.models import User
+
 from lner.models import LightningNode
 from lner.models import Invoice
 from lner.models import InvoiceRequest
@@ -96,7 +99,6 @@ def run():
 
     for invoice_obj in invoices_from_db:
         invoice_request = InvoiceRequest.objects.get(id=invoice_obj.invoice_request.id)
-
         if invoice_request.lightning_node not in invoices_by_node:
             invoices_by_node[invoice_request.lightning_node] = {}
 
@@ -110,6 +112,7 @@ def run():
         if created:
             logger.info("Global checkpoint does not exist")
             node.global_checkpoint = 0
+            node.save()
 
         invoices_details = lnclient.listinvoices(
             index_offset=node.global_checkpoint,
@@ -142,8 +145,8 @@ def run():
                     continue
 
                 mock_setteled = (invoice_obj.created + timedelta(seconds=3) < timezone.now())
-
                 creation_unixtime = int(time.mktime(invoice_obj.created.timetuple()))
+
                 invoice_list_from_node.append(
                     {
                         "settled": mock_setteled,
@@ -198,14 +201,23 @@ def run():
                 continue
 
             # Validate
-            assert invoice.invoice_request.memo == raw_invoice["memo"], "Memo in DB does not match the one in invocie request: db=({}) invoice_request=({})".format(
-                invoice.invoice_request.memo,
-                raw_invoice["memo"]
-            )
-            assert invoice.pay_req == raw_invoice["payment_request"], "Payment request does not match the one in invocie request: db=({}) invoice_request=({})".format(
-                invoice.pay_req,
-                raw_invoice["payment_request"]
-            )
+            if invoice.invoice_request.memo != raw_invoice["memo"]:
+                logger.error("Memo in DB does not match the one in invocie request: db=({}) invoice_request=({})".format(
+                    invoice.invoice_request.memo,
+                    raw_invoice["memo"]
+                ))
+
+                retry_mini_map[add_index_from_node] = True  # try again later
+                continue
+
+            if invoice.pay_req != raw_invoice["payment_request"]:
+                logger.error("Payment request does not match the one in invocie request: db=({}) invoice_request=({})".format(
+                    invoice.pay_req,
+                    raw_invoice["payment_request"]
+                ))
+
+                retry_mini_map[add_index_from_node] = True  # try again later
+                continue
 
             checkpoint_helper = CheckpointHelper(
                 node=node,
@@ -253,17 +265,22 @@ def run():
                 checkpoint_helper.set_checkpoint("memo_invalid")
                 continue
 
-            if "action" in action_details:
-                if action_details["action"] == "upvote":
+            action = action_details.get("action")
 
+            if action:
+                if action in ["Upvote", "Accept"]:
+                    vote_type = Vote.VOTE_TYPE_MAP[action]
+                    change = settings.PAYMENT_AMOUNT
                     post_id = action_details["post_id"]
-                    post = Post.objects.get(pk=post_id)
+                    try:
+                        post = Post.objects.get(pk=post_id)
+                    except (ObjectDoesNotExist, ValueError):
+                        logger.error("Skipping vote. The post for vote does not exist: {}".format(action_details))
+                        checkpoint_helper.set_checkpoint("invalid_post")
+                        continue
 
                     user, created = User.objects.get_or_create(pubkey="Unknown")
 
-                    vote_type = Vote.UP
-                    change = settings.PAYMENT_AMOUNT
-                    print(change)
 
                     # Only maintain one vote for each user/post pair.
                     votes = Vote.objects.filter(author=user, post=post, type=vote_type)

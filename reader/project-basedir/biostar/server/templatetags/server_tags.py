@@ -260,7 +260,8 @@ def post_body(context, post, user, tree):
         user=user,
         tree=tree,
         request=context['request'],
-        vote_url=post.get_vote_url()
+        vote_url=post.get_vote_url(),
+        accept_url=post.get_accept_url(),
     )
 
 @register.inclusion_tag('server_tags/post_preview_body.html', takes_context=True)

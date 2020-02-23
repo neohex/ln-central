@@ -23,7 +23,10 @@
         {% if not post.is_toplevel and post.can_accept %}
             <div class="vote mark {{ post.has_accepted|on }} tip" data-toggle="tooltip" data-placement="top"
                  data-type="accept" title="Accept!">
-                <i class="fa fa-check-circle-o fa-2x"></i>
+
+                <a href="{{ accept_url }}">
+                    <i class="fa fa-check-circle-o fa-2x"></i>
+                </a>
             </div>
         {% endif %}
 
