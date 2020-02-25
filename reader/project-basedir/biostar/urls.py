@@ -73,35 +73,23 @@ urlpatterns = [
     # Post details.
     url(r'^p/(?P<pk>\d+)/$', views.PostDetails.as_view(), name="post-details"),
 
-    # Post preview edit
-    url(r'^p/edit/preview/(?P<memo>{})/$'.format(MEMO_RE), views.RateLimitedNewPost.as_view(), name="post-preview-edit"),
+    # New post / answer / comment
+    url(r'^x/new/post/$', views.NewPost.as_view(), name="new-post"),
+    url(r'^x/new/answer/(?P<pid>\d+)/$', views.NewAnswer.as_view(post_type="answer"), name="new-answer"),
+    url(r'^x/new/comment/(?P<pid>\d+)/$', views.NewAnswer.as_view(post_type="comment"), name="new-comment"),
 
-    # Post publish
-    url(r'^p/publish/preview/best_node/(?P<memo>{})/$'.format(MEMO_RE), PostPublishView.as_view(), name="post-publish"),
-    url(r'^p/publish/preview/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), PostPublishView.as_view(), name="post-publish-node-selected"),
+    # Preview
+    url(r'^x/new/preview/(?P<memo>{})/$'.format(MEMO_RE), PostPreviewView.as_view(), name="post-preview"),
+    url(r'^x/edit/preview/(?P<memo>{})/$'.format(MEMO_RE), views.NewPost.as_view(), name="post-preview-edit"),
 
-    # Post preview
-    url(r'^p/new/preview/(?P<memo>{})/$'.format(MEMO_RE), PostPreviewView.as_view(), name="post-preview"),
+    # Publish (Get Invoice and QR code)
+    url(r'^x/publish/post/best_node/(?P<memo>{})/$'.format(MEMO_RE), PostPublishView.as_view(), name="post-publish"),
+    url(r'^x/publish/post/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), PostPublishView.as_view(), name="post-publish-node-selected"),
+    url(r'^x/publish/vote/best_node/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="vote-publish"),
+    url(r'^x/publish/vote/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="vote-publish-node-selected"),
 
-    # A separate url for each post type.
-    url(r'^p/new/post/$', views.RateLimitedNewPost.as_view(), name="new-post"),
-
-    # A new answer
-    url(r'^p/new/answer/(?P<pid>\d+)/$', views.RateLimitedNewAnswer.as_view(post_type="answer"), name="new-answer"),
-
-    # A new comment
-    url(r'^p/new/comment/(?P<pid>\d+)/$', views.RateLimitedNewAnswer.as_view(post_type="comment"), name="new-comment"),
-
-    # Edit an existing post.
-    url(r'^p/edit/(?P<pk>\d+)/$', EditPost.as_view(), name="post-edit"),
-
-    # ==============================
-    # Vote
-    # ==============================
-
-    # Post publish
-    url(r'^p/publish_vote/best_node/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="vote-publish"),
-    url(r'^p/publish_vote/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="vote-publish-node-selected"),
+    # # Edit an existing post. (Not implemented)
+    # url(r'^x/edit/(?P<pk>\d+)/$', EditPost.as_view(), name="post-edit"),
 
 
     # ==============================
