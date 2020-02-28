@@ -285,6 +285,18 @@ def post_preview_body(context, post_preview):
         date=post_preview.date
     )
 
+@register.inclusion_tag('server_tags/accept_preview_body.html', takes_context=True)
+def accept_preview_body(context, post):
+
+    "Renders the post preview body"
+    return dict(
+        post=post,
+        request=context['request'],
+        payment_amount=settings.PAYMENT_AMOUNT,
+        form=context["form"],
+        memo_json=json.dumps(context["memo"], sort_keys=True),
+    )
+
 @register.inclusion_tag('server_tags/search_bar.html', takes_context=True)
 def search_bar(context):
     "Displays search bar"

@@ -52,6 +52,9 @@ def listinvoices(index_offset, rpcserver, max_invoices=100, mock=False):
     return cli.run(cmd, log_cmd=False)
 
 def verifymessage(msg, sig, rpcserver, mock=False):
+    """
+    NOTE: CLI retruns "pubkey" while API returns "idnetity_pubkey"
+    """
     if mock:
         return {
             "valid": True,

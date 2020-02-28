@@ -299,16 +299,39 @@ def run():
                         Post.objects.filter(pk=post.root_id).update(subs_count=F('subs_count') + change)
 
                     elif vote_type == Vote.ACCEPT:
+
+                        if "sig" not in action_details:
+                            checkpoint_helper.set_checkpoint("sig_missing")
+                            continue
+
+                        sig = action_details.pop("sig")
+
+                        verifymessage_detail = lnclient.verifymessage(
+                            msg=json.dumps(action_details, sort_keys=True),
+                            sig=sig,
+                            rpcserver=node.rpcserver,
+                            mock=settings.MOCK_LN_CLIENT
+                        )
+
+                        if not verifymessage_detail["valid"]:
+                            checkpoint_helper.set_checkpoint("invalid_signiture")
+                            continue
+
+                        if verifymessage_detail["pubkey"] != post.parent.author.pubkey:
+                            checkpoint_helper.set_checkpoint("signiture_unauthorized")
+                            continue
+
                         if change > 0:
+                            # First, un-accept all answers
+                            for answer in Post.objects.filter(parent=post.parent, type=Post.ANSWER):
+                                if answer.has_accepted:
+                                    Post.objects.filter(pk=answer.id).update(vote_count=F('vote_count') - change, has_accepted=False)
+
                             # There does not seem to be a negation operator for F objects.
                             Post.objects.filter(pk=post.id).update(vote_count=F('vote_count') + change, has_accepted=True)
                             Post.objects.filter(pk=post.root_id).update(has_accepted=True)
                         else:
-                            Post.objects.filter(pk=post.id).update(vote_count=F('vote_count') + change, has_accepted=False)
-
-                            # Only set root as not accepted if there are no accepted siblings
-                            if Post.objects.exclude(pk=post.root_id).filter(root_id=post.root_id, has_accepted=True).count() == 0:
-                                Post.objects.filter(pk=post.root_id).update(has_accepted=False)
+                            raise Exeption("Un-accepting is not supported")
                     else:
                         Post.objects.filter(pk=post.id).update(vote_count=F('vote_count') + change)
 

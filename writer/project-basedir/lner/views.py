@@ -74,7 +74,12 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
 
                 invoice_stdout["pay_req"] = "FAKE"
                 invoice_stdout["r_hash"] = "FAKE"
-                invoice_stdout["add_index"] = Invoice.objects.aggregate(Max('add_index'))["add_index__max"] + 1
+
+                if len(Invoice.objects.all()) == 0:
+                    invoice_stdout["add_index"] = 1
+                else:
+                    # TODO: Mock mulitiple nodes. Currently Mock uses Invoice.objects.aggregate which ignores node.
+                    invoice_stdout["add_index"] = Invoice.objects.aggregate(Max('add_index'))["add_index__max"] + 1
 
                 serializer = InvoiceSerializer(data=invoice_stdout, many=False)  # re-serialize
                 serializer.is_valid(raise_exception=True)  # validate data going into the database

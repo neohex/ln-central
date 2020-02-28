@@ -11,7 +11,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Fieldset, Div, Submit, ButtonHolder
 from django.shortcuts import render
 from django import shortcuts
-from django.http import HttpResponseRedirect, HttpRequest
+from django.http import HttpResponseRedirect, HttpResponse, HttpRequest,  HttpResponseNotFound
 from datetime import datetime
 from django.utils.timezone import utc
 from django.core.exceptions import ObjectDoesNotExist
@@ -230,19 +230,38 @@ class SignMessageForm(forms.Form):
         else:
             memo = kwargs.get("initial").get("memo")
 
+        memo_deserialized = json_util.deserialize_memo(memo)
+        action = memo_deserialized.get("action")
+
         super(SignMessageForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Field('signature', rows="4"),
-            ButtonHolder(
-                Submit('submit', 'Check')
-            )
-        )
 
-        self.helper.form_action = reverse(
-            "post-preview",
-            kwargs=dict(memo=memo)
-        )
+
+        if action == "Accept":
+            self.helper.layout = Layout(
+                Field('signature', rows="4"),
+                ButtonHolder(
+                    Submit('submit', 'Accept Answer')
+                )
+            )
+
+            self.helper.form_action = reverse(
+                "accept-preview",
+                kwargs=dict(memo=memo)
+            )
+        else:
+
+            self.helper.layout = Layout(
+                Field('signature', rows="4"),
+                ButtonHolder(
+                    Submit('submit', 'Check')
+                )
+            )
+
+            self.helper.form_action = reverse(
+                "post-preview",
+                kwargs=dict(memo=memo)
+            )
 
 def parse_tags(category, tag_val):
     pass
@@ -280,7 +299,12 @@ class NewPost(FormView):
                 if value:
                     initial[key] = value
 
-        context = self.get_context_data(**kwargs)
+        try:
+            context = self.get_context_data(**kwargs)
+        except Exception as e:
+            logger.exception(e)
+            return HttpResponse(status=500, content="<h1>Internal Server Error 11</h1>")
+
         context['form'] = self.form_class(initial=initial)
         context['errors_detected'] = False
 
@@ -304,7 +328,7 @@ class NewPost(FormView):
                     parent = Post.objects.get(pk=parent_post_id)
                 except ObjectDoesNotExist, exc:
                     logger.error("The post does not exist. Perhaps it was deleted request (Request: %s)", request)
-                    return HttpResponseRedirect("/")
+                    return HttpResponse(status=500, content="<h1>The post does not exist</h1>")
 
                 post_preview.parent_post_id = parent_post_id
                 post_preview.title = parent.title
@@ -322,7 +346,12 @@ class NewPost(FormView):
         # Validating the form.
         form = self.form_class(request.POST)
         if not form.is_valid():
-            context = self.get_context_data(**kwargs)
+            try:
+                context = self.get_context_data(**kwargs)
+            except Exception as e:
+                logger.exception(e)
+                return HttpResponse(status=500, content="<h1>Internal Server Error 12</h1>")
+
             context['form'] = form
             context['errors_detected'] = True
 
@@ -378,7 +407,7 @@ class PostPreviewView(FormView):
                 parent = Post.objects.get(pk=parent_post_id)
             except ObjectDoesNotExist, exc:
                 logger.error("The post does not exist. Perhaps it was deleted request (Request: %s)", request)
-                return HttpResponseRedirect("/")
+                return HttpResponse(status=500, content="<h1>The post does not exist</h1>")
 
             post_preview.parent_post_id = parent_post_id
             post_preview.title = parent.title
@@ -424,10 +453,14 @@ class PostPreviewView(FormView):
         if "sig" not in memo:
             context['user'] = User(id=1, pubkey="Unknown")
 
+        # re-serialized because signature was added
+        memo_serialized = json_util.serialize_memo(memo)
+
         post_preview = self.get_model(memo)
-        context['post'] = post_preview
-        context['publish_url'] = post_preview.get_publish_url(
-            memo=json_util.serialize_memo(memo)
+        context["memo"] = memo_serialized
+        context["post"] = post_preview
+        context["publish_url"] = post_preview.get_publish_url(
+            memo=memo_serialized
         )
 
         return context
@@ -435,14 +468,20 @@ class PostPreviewView(FormView):
 
     def post(self, request, *args, **kwargs):
         """
-        Post is used when checking signature
+        POST is for checking signature
         """
 
         signature = request.POST.get("signature")
         kwargs["signature"] = signature
 
         view = super(PostPreviewView, self).get(request, *args, **kwargs)
-        view_obj = super(PostPreviewView, self).get_context_data().get("view")
+
+        try:
+            view_obj = super(PostPreviewView, self).get_context_data().get("view")
+        except Exception as e:
+            logger.exception(e)
+            return HttpResponse(status=500, content="<h1>Internal Server Error 13</h1>")
+
         memo_serialized = view_obj.kwargs["memo"]
 
         memo = validators.validate_memo(
@@ -451,7 +490,7 @@ class PostPreviewView(FormView):
 
         form = self.form_class(request.POST, memo=memo_serialized)
 
-        skip_all_other_checks = False
+        errors_detected_skip_other_checks = False
         if signature:
             try:
                 result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=signature)
@@ -482,21 +521,156 @@ class PostPreviewView(FormView):
                     ]
                 }
 
-                skip_all_other_checks = True
+                errors_detected_skip_other_checks = True
+
+        if not errors_detected_skip_other_checks:
+            try:
+                context = self.get_context_data(**kwargs)
+            except Exception as e:
+                logger.exception(e)
+                return HttpResponse(status=500, content="<h1>Internal Server Error 14</h1>")
+
+            context["form"] = form
+            context["errors_detected"] = not form.is_valid()
+
+        return render(request, self.template_name, context)
 
 
-        if not skip_all_other_checks:
-            context = self.get_context_data(**kwargs)
+class AcceptPreviewView(FormView):
+    """
+    Takes a signature required for accepting an answer
+    """
 
-            if form.is_valid():
-                context["form"] = form
-                context["errors_detected"] = False
+    template_name = "accept_preview.html"
+    form_class = SignMessageForm
+
+    def get_form_kwargs(self):
+        view_obj = super(AcceptPreviewView, self).get_context_data().get("view")
+        memo = view_obj.kwargs["memo"]
+
+        return {
+            "memo": memo
+        }
+
+    def get_model(self, memo):
+        post_id = memo.get("post_id")
+        post = None
+
+        if post_id:
+            try:
+                post = Post.objects.get(pk=post_id)
+            except ObjectDoesNotExist, exc:
+                logger.error("The post does not exist. Perhaps it was deleted request (Request: %s)", request)
+                return HttpResponse(status=500, content="<h1>The post does not exist</h1>")
+
+        else:
+            logger.error("The post is was not provided in the memo (Request: %s)", request)
+            return HttpResponse(status=500, content="<h1>The post does not exist</h1>")
+
+        return post
+
+    def get_context_data(self, **kwargs):
+        context = super(AcceptPreviewView, self).get_context_data(**kwargs)
+
+        view_obj = context.get("view")
+        memo_serialized = view_obj.kwargs["memo"]
+
+        memo = validators.validate_memo(
+            json_util.deserialize_memo(memo_serialized)
+        )
+
+        signature = kwargs.get("signature")
+        if signature:
+            result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=signature)
+            if result["valid"]:
+                identity_pubkey = result["identity_pubkey"]
+                context['user'] = User(id=1, pubkey=identity_pubkey)
+                memo["sig"] = signature  # add signature to memo
+
+        context['post'] = self.get_model(memo)
+
+        # re-serialized because signature was added
+        context['memo'] = json_util.serialize_memo(memo)
+
+        return context
+
+
+    def post(self, request, *args, **kwargs):
+        """
+        Post is used when checking signature
+        """
+        signature = request.POST.get("signature")
+        kwargs["signature"] = signature
+
+        view = super(AcceptPreviewView, self).get(request, *args, **kwargs)
+        view_obj = super(AcceptPreviewView, self).get_context_data().get("view")
+        memo_serialized = view_obj.kwargs["memo"]
+
+        memo = validators.validate_memo(
+            json_util.deserialize_memo(memo_serialized)
+        )
+        post = self.get_model(memo)
+
+        form = self.form_class(request.POST, memo=memo_serialized)
+
+        errors_detected_skip_other_checks = False
+        if signature:
+            try:
+                result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=signature)
+            except ln.LNUtilError as msg:
+                result = {
+                    "valid": False,
+                }
+
+            if not result["valid"]:
+                # Signature is invalid
+
+                ## See: https://github.com/alevchuk/ln-central/issues/27
+                # self.form_class.add_error(
+                #     "signature",
+                #     ValidationError("Signature is invalid. Try signing latest preview data or delete signature to be anonymous.")
+                # )
+
+                context = {
+                    "post": post,
+                    "memo": memo_serialized,
+                    "form": form,
+                    "errors_detected": True,
+                    "show_error_summary": True,
+                    "error_summary_list": [
+                        "Signature is invalid. Try signing the latest message shown bellow."
+                    ]
+                }
+
+                errors_detected_skip_other_checks = True
+
+        if not errors_detected_skip_other_checks:
+            try:
+                context = self.get_context_data(**kwargs)
+            except Exception as e:
+                logger.exception(e)
+                return HttpResponse(status=500, content="<h1><Internal Server Error 15/h1>")
+
+            context["form"] = form
+            context["errors_detected"] = not form.is_valid()
+
+            # Now check if the signature belongs to author of the question
+            pubkey = result["identity_pubkey"]
+
+            if result["identity_pubkey"] != post.parent.author.pubkey:
+                context = {
+                    "post": post,
+                    "memo": context["memo"],
+                    "form": form,
+                    "errors_detected": True,
+                    "show_error_summary": True,
+                    "error_summary_list": [
+                        "Question has a different author. You can only accept answers if you're the author of the question."
+                    ]
+                }
             else:
-                # Form errors detected
-                post_preview = self.get_model(memo)
-
-                context["form"] = form
-                context["errors_detected"] = True
+                # Looks good! Let's generate an invoice
+                return HttpResponseRedirect(post.get_accept_publish_url(memo=context["memo"]))
 
         return render(request, self.template_name, context)
 
@@ -535,12 +709,17 @@ class NewAnswer(FormView):
             parent = Post.objects.get(pk=parent_post_id)
         except ObjectDoesNotExist, exc:
             logger.error("The post does not exist. Perhaps it was deleted request (Request: %s)", request)
-            return HttpResponseRedirect("/")
+            return HttpResponse(status=500, content="<h1>The post does not exist</h1>")
 
         # Validating the form.
         form = self.form_class(request.POST)
         if not form.is_valid():
-            context = self.get_context_data(**kwargs)
+            try:
+                context = self.get_context_data(**kwargs)
+            except Exception as e:
+                logger.exception(e)
+                return HttpResponse(status=500, content="<h1>Internal Server Error 16</h1>")
+
             context["form"] = form
             context["errors_detected"] = True
             return render(request, self.template_name, context)
@@ -585,7 +764,7 @@ class EditPost(FormView):
         # Check and exit if not a valid edit.
         if not post.is_editable:
             logger.error("This user may not modify the post (Request: %s)", request)
-            return HttpResponseRedirect(reverse("home"))
+            return HttpResponse(status=500, content="<h1>This user may not modify the post</h1>")
 
         initial = dict(title=post.title, content=post.content, post_type=post.type, tag_val=post.tag_val)
 
@@ -713,11 +892,8 @@ class PostPublishView(TemplateView):
         try:
             details = ln.add_invoice(context["memo"], node_id=context["node_id"])
         except ln.LNUtilError as e:
-            logger.excetion(e)
-            return HttpResponseNotFound(
-                "<h1>Command for <b>addinvoice</b> failed or timed-out. "
-                "Please refresh this page.</h1>"
-            )
+            logger.exception(e)
+            raise
 
         context['pay_req'] = details['pay_req']
         context['payment_amount'] = settings.PAYMENT_AMOUNT
@@ -725,7 +901,11 @@ class PostPublishView(TemplateView):
         return context
 
     def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
+        try:
+            context = self.get_context_data(**kwargs)
+        except Exception as e:
+            return HttpResponse(status=500, content="<h1>Internal Server Error 17</h1>")
+
         memo = context["memo"]
 
         if "node_id" in context:
@@ -746,6 +926,7 @@ class VotePublishView(TemplateView):
     """
 
     template_name = "vote_publish.html"
+    form_class = SignMessageForm
 
     def get_context_data(self, **kwargs):
         context = super(VotePublishView, self).get_context_data(**kwargs)
@@ -787,23 +968,114 @@ class VotePublishView(TemplateView):
             )
         )
 
-        try:
-            details = ln.add_invoice(context["memo"], node_id=node_id)
-        except ln.LNUtilError as e:
-            logger.excetion(e)
-            return HttpResponseNotFound(
-                "<h1>Command for <b>addinvoice</b> failed or timed-out. "
-                "Please refresh this page.</h1>"
-            )
+        details = ln.add_invoice(context["memo"], node_id=node_id)
 
         context['pay_req'] = details['pay_req']
         context['payment_amount'] = settings.PAYMENT_AMOUNT
 
         return context
 
+
+    def post(self, request, *args, **kwargs):
+        """
+        POST is for checking signature of Accept "votes"
+        """
+
+        signature = request.POST.get("signature")
+        kwargs["signature"] = signature
+
+        try:
+            context = super(VotePublishView, self).get_context_data()
+            view_obj = context.get("view")
+
+        except Exception as e:
+            logger.exception(e)
+            return HttpResponse(status=500, content="<h1>Internal Server Error 18</h1>")
+
+        memo_serialized = view_obj.kwargs["memo"]
+
+        memo = validators.validate_memo(
+            json_util.deserialize_memo(memo_serialized)
+        )
+
+        form = self.form_class(request.POST, memo=memo_serialized)
+
+        errors_detected_skip_other_checks = False
+        if signature:
+            try:
+                result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=signature)
+            except ln.LNUtilError as msg:
+                result = {
+                    "valid": False,
+                }
+
+            post = AcceptPreviewView().get_model(memo)
+
+            if not result["valid"]:
+                # Signature is invalid
+
+                ## See: https://github.com/alevchuk/ln-central/issues/27
+                # self.form_class.add_error(
+                #     "signature",
+                #     ValidationError("Signature is invalid. Try signing latest preview data or delete signature to be anonymous.")
+                # )
+
+                context = {
+                    "post": post,
+                    "form": form,
+                    "errors_detected": True,
+                    "show_error_summary": True,
+                    "error_summary_list": [
+                        "Signature is invalid."
+                    ]
+                }
+
+                errors_detected_skip_other_checks = True
+            else:
+                # Signature is valid, check if Accept belongs to the author of the post
+                assert post.type == Post.ANSWER and post.parent.type == Post.QUESTION, "Accept only Answers to Questions"
+
+                # TODO: remove
+                print(post.parent.author.pubkey)
+
+                if post.parent.author.pubkey != result["identity_pubkey"]:
+                    context = {
+                        "post": post,
+                        "form": form,
+                        "errors_detected": True,
+                        "show_error_summary": True,
+                        "error_summary_list": [
+                            "Signature does not belong to the Question author. Sorry, you can only accept an Answer if you are the author of the Question."
+                        ]
+                    }
+
+                    errors_detected_skip_other_checks = True
+
+
+        if not errors_detected_skip_other_checks:
+            try:
+                context = self.get_context_data(**kwargs)
+            except Exception as e:
+                logger.exception(e)
+                return HttpResponse(status=500, content="<h1>Internal Server Error 19</h1>")
+
+            context["form"] = form
+            context["errors_detected"] = form.is_valid()
+
+        return render(request, self.template_name, context)
+
+
     def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        memo = context["memo"]
+        try:
+            context = self.get_context_data(**kwargs)
+        except Exception as e:
+            logger.exception(e)
+            return HttpResponse(status=500, content="<h1>Internal Server Error 20</h1>")
+
+        memo = context.get("memo")
+        if not memo:
+            logger.error("memo was not provided")
+            return HttpResponse(status=500, content="<h1>Internal Server Error 21</h1>")
 
         if "node_id" in context:
             # Check payment and redirect if payment is confirmed

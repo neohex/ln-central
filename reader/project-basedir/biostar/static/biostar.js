@@ -33,8 +33,9 @@ function add_comment(elem) {
     var post_id = elem.attr('data-value')
     var container = elem.parent().parent()
 
+    // TODO: remove java script
     container.after('<div id="comment-row">\
-    <form id="comment-form" role="form" action="/p/new/comment/' + post_id + '/" method="post"> \
+    <form id="comment-form" role="form" action="/x/new/comment/' + post_id + '/" method="post"> \
         <div class="form-group">\
         <div class="wmd-panel">\
             <div id="wmd-button-bar-2"></div>\

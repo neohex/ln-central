@@ -7,7 +7,7 @@ admin.autodiscover()
 
 from django.views.generic import TemplateView
 from biostar.server import views, ajax, search, moderate, api
-from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, PostPreviewView, VotePublishView, PostPublishView
+from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, PostPreviewView, VotePublishView, PostPublishView, AcceptPreviewView
 from biostar.apps.users.views import DigestManager
 from biostar.apps.util.views import QRCode
 from biostar.apps.util.views import PaymentCheck
@@ -79,18 +79,21 @@ urlpatterns = [
     url(r'^x/new/comment/(?P<pid>\d+)/$', views.NewAnswer.as_view(post_type="comment"), name="new-comment"),
 
     # Preview
-    url(r'^x/new/preview/(?P<memo>{})/$'.format(MEMO_RE), PostPreviewView.as_view(), name="post-preview"),
-    url(r'^x/edit/preview/(?P<memo>{})/$'.format(MEMO_RE), views.NewPost.as_view(), name="post-preview-edit"),
+    url(r'^x/preview/new/(?P<memo>{})/$'.format(MEMO_RE), PostPreviewView.as_view(), name="post-preview"),
+    url(r'^x/preview/edit/(?P<memo>{})/$'.format(MEMO_RE), views.NewPost.as_view(), name="post-preview-edit"),
+    url(r'^x/preview/accept/best_node/(?P<memo>{})/$'.format(MEMO_RE), AcceptPreviewView.as_view(), name="accept-preview"),
+    url(r'^x/preview/accept/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), AcceptPreviewView.as_view(), name="accept-preview-node-selected"),
 
-    # Publish (Get Invoice and QR code)
+    # Publish (QR code Invoice)
     url(r'^x/publish/post/best_node/(?P<memo>{})/$'.format(MEMO_RE), PostPublishView.as_view(), name="post-publish"),
     url(r'^x/publish/post/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), PostPublishView.as_view(), name="post-publish-node-selected"),
     url(r'^x/publish/vote/best_node/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="vote-publish"),
     url(r'^x/publish/vote/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="vote-publish-node-selected"),
+    url(r'^x/publish/accept/best_node/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="accept-publish"),
+    url(r'^x/publish/accept/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), VotePublishView.as_view(), name="accept-publish-node-selected"),
 
     # # Edit an existing post. (Not implemented)
     # url(r'^x/edit/(?P<pk>\d+)/$', EditPost.as_view(), name="post-edit"),
-
 
     # ==============================
     # Moderator

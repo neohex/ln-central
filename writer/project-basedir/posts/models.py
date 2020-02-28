@@ -362,9 +362,9 @@ class Post(models.Model):
         url = reverse("post-details", kwargs=dict(pk=self.root_id))
         return url if self.is_toplevel else "%s#%s" % (url, self.id)
 
-    def _vote_url(self, action):
+    def get_vote_url(self):
         obj = dict(
-            action=action,
+            action="Upvote",
             post_id=self.id,
             unixtime=int(time.time())
         )
@@ -374,10 +374,20 @@ class Post(models.Model):
         return url
 
     def get_accept_url(self):
-        return self._vote_url("Accept")
+        obj = dict(
+            action="Accept",
+            post_id=self.id,
+            unixtime=int(time.time())
+        )
+        memo = json_util.serialize_memo(obj)
+        url = reverse("accept-preview", kwargs=dict(memo=memo))
 
-    def get_vote_url(self):
-        return self._vote_url("Upvote")
+        return url
+
+    def get_accept_publish_url(self, memo):
+        url = reverse("accept-publish", kwargs=dict(memo=memo))
+
+        return url
 
     @staticmethod
     def check_root(sender, instance, created, *args, **kwargs):
