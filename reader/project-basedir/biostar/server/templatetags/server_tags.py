@@ -289,12 +289,13 @@ def post_preview_body(context, post_preview):
 def accept_preview_body(context, post):
 
     "Renders the post preview body"
+    memo = json_util.deserialize_memo(context["memo"])
     return dict(
         post=post,
         request=context['request'],
         payment_amount=settings.PAYMENT_AMOUNT,
         form=context["form"],
-        memo_json=json.dumps(context["memo"], sort_keys=True),
+        memo_json=json.dumps(memo, sort_keys=True),
     )
 
 @register.inclusion_tag('server_tags/search_bar.html', takes_context=True)
