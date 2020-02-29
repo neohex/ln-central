@@ -206,6 +206,8 @@ def run():
                 if raw_invoice['state'] == "CANCELED":
                     logger.error("Skipping because invoice is cancelled...")
                     retry_mini_map[add_index_from_node] = False  # advance global checkpoint
+                else:
+                    retry_mini_map[add_index_from_node] = True  # try again later
 
                 continue
 
