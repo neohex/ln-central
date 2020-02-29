@@ -94,7 +94,7 @@ def run():
 
     # Get all invoices that are not checkpointed
     all_invoices_from_db = {}  # Dict[LightningNode, Dict[int, Invoice]]  # where int is add_index
-    invoices_from_db = Invoice.objects.filter(checkpoint_value="no_checkpoint")
+    invoices_from_db = Invoice.objects.all()
     invoice_count_from_db = len(invoices_from_db)
 
     for invoice_obj in invoices_from_db:
@@ -108,7 +108,7 @@ def run():
     invoice_count_from_nodes = 0
     node_list = LightningNode.objects.all()
     for node in node_list:
-        logger.info("\n\n --------------------- {} id={} ----------------------------".format(node.node_name, node.id))
+        logger.info("--------------------- {} id={} ----------------------------".format(node.node_name, node.id))
         
         created = (node.global_checkpoint == -1)
         if created:
@@ -165,6 +165,11 @@ def run():
 
         retry_mini_map = {int(invoice['add_index']): False for invoice in invoice_list_from_node}
 
+        one_hour_ago = timezone.now() - timedelta(hours=1)
+        logger.error("Recent invoice_list_from_db was: {}".format(
+            [i.id for i in invoice_list_from_db.values() if i.modified > one_hour_ago]
+        ))
+
         for raw_invoice in invoice_list_from_node:
             # Example of raw_invoice:
             # {
@@ -193,11 +198,6 @@ def run():
             add_index_from_node = int(raw_invoice["add_index"])
 
             invoice = invoice_list_from_db.get(add_index_from_node)
-
-            one_hour_ago = timezone.now() - timedelta(hours=1)
-            logger.error("Recent invoice_list_from_db was: {}".format(
-                [i.id for i in invoice_list_from_db.values() if i.modified > one_hour_ago]
-            ))
 
             if invoice is None:
                 logger.error("Unknown add_index {}".format(add_index_from_node))
@@ -437,11 +437,13 @@ def run():
             node.save()
             logger.info("Saved new global checkpoint {}".format(new_global_checkpoint))
 
+        logger.info("\n\n")
+
 
     processing_wall_time = time.time() - start_time
     logger.info(
         (
-            "Processed {} invoices from nodes and {} from db in {:.3f} seconds"
+            "Processed {} invoices from nodes and {} from db in {:.3f} seconds\n\n\n\n\n"
         ).format(
             invoice_count_from_nodes,
             invoice_count_from_db,
@@ -461,7 +463,6 @@ def run_many():
         t = run()
         processing_times_array.append(t)
         time.sleep(0.5)
-        logger.info("\n\n\n\n\n")
 
     processing_wall_time = time.time() - start_time
     logger.info("Finished 200 runs in {:.3f} seconds".format(processing_wall_time))
