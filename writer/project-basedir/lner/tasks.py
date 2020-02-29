@@ -93,21 +93,23 @@ def run():
     # TODO: Handle duplicates (e.g. payments to different nodes), first come first serve
 
     # Get all invoices that are not checkpointed
-    invoices_by_node = {}
+    all_invoices_from_db = {}  # Dict[LightningNode, Dict[int, Invoice]]  # where int is add_index
     invoices_from_db = Invoice.objects.filter(checkpoint_value="no_checkpoint")
     invoice_count_from_db = len(invoices_from_db)
 
     for invoice_obj in invoices_from_db:
         invoice_request = InvoiceRequest.objects.get(id=invoice_obj.invoice_request.id)
-        if invoice_request.lightning_node not in invoices_by_node:
-            invoices_by_node[invoice_request.lightning_node] = {}
+        if invoice_request.lightning_node not in all_invoices_from_db:
+            all_invoices_from_db[invoice_request.lightning_node] = {}
 
-        invoices_by_node[invoice_request.lightning_node][invoice_obj.add_index] = invoice_obj
+        all_invoices_from_db[invoice_request.lightning_node][invoice_obj.add_index] = invoice_obj
 
     # Process each node
     invoice_count_from_nodes = 0
     node_list = LightningNode.objects.all()
     for node in node_list:
+        logger.info("\n\n --------------------- {} id={} ----------------------------".format(node.node_name, node.id))
+        
         created = (node.global_checkpoint == -1)
         if created:
             logger.info("Global checkpoint does not exist")
@@ -120,11 +122,11 @@ def run():
             mock=settings.MOCK_LN_CLIENT
         )
 
-        if node not in invoices_by_node:
+        if node not in all_invoices_from_db:
             invoice_list_from_db = {}
             logger.info("DB has no invoices for this node")
         else:
-            invoice_list_from_db = invoices_by_node[node]
+            invoice_list_from_db = all_invoices_from_db[node]
 
         # example of invoices_details: {"invoices": [], 'first_index_offset': '5', 'last_index_offset': '72'}
         invoice_list_from_node = invoices_details['invoices']
@@ -192,14 +194,19 @@ def run():
 
             invoice = invoice_list_from_db.get(add_index_from_node)
 
-            if invoice is None:
-                logger.error("Unknown add_index {}. Skipping invoice...".format(add_index_from_node))
-                logger.error("Raw invoice was: {}".format(raw_invoice))
-                logger.error("Recent invoice_list_from_db was: {}".format(
-                    [i.id for i in invoice_list_from_db if i.modified < timezone.now() - timedelta(hour=1)]
-                ))
+            one_hour_ago = timezone.now() - timedelta(hours=1)
+            logger.error("Recent invoice_list_from_db was: {}".format(
+                [i.id for i in invoice_list_from_db.values() if i.modified > one_hour_ago]
+            ))
 
-                retry_mini_map[add_index_from_node] = True  # try again later
+            if invoice is None:
+                logger.error("Unknown add_index {}".format(add_index_from_node))
+                logger.error("Raw invoice from node was: {}".format(raw_invoice))
+
+                if raw_invoice['state'] == "CANCELED":
+                    logger.error("Skipping because invoice is cancelled...")
+                    retry_mini_map[add_index_from_node] = False  # advance global checkpoint
+
                 continue
 
             # Validate
@@ -454,6 +461,7 @@ def run_many():
         t = run()
         processing_times_array.append(t)
         time.sleep(0.5)
+        logger.info("\n\n\n\n\n")
 
     processing_wall_time = time.time() - start_time
     logger.info("Finished 200 runs in {:.3f} seconds".format(processing_wall_time))
