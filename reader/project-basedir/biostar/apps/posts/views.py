@@ -238,6 +238,20 @@ class SignMessageForm(forms.Form):
 
 
         if action == "Accept":
+            self.signature = forms.CharField(
+                widget=forms.Textarea,
+                label="Signature",
+                required=True,
+                error_messages={
+                    'required': (
+
+                    )
+                },
+                max_length=200, min_length=10,
+                validators=[validators.pre_validate_signature],
+                help_text="JSON output of the signmessage command or just text of the signature"
+            )
+
             self.helper.layout = Layout(
                 Field('signature', rows="4"),
                 ButtonHolder(
@@ -652,25 +666,48 @@ class AcceptPreviewView(FormView):
                 return HttpResponse(status=500, content="<h1><Internal Server Error 15/h1>")
 
             context["form"] = form
-            context["errors_detected"] = not form.is_valid()
 
-            # Now check if the signature belongs to author of the question
-            pubkey = result["identity_pubkey"]
+            if not form.is_valid():
+                hide_form_errors = False
+                if not signature:
+                    error_summary_list = [
+                        "Signature is required here. Yet when you clicked \"Accept Answer\" the signature was empty."
+                    ]
+                    hide_form_errors = True
+                else:
+                    error_summary_list = [
+                        "Signature is required here. Yet when you clicked \"Accept Answer\" the signature was invalid."
+                    ]
 
-            if result["identity_pubkey"] != post.parent.author.pubkey:
+                if hide_form_errors:
+                    form = self.form_class(memo=memo_serialized)
+
                 context = {
                     "post": post,
                     "memo": context["memo"],
                     "form": form,
                     "errors_detected": True,
                     "show_error_summary": True,
-                    "error_summary_list": [
-                        "Question has a different author. You can only accept answers if you're the author of the question."
-                    ]
+                    "error_summary_list": error_summary_list
                 }
             else:
-                # Looks good! Let's generate an invoice
-                return HttpResponseRedirect(post.get_accept_publish_url(memo=context["memo"]))
+                # Now check if the signature belongs to author of the question
+                pubkey = result["identity_pubkey"]
+
+                if result["identity_pubkey"] == post.parent.author.pubkey:
+                    # Looks good! Let's generate an invoice
+                    return HttpResponseRedirect(post.get_accept_publish_url(memo=context["memo"]))
+                else:
+                    context = {
+                        "post": post,
+                        "memo": context["memo"],
+                        "form": form,
+                        "errors_detected": True,
+                        "show_error_summary": True,
+                        "error_summary_list": [
+                            "Question has a different author. You can only accept answers if you're the author of the question."
+                        ]
+                    }
 
         return render(request, self.template_name, context)
 
