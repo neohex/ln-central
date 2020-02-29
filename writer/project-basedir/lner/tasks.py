@@ -195,14 +195,16 @@ def run():
             if invoice is None:
                 logger.error("Unknown add_index {}. Skipping invoice...".format(add_index_from_node))
                 logger.error("Raw invoice was: {}".format(raw_invoice))
-                logger.error("invoice_list_from_db was: {}".format(invoice_list_from_db))
+                logger.error("Recent invoice_list_from_db was: {}".format(
+                    [i.id for i in invoice_list_from_db if i.modified < timezone.now() - timedelta(hour=1)]
+                ))
 
                 retry_mini_map[add_index_from_node] = True  # try again later
                 continue
 
             # Validate
             if invoice.invoice_request.memo != raw_invoice["memo"]:
-                logger.error("Memo in DB does not match the one in invocie request: db=({}) invoice_request=({})".format(
+                logger.error("Memo in DB does not match the one in invoice request: db=({}) invoice_request=({})".format(
                     invoice.invoice_request.memo,
                     raw_invoice["memo"]
                 ))
@@ -211,7 +213,7 @@ def run():
                 continue
 
             if invoice.pay_req != raw_invoice["payment_request"]:
-                logger.error("Payment request does not match the one in invocie request: db=({}) invoice_request=({})".format(
+                logger.error("Payment request does not match the one in invoice request: db=({}) invoice_request=({})".format(
                     invoice.pay_req,
                     raw_invoice["payment_request"]
                 ))
