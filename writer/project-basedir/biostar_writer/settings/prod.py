@@ -9,7 +9,10 @@ DEFAULT_LOGGING['handlers']['console']['filters'] = []  # Not Debug, yet Verbose
 # SECURE_HSTS_SECONDS=3600  # https://docs.djangoproject.com/en/2.1/ref/middleware/#http-strict-transport-security
 # SECURE_SSL_REDIRECT=True  # https://docs.djangoproject.com/en/2.1/ref/settings/#secure-ssl-redirect
 
-ALLOWED_HOSTS = ['127.0.0.1']  # https://docs.djangoproject.com/en/2.1/ref/settings/#allowed-hosts
+
+# comma separated list of hosts
+__DEFAULT_ALLOWED_HOSTS = 'localhost'
+ALLOWED_HOSTS = get_env("ALLOWED_HOSTS", __DEFAULT_ALLOWED_HOSTS).split(",")  # https://docs.djangoproject.com/en/2.1/ref/settings/#allowed-hosts
 
 CSRF_COOKIE_SECURE=True
 SESSION_COOKIE_SECURE=True

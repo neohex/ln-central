@@ -26,6 +26,25 @@ BASE_DIR = (
     )
 )
 
+def get_env(name, default=None, strict=False, func=None):
+    """Get the environment variable or return exception"""
+
+    if strict and name not in os.environ:
+        msg = "*** Required environment variable '{}' not set.".format(name)
+        raise ImproperlyConfigured(msg)
+
+    value = os.environ.get(name, default)
+
+    if not value:
+        msg = "*** Required environment variable '{}' not set and has no default value".format(
+            name)
+        raise ImproperlyConfigured(msg)
+
+    if func:
+        return func(value)
+    else:
+        return unicode(value, encoding="utf-8")
+
 SECURE_CONTENT_TYPE_NOSNIFF = True  # https://docs.djangoproject.com/en/2.1/ref/middleware/#x-content-type-options
 SECURE_BROWSER_XSS_FILTER = True  # https://docs.djangoproject.com/en/2.1/ref/middleware/#x-xss-protection-1-mode-block
 X_FRAME_OPTIONS = 'DENY'  # https://docs.djangoproject.com/en/2.1/ref/clickjacking/
@@ -133,7 +152,7 @@ def get_env(name, default=None, strict=False, func=None):
         try:
             return unicode(value, encoding="utf-8")
 
-        except Exception as e: 
+        except Exception as e:
             if sys.version_info >= (3, 0):
                 return str(value)
             else:
