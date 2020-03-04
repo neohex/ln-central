@@ -7,10 +7,10 @@
         <div class="box vote">
             {% if post.is_toplevel %}
                 <div class="c">{{ post.thread_score }}</div>
-                <div class="t">vote{{ post.thread_score|pluralize }}</div>
+                <div class="t">vote sats</div>
             {% else %}
                 <div class="c">{{ post.vote_count }}</div>
-                <div class="t">vote{{ post.vote_count|pluralize }}</div>
+                <div class="t">vote sats</div>
             {% endif %}
         </div>
         <div class="box {% boxclass post.root %}">
@@ -25,10 +25,10 @@
         <div class="box vote">
             {% if post.is_toplevel %}
                 <div class="c">{{ post.thread_score }}</div>
-                <div class="t">vote{{ post.thread_score|pluralize }}</div>
+                <div class="t">vote sats</div>
             {% else %}
                 <div class="c">{{ post.vote_count }}</div>
-                <div class="t">vote{{ post.vote_count|pluralize }}</div>
+                <div class="t">vote sats</div>
             {% endif %}
         </div>
         <div class="box {% boxclass post.root %}">
