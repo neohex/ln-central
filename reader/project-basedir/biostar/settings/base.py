@@ -90,6 +90,9 @@ INTERNAL_IPS = ('127.0.0.1',)
 HOME_DIR = get_env("BIOSTAR_HOME", __DEFAULT_HOME)
 LIVE_DIR = abspath(HOME_DIR, 'live')
 
+__DEFAULT_WRITER_HOST = "localhost"
+WRITER_HOST = get_env("WRITER_HOST", __DEFAULT_WRITER_HOST)
+
 DATABASE_NAME = get_env("DATABASE_NAME")
 STATIC_DIR = abspath(HOME_DIR, 'biostar', 'static')
 
@@ -290,9 +293,9 @@ INSTALLED_APPS = [
     'haystack',  # Modular search for Django
     'crispy_forms',  # application that lets you easily build, customize and reuse forms
     'djcelery',  # was used by Biostar for sending emails
-                 # "queue, execution units, called tasks, are executed concurrently 
-                 # on a single or more worker servers using multiprocessing, Eventlet, 
-                 # or gevent. Tasks can execute asynchronously (in the background) or 
+                 # "queue, execution units, called tasks, are executed concurrently
+                 # on a single or more worker servers using multiprocessing, Eventlet,
+                 # or gevent. Tasks can execute asynchronously (in the background) or
                  # synchronously (wait until ready)"
     'kombu.transport.django',  # "transport using the Django database as a message store"
     'captcha',  # mostly deleted in the De-Cookify commit 19e67656233669db8c386fa69b125571faeaff4e

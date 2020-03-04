@@ -24,7 +24,7 @@ def call_endpoint(path, args={}, as_post=False):
     else:
         headers = {}
 
-    full_path = 'http://127.0.0.1:8000/{}.json'.format(path)
+    full_path = 'http://{}:8000/{}.json'.format(settings.WRITER_HOST, path)
     try:
         if as_post:
             return requests.post(full_path, headers=headers, data=args)
