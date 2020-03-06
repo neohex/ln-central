@@ -69,7 +69,7 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
         )
 
         if created or retry_addinvoice:
-
+            logger.info("New invoice request created: {}".format(request_obj))
             # InvoiceRequest just got created? do:
             #  1. addinvoice RPC to the node
             #  2. create Invoice
@@ -128,20 +128,24 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
                     add_index=serializer.validated_data.get("add_index")
                 )
                 invoice_obj.save()
-                logger.info("Saved results of addinvoice in the DB")
+                logger.info("Saved results of addinvoice to DB")
 
                 return Response(serializer.validated_data)
 
         else:
+            logger.info("Invoice request already exists: {}".format(request_obj))
             try:
                 invoice_obj = Invoice.objects.get(invoice_request=request_obj)
+                logger.info("New invoice created: {}".format(invoice_obj))
+
             except Invoice.DoesNotExist:
+                logger.info("Re-trying to create new invoice")
                 retry_num += 1
                 time.sleep(CreateInvoiceViewSet.RETRY_SLEEP_SECONDS)
                 return self.create(request, format=format, retry_addinvoice=True, retry_num=retry_num)
 
             serializer = InvoiceSerializer(invoice_obj)
-            logger.info("Invoice already exists for {}".format(request_obj))
+
 
             return Response(serializer.data)
 
