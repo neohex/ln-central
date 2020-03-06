@@ -9,7 +9,7 @@ DEBUG = True
 FIXTURE_DIRS = []
 SITE_ID = 1  # Local Dev Site Name http://www.lvh.me
 
-ALLOWED_HOSTS = ["127.0.0.1"]  # https://docs.djangoproject.com/en/2.1/ref/settings/#allowed-hosts
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]  # https://docs.djangoproject.com/en/2.1/ref/settings/#allowed-hosts
 
 
 # Database

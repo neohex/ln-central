@@ -133,10 +133,10 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
                 return Response(serializer.validated_data)
 
         else:
-            logger.info("Invoice request already exists: {}".format(request_obj))
+            logger.info("Good it already exists: {}".format(request_obj))
             try:
                 invoice_obj = Invoice.objects.get(invoice_request=request_obj)
-                logger.info("New invoice created: {}".format(invoice_obj))
+                logger.info("New invoice created! {}".format(invoice_obj))
 
             except Invoice.DoesNotExist:
                 logger.info("Re-trying to create new invoice")
