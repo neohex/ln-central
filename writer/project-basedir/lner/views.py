@@ -127,6 +127,8 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
                     r_hash=serializer.validated_data.get("r_hash"),
                     add_index=serializer.validated_data.get("add_index")
                 )
+                logger.info("New invoice created! {}".format(invoice_obj))
+
                 invoice_obj.save()
                 logger.info("Saved results of addinvoice to DB")
 
@@ -136,16 +138,21 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
             logger.info("Good it already exists: {}".format(request_obj))
             try:
                 invoice_obj = Invoice.objects.get(invoice_request=request_obj)
-                logger.info("New invoice created! {}".format(invoice_obj))
-
             except Invoice.DoesNotExist:
                 logger.info("Re-trying to create new invoice")
                 retry_num += 1
                 time.sleep(CreateInvoiceViewSet.RETRY_SLEEP_SECONDS)
                 return self.create(request, format=format, retry_addinvoice=True, retry_num=retry_num)
 
+            logger.info("Fetched invoice from DB: {}".format(invoice_obj))
             serializer = InvoiceSerializer(invoice_obj)
 
+            if serializer.is_valid:
+                logger.info("Invoice is valid")
+            else:
+                msg = "Invoice is NOT valid, errors: {}".format(serializer.errors)
+                logger.error(msg)
+                raise CreateInvoiceError(msg)
 
             return Response(serializer.data)
 
