@@ -1,3 +1,3 @@
 [submodule "writer/project-basedir/dependencies/github.com/alevchuk/django-background-tasks"]
 	path = writer/project-basedir/dependencies/github.com/alevchuk/django-background-tasks
-	url = git@github.com:alevchuk/django-background-tasks.git
+	url = https://github.com/arteria/django-background-tasks.git

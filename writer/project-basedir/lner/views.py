@@ -69,6 +69,11 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
         )
 
         if created or retry_addinvoice:
+
+            # InvoiceRequest just got created? do:
+            #  1. addinvoice RPC to the node
+            #  2. create Invoice
+
             if settings.MOCK_LN_CLIENT:
                 invoice_stdout = {}
 
@@ -82,7 +87,7 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
                     invoice_stdout["add_index"] = Invoice.objects.aggregate(Max('add_index'))["add_index__max"] + 1
 
                 serializer = InvoiceSerializer(data=invoice_stdout, many=False)  # re-serialize
-                serializer.is_valid(raise_exception=True)  # validate data going into the database
+                is_valid = serializer.is_valid(raise_exception=False)  # validate data going into the database
 
                 invoice_obj = Invoice(
                     invoice_request=request_obj,
@@ -101,9 +106,20 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
                     amt=settings.PAYMENT_AMOUNT,
                     expiry=settings.INVOICE_EXPIRY,
                 )
+                logger.info("Finished addinvoice on the node")
+
+                if "payment_request" in invoice_stdout:
+                    # lncli returns "payment_request" instead of "pay_req", probably since
+                    # commit 8f5d78c875b8eca436f7ee2e86e743afee262386 (Dec 20 2019)  build+lncli: default to hex encoding for byte slices
+                    invoice_stdout["pay_req"] = invoice_stdout["payment_request"]
 
                 serializer = InvoiceSerializer(data=invoice_stdout, many=False)  # re-serialize
-                serializer.is_valid(raise_exception=True)  # validate data going into the database
+                is_valid = serializer.is_valid(raise_exception=False)  # validate data going into the database
+
+                if not is_valid:
+                    msg = "Output of addinvoice was not valid: errors={} stdout={}".format(serializer.errors, invoice_stdout)
+                    logger.error(msg)
+                    raise CreateInvoiceError(msg)
 
                 invoice_obj = Invoice(
                     invoice_request=request_obj,
@@ -112,6 +128,8 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
                     add_index=serializer.validated_data.get("add_index")
                 )
                 invoice_obj.save()
+                logger.info("Saved results of addinvoice in the DB")
+
                 return Response(serializer.validated_data)
 
         else:
@@ -123,6 +141,8 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
                 return self.create(request, format=format, retry_addinvoice=True, retry_num=retry_num)
 
             serializer = InvoiceSerializer(invoice_obj)
+            logger.info("Invoice already exists for {}".format(request_obj))
+
             return Response(serializer.data)
 
 
