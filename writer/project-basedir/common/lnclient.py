@@ -46,7 +46,7 @@ def listinvoices(index_offset, rpcserver, max_invoices=100, mock=False):
         "listinvoices",
         "--index_offset", str(index_offset),
         "--max_invoices", str(max_invoices),
-        "--reversed=False"
+        "--paginate-forwards",
     ]
 
     return cli.run(cmd, log_cmd=False)
