@@ -36,8 +36,8 @@ from lner.models import InvoiceRequest
 logger.info("Python version: {}".format(sys.version.replace("\n", " ")))
 
 
-BETWEEN_NODES_DELAY = 0.3
-TOP_LEVEL_DELAY = 1.5
+BETWEEN_NODES_DELAY = 1
+TOP_LEVEL_DELAY = 3
 
 
 def human_time(ts):
@@ -191,9 +191,9 @@ class Runner(object):
         retry_mini_map = {int(invoice['add_index']): False for invoice in invoice_list_from_node}
 
         one_hour_ago = timezone.now() - timedelta(hours=1)
-        logger.error("Recent invoice_list_from_db was: {}".format(
-            [i.id for i in invoice_list_from_db.values() if i.modified > one_hour_ago]
-        ))
+        recent_invoices = [i.id for i in invoice_list_from_db.values() if i.modified > one_hour_ago]
+        if len(recent_invoices) > 0:
+            logger.info("Recent invoice_list_from_db was: {}".format(recent_invoices))
 
         for raw_invoice in invoice_list_from_node:
             # Example of raw_invoice:
@@ -515,13 +515,17 @@ def run_many():
     processing_wall_time = time.time() - start_time
     logger.info("Finished 200 runs in {:.3f} seconds".format(processing_wall_time))
 
-    logger.info("\nTotal pre-run max was {:.3f} seconds".format(max(pre_run_times_array)))
-    logger.info("Total pre-run avg was {:.3f} seconds".format(sum(pre_run_times_array) / len(processing_times_array)))
-    logger.info("Total pre-run min was {:.3f} seconds".format(min(pre_run_times_array)))
+    logger.info("\n")
+    logger.info("Cumulative pre-run total was {:.3f} seconds".format(sum(pre_run_times_array)))
+    logger.info("Cumulative pre-run max was {:.3f} seconds".format(max(pre_run_times_array)))
+    logger.info("Cumulative pre-run avg was {:.3f} seconds".format(sum(pre_run_times_array) / len(processing_times_array)))
+    logger.info("Cumulative pre-run min was {:.3f} seconds".format(min(pre_run_times_array)))
 
-    logger.info("\nTotal max was {:.3f} seconds".format(max(processing_times_array)))
-    logger.info("Total avg was {:.3f} seconds".format(sum(processing_times_array) / len(processing_times_array)))
-    logger.info("Total min was {:.3f} seconds".format(min(processing_times_array)))
+    logger.info("\n")
+    logger.info("Cululative total was {:.3f} seconds".format(sum(processing_times_array)))
+    logger.info("Cululative max was {:.3f} seconds".format(max(processing_times_array)))
+    logger.info("Cululative avg was {:.3f} seconds".format(sum(processing_times_array) / len(processing_times_array)))
+    logger.info("Cululative min was {:.3f} seconds".format(min(processing_times_array)))
 
     logger.info("\n\n")
 
