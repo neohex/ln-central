@@ -36,8 +36,17 @@ from lner.models import InvoiceRequest
 logger.info("Python version: {}".format(sys.version.replace("\n", " ")))
 
 
+BETWEEN_NODES_DELAY = 0.3
+TOP_LEVEL_DELAY = 1.5
+
+
 def human_time(ts):
     return datetime.utcfromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
+
+
+def sleep(seconds):
+    logger.info("Sleeping for {} seconds".format(seconds))
+    time.sleep(seconds)
 
 
 class CheckpointHelper(object):
@@ -76,40 +85,56 @@ class CheckpointHelper(object):
         return self.invoice.checkpoint_value != "no_checkpoint"
 
 
-def run():
-    start_time = time.time()
-    # Delete invoices that are passed retention
-    for invoice_obj in Invoice.objects.all():
-        if invoice_obj.created < timezone.now() - settings.INVOICE_RETENTION:
-            logger.info("Deleting invoice {} because it is older then retention {}".format(invoice_obj, settings.INVOICE_RETENTION))
+class Runner(object):
+    def __init__(self):
+        pass
+
+    def pre_run(self):
+        self.all_invoices_from_db = {}  # Dict[LightningNode, Dict[int, Invoice]]  # where int is add_index
+        self.invoice_count_from_nodes = 0
+
+        start_time = time.time()
+
+        # Delete invoices that are passed retention
+        for invoice_obj in Invoice.objects.all():
+            if invoice_obj.created < timezone.now() - settings.INVOICE_RETENTION:
+                logger.info("Deleting invoice {} because it is older then retention {}".format(invoice_obj, settings.INVOICE_RETENTION))
+                invoice_request = InvoiceRequest.objects.get(id=invoice_obj.invoice_request.id)
+                if invoice_request:
+                    invoice_request.delete()  # cascading delete also deletes the invoice
+                else:
+                    logger.info("There was no invoice request, deleting just the invoice")
+                    invoice_obj.delete()
+                continue
+
+        # TODO: Handle duplicates (e.g. payments to different nodes), first come first serve
+
+        # Get all invoices that are not checkpointed
+        invoices_from_db = Invoice.objects.all()
+        self.invoice_count_from_db = len(invoices_from_db)
+
+        for invoice_obj in invoices_from_db:
             invoice_request = InvoiceRequest.objects.get(id=invoice_obj.invoice_request.id)
-            if invoice_request:
-                invoice_request.delete()  # cascading delete also deletes the invoice
-            else:
-                logger.info("There was no invoice request, deleting just the invoice")
-                invoice_obj.delete()
-            continue
+            if invoice_request.lightning_node not in self.all_invoices_from_db:
+                self.all_invoices_from_db[invoice_request.lightning_node] = {}
 
-    # TODO: Handle duplicates (e.g. payments to different nodes), first come first serve
+            self.all_invoices_from_db[invoice_request.lightning_node][invoice_obj.add_index] = invoice_obj
 
-    # Get all invoices that are not checkpointed
-    all_invoices_from_db = {}  # Dict[LightningNode, Dict[int, Invoice]]  # where int is add_index
-    invoices_from_db = Invoice.objects.all()
-    invoice_count_from_db = len(invoices_from_db)
+        processing_wall_time = time.time() - start_time
+        logger.info(
+            (
+                "Pre-run took {:.3f} seconds\n\n\n\n\n"
+            ).format(
+                processing_wall_time
+            )
+        )
 
-    for invoice_obj in invoices_from_db:
-        invoice_request = InvoiceRequest.objects.get(id=invoice_obj.invoice_request.id)
-        if invoice_request.lightning_node not in all_invoices_from_db:
-            all_invoices_from_db[invoice_request.lightning_node] = {}
+        return processing_wall_time
 
-        all_invoices_from_db[invoice_request.lightning_node][invoice_obj.add_index] = invoice_obj
-
-    # Process each node
-    invoice_count_from_nodes = 0
-    node_list = LightningNode.objects.all()
-    for node in node_list:
+    def run_one_node(self, node):
+        start_time = time.time()
         logger.info("--------------------- {} id={} ----------------------------".format(node.node_name, node.id))
-        
+
         created = (node.global_checkpoint == -1)
         if created:
             logger.info("Global checkpoint does not exist")
@@ -122,15 +147,15 @@ def run():
             mock=settings.MOCK_LN_CLIENT
         )
 
-        if node not in all_invoices_from_db:
+        if node not in self.all_invoices_from_db:
             invoice_list_from_db = {}
             logger.info("DB has no invoices for this node")
         else:
-            invoice_list_from_db = all_invoices_from_db[node]
+            invoice_list_from_db = self.all_invoices_from_db[node]
 
         # example of invoices_details: {"invoices": [], 'first_index_offset': '5', 'last_index_offset': '72'}
         invoice_list_from_node = invoices_details['invoices']
-        invoice_count_from_nodes += len(invoice_list_from_node)
+        self.invoice_count_from_nodes += len(invoice_list_from_node)
 
         if settings.MOCK_LN_CLIENT:
             # Here the mock pulls invoices from DB Invoice model, while in prod invoices are pulled from the Lightning node
@@ -439,38 +464,66 @@ def run():
             node.save()
             logger.info("Saved new global checkpoint {}".format(new_global_checkpoint))
 
-        logger.info("\n\n")
+        processing_wall_time = time.time() - start_time
 
-
-    processing_wall_time = time.time() - start_time
-    logger.info(
-        (
-            "Processed {} invoices from nodes and {} from db in {:.3f} seconds\n\n\n\n\n"
-        ).format(
-            invoice_count_from_nodes,
-            invoice_count_from_db,
-            processing_wall_time
-        )
-    )
-
-    return processing_wall_time
+        logger.info("Processing node {} took {:.3f} seconds".format(node.node_name, processing_wall_time))
+        return processing_wall_time
 
 
 @background(queue='queue-1', remove_existing_tasks=True)
 def run_many():
+    runner = Runner()
+
     processing_times_array = []
+    pre_run_times_array = []
+
     start_time = time.time()
 
     for _ in range(100):
-        t = run()
-        processing_times_array.append(t)
-        time.sleep(0.5)
+
+        p = runner.pre_run()
+        node_list = LightningNode.objects.all()
+
+        nodes_processing_times_array = []
+        for node in node_list:
+            t = runner.run_one_node(node)
+
+            processing_times_array.append(t)
+            nodes_processing_times_array.append(t)
+
+            sleep(BETWEEN_NODES_DELAY)
+
+        logger.info(
+            (
+                "Processed {} invoices from nodes and {} from db\n\n\n\n\n"
+            ).format(
+                runner.invoice_count_from_nodes,
+                runner.invoice_count_from_db,
+            )
+        )
+
+        logger.info("Pre-run {:.3f} seconds".format(p))
+        logger.info("Max was {:.3f} seconds".format(max(nodes_processing_times_array)))
+        logger.info("Avg was {:.3f} seconds".format(sum(nodes_processing_times_array) / len(nodes_processing_times_array)))
+        logger.info("Min was {:.3f} seconds".format(min(nodes_processing_times_array)))
+
+        logger.info("\n\n")
+
+        pre_run_times_array.append(p)
+        sleep(TOP_LEVEL_DELAY)
 
     processing_wall_time = time.time() - start_time
     logger.info("Finished 200 runs in {:.3f} seconds".format(processing_wall_time))
-    logger.info("Min was {:.3f} seconds".format(min(processing_times_array)))
-    logger.info("Avg was {:.3f} seconds".format(sum(processing_times_array) / len(processing_times_array)))
-    logger.info("Max was {:.3f} seconds".format(max(processing_times_array)))
+
+    logger.info("\nTotal pre-run max was {:.3f} seconds".format(max(pre_run_times_array)))
+    logger.info("Total pre-run avg was {:.3f} seconds".format(sum(pre_run_times_array) / len(processing_times_array)))
+    logger.info("Total pre-run min was {:.3f} seconds".format(min(pre_run_times_array)))
+
+    logger.info("\nTotal max was {:.3f} seconds".format(max(processing_times_array)))
+    logger.info("Total avg was {:.3f} seconds".format(sum(processing_times_array) / len(processing_times_array)))
+    logger.info("Total min was {:.3f} seconds".format(min(processing_times_array)))
+
+    logger.info("\n\n")
 
 # schedule a new task after "repeat" number of seconds
 run_many(repeat=1)
