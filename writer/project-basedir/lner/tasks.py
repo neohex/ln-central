@@ -333,6 +333,7 @@ class Runner(object):
                             continue
 
                         sig = action_details.pop("sig")
+                        sig = validators.pre_validate_signature(sig)
 
                         verifymessage_detail = lnclient.verifymessage(
                             msg=json.dumps(action_details, sort_keys=True),
@@ -378,6 +379,7 @@ class Runner(object):
 
                 if "sig" in action_details:
                     sig = action_details.pop("sig")
+                    sig = validators.pre_validate_signature(sig)
 
                     verifymessage_detail = lnclient.verifymessage(
                         msg=json.dumps(action_details, sort_keys=True),
