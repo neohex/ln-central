@@ -37,7 +37,7 @@ logger.info("Python version: {}".format(sys.version.replace("\n", " ")))
 
 
 BETWEEN_NODES_DELAY = 1
-TOP_LEVEL_DELAY = 3
+TOP_LEVEL_DELAY = 4
 
 
 def human_time(ts):
@@ -479,7 +479,8 @@ def run_many():
 
     start_time = time.time()
 
-    for _ in range(100):
+    num_runs = 10
+    for _ in range(num_runs):
 
         p = runner.pre_run()
         node_list = LightningNode.objects.all()
@@ -513,7 +514,7 @@ def run_many():
         sleep(TOP_LEVEL_DELAY)
 
     processing_wall_time = time.time() - start_time
-    logger.info("Finished 200 runs in {:.3f} seconds".format(processing_wall_time))
+    logger.info("Finished {} runs in {:.3f} seconds".format(num_runs, processing_wall_time))
 
     logger.info("\n")
     logger.info("Cumulative pre-run total was {:.3f} seconds".format(sum(pre_run_times_array)))
