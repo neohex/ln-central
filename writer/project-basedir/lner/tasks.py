@@ -87,16 +87,17 @@ class CheckpointHelper(object):
 
 class Runner(object):
     def __init__(self):
-        pass
-
-    def pre_run(self):
         self.all_invoices_from_db = {}  # Dict[LightningNode, Dict[int, Invoice]]  # where int is add_index
-        self.invoice_count_from_nodes = 0
 
+        self.invoice_count_from_db = {}  # Dict[LightningNode, int]]
+        self.invoice_count_from_nodes = {}  # Dict[LightningNode, int]]
+
+    def pre_run(self, node):
         start_time = time.time()
+        self.all_invoices_from_db[node] = {}
 
         # Delete invoices that are passed retention
-        for invoice_obj in Invoice.objects.all():
+        for invoice_obj in Invoice.objects.filter(lightning_node=node, add_index__lte=node.global_checkpoint):
             if invoice_obj.created < timezone.now() - settings.INVOICE_RETENTION:
                 logger.info("Deleting invoice {} because it is older then retention {}".format(invoice_obj, settings.INVOICE_RETENTION))
                 invoice_request = InvoiceRequest.objects.get(id=invoice_obj.invoice_request.id)
@@ -105,25 +106,22 @@ class Runner(object):
                 else:
                     logger.info("There was no invoice request, deleting just the invoice")
                     invoice_obj.delete()
-                continue
+
+        # Get all invoices:
+        # - not checkpointed ones needed for re-checking
+        # - checkpointed ones needed for de-duplication
+        invoices_from_db = Invoice.objects.filter(lightning_node=node, add_index__gt=node.global_checkpoint)
+        self.invoice_count_from_db[node] = len(invoices_from_db)
 
         # TODO: Handle duplicates (e.g. payments to different nodes), first come first serve
-
-        # Get all invoices that are not checkpointed
-        invoices_from_db = Invoice.objects.all()
-        self.invoice_count_from_db = len(invoices_from_db)
-
         for invoice_obj in invoices_from_db:
             invoice_request = InvoiceRequest.objects.get(id=invoice_obj.invoice_request.id)
-            if invoice_request.lightning_node not in self.all_invoices_from_db:
-                self.all_invoices_from_db[invoice_request.lightning_node] = {}
-
-            self.all_invoices_from_db[invoice_request.lightning_node][invoice_obj.add_index] = invoice_obj
+            self.all_invoices_from_db[node][invoice_obj.add_index] = invoice_obj
 
         processing_wall_time = time.time() - start_time
         logger.info(
             (
-                "Pre-run took {:.3f} seconds\n\n\n\n\n"
+                "Pre-run took {:.3f} seconds\n"
             ).format(
                 processing_wall_time
             )
@@ -133,13 +131,6 @@ class Runner(object):
 
     def run_one_node(self, node):
         start_time = time.time()
-        logger.info("--------------------- {} id={} ----------------------------".format(node.node_name, node.id))
-
-        created = (node.global_checkpoint == -1)
-        if created:
-            logger.info("Global checkpoint does not exist")
-            node.global_checkpoint = 0
-            node.save()
 
         invoices_details = lnclient.listinvoices(
             index_offset=node.global_checkpoint,
@@ -155,7 +146,7 @@ class Runner(object):
 
         # example of invoices_details: {"invoices": [], 'first_index_offset': '5', 'last_index_offset': '72'}
         invoice_list_from_node = invoices_details['invoices']
-        self.invoice_count_from_nodes += len(invoice_list_from_node)
+        self.invoice_count_from_nodes[node] = len(invoice_list_from_node)
 
         if settings.MOCK_LN_CLIENT:
             # Here the mock pulls invoices from DB Invoice model, while in prod invoices are pulled from the Lightning node
@@ -166,7 +157,7 @@ class Runner(object):
             # 5. After X seconds passed based on Invoice created time, here Mock update the Invoice checkpoint to "done" faking a payment
 
             invoice_list_from_node = []
-            for invoice_obj in Invoice.objects.filter(checkpoint_value="no_checkpoint"):
+            for invoice_obj in Invoice.objects.filter(lightning_node=node, checkpoint_value="no_checkpoint"):
                 invoice_request = InvoiceRequest.objects.get(id=invoice_obj.invoice_request.id)
                 if invoice_request.lightning_node.id != node.id:
                     continue
@@ -182,6 +173,7 @@ class Runner(object):
                         "memo": invoice_request.memo,
                         "add_index": invoice_obj.add_index,
                         "payment_request": invoice_obj.pay_req,
+                        "pay_req": invoice_obj.pay_req,  # Old format
                         "r_hash": invoice_obj.r_hash,
                         "creation_date": str(creation_unixtime),
                         "expiry": str(creation_unixtime + 120)
@@ -472,63 +464,80 @@ class Runner(object):
 
 @background(queue='queue-1', remove_existing_tasks=True)
 def run_many():
-    runner = Runner()
-
-    processing_times_array = []
-    pre_run_times_array = []
-
     start_time = time.time()
+    runner = Runner()
+    total_prerun_processing_times_array = []
+    total_run_processing_times_array = []
 
     num_runs = 10
     for _ in range(num_runs):
-
-        p = runner.pre_run()
         node_list = LightningNode.objects.all()
 
-        nodes_processing_times_array = []
+        prerun_processing_times_array = []
+        run_processing_times_array = []
+
+        # initialize checkpoints
         for node in node_list:
+            logger.info("--------------------- {} id={} ----------------------------".format(node.node_name, node.id))
+
+            created = (node.global_checkpoint == -1)
+            if created:
+                logger.info("Global checkpoint does not exist")
+                node.global_checkpoint = 0
+                node.save()
+
+            # pre-run!
+            p = runner.pre_run(node)
+
+            # run
             t = runner.run_one_node(node)
 
-            processing_times_array.append(t)
-            nodes_processing_times_array.append(t)
+            prerun_processing_times_array.append(p)
+            total_prerun_processing_times_array.append(p)
+
+            run_processing_times_array.append(t)
+            total_run_processing_times_array.append(t)
+
+            logger.info(
+                (
+                    "Processed {} invoices from node and {} from db\n\n\n\n\n"
+                ).format(
+                    runner.invoice_count_from_nodes[node],
+                    runner.invoice_count_from_db[node],
+                )
+            )
 
             sleep(BETWEEN_NODES_DELAY)
 
-        logger.info(
-            (
-                "Processed {} invoices from nodes and {} from db\n\n\n\n\n"
-            ).format(
-                runner.invoice_count_from_nodes,
-                runner.invoice_count_from_db,
-            )
-        )
+        logger.info("Pre-run Max was {:.3f} seconds".format(max(prerun_processing_times_array)))
+        logger.info("Pre-run Avg was {:.3f} seconds".format(sum(prerun_processing_times_array) / len(prerun_processing_times_array)))
+        logger.info("Pre-run Min was {:.3f} seconds".format(min(prerun_processing_times_array)))
+        logger.info("\n")
+        logger.info("Run Max was {:.3f} seconds".format(max(run_processing_times_array)))
+        logger.info("Run Avg was {:.3f} seconds".format(sum(run_processing_times_array) / len(run_processing_times_array)))
+        logger.info("Run Min was {:.3f} seconds".format(min(run_processing_times_array)))
 
-        logger.info("Pre-run {:.3f} seconds".format(p))
-        logger.info("Max was {:.3f} seconds".format(max(nodes_processing_times_array)))
-        logger.info("Avg was {:.3f} seconds".format(sum(nodes_processing_times_array) / len(nodes_processing_times_array)))
-        logger.info("Min was {:.3f} seconds".format(min(nodes_processing_times_array)))
-
-        logger.info("\n\n")
-
-        pre_run_times_array.append(p)
+        logger.info("\n")
         sleep(TOP_LEVEL_DELAY)
 
+
+    logger.info("\n")
+    logger.info("Cumulative pre-run total was {:.3f} seconds".format(sum(prerun_processing_times_array)))
+    logger.info("Cumulative pre-run max was {:.3f} seconds".format(max(prerun_processing_times_array)))
+    logger.info("Cumulative pre-run avg was {:.3f} seconds".format(sum(prerun_processing_times_array) / len(prerun_processing_times_array)))
+    logger.info("Cumulative pre-run min was {:.3f} seconds".format(min(prerun_processing_times_array)))
+
+    logger.info("\n")
+    logger.info("Cumulative total was {:.3f} seconds".format(sum(run_processing_times_array)))
+    logger.info("Cumulative max was {:.3f} seconds".format(max(run_processing_times_array)))
+    logger.info("Cumulative avg was {:.3f} seconds".format(sum(run_processing_times_array) / len(run_processing_times_array)))
+    logger.info("Cumulative min was {:.3f} seconds".format(min(run_processing_times_array)))
+
+    logger.info("\n")
     processing_wall_time = time.time() - start_time
-    logger.info("Finished {} runs in {:.3f} seconds".format(num_runs, processing_wall_time))
+    logger.info("Finished {} runs in wall-time of {:.3f} seconds".format(num_runs, processing_wall_time))
 
-    logger.info("\n")
-    logger.info("Cumulative pre-run total was {:.3f} seconds".format(sum(pre_run_times_array)))
-    logger.info("Cumulative pre-run max was {:.3f} seconds".format(max(pre_run_times_array)))
-    logger.info("Cumulative pre-run avg was {:.3f} seconds".format(sum(pre_run_times_array) / len(processing_times_array)))
-    logger.info("Cumulative pre-run min was {:.3f} seconds".format(min(pre_run_times_array)))
-
-    logger.info("\n")
-    logger.info("Cululative total was {:.3f} seconds".format(sum(processing_times_array)))
-    logger.info("Cululative max was {:.3f} seconds".format(max(processing_times_array)))
-    logger.info("Cululative avg was {:.3f} seconds".format(sum(processing_times_array) / len(processing_times_array)))
-    logger.info("Cululative min was {:.3f} seconds".format(min(processing_times_array)))
-
-    logger.info("\n\n")
+    logger.info("\n\n\n\n\n")
 
 # schedule a new task after "repeat" number of seconds
 run_many(repeat=1)

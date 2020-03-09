@@ -32,9 +32,11 @@ class InvoiceRequestSerializer(HyperlinkedModelSerializer):
 
 
 class InvoiceSerializer(HyperlinkedModelSerializer):
+    node_id = IntegerField()
+
     class Meta:
         model = Invoice
-        fields = ['r_hash', 'pay_req', 'add_index']  # TODO: only pay_req is what reader needs. Return only "pay_req" on retirev. Yet on create we need to have all fields.
+        fields = ['node_id', 'r_hash', 'pay_req', 'add_index']  # TODO: only pay_req is what reader needs. Return only "pay_req" on retirev. Yet on create we need to have all fields.
 
 
 class CheckPaymentSerializer(HyperlinkedModelSerializer):

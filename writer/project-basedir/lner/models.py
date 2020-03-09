@@ -27,6 +27,13 @@ class LightningNode(CustomModel):
     )
     qos_score = models.IntegerField(verbose_name='Higher score means higher quality of service', default=-1)
 
+def get_first_node():
+    if len(LightningNode.objects.all()) == 0:
+        n = LightningNode(rpcserver="bl3:10009", node_name="bl3")
+        n.save()
+
+    return LightningNode.objects.get(id=1).id
+
 
 class InvoiceRequest(CustomModel):
     lightning_node = models.ForeignKey(LightningNode, on_delete=models.CASCADE)
@@ -35,8 +42,8 @@ class InvoiceRequest(CustomModel):
         max_length=settings.MAX_MEMO_SIZE
     )
 
-
 class Invoice(CustomModel):
+    lightning_node = models.ForeignKey(LightningNode, on_delete=models.CASCADE, default=get_first_node)
     invoice_request = models.ForeignKey(InvoiceRequest, null=True, default=None, on_delete=models.CASCADE)
     r_hash = models.CharField(verbose_name='LN Invoice r_hash', max_length=255, default="__DEFAULT__")
     pay_req = models.CharField(verbose_name='LN Invoice pay_req', max_length=settings.MAX_PAYREQ_SIZE)
