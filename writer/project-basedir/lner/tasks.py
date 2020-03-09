@@ -37,7 +37,6 @@ logger.info("Python version: {}".format(sys.version.replace("\n", " ")))
 
 
 BETWEEN_NODES_DELAY = 1
-TOP_LEVEL_DELAY = 4
 
 
 def human_time(ts):
@@ -520,7 +519,6 @@ def run_many():
         logger.info("Run Min was {:.3f} seconds".format(min(run_processing_times_array)))
 
         logger.info("\n")
-        sleep(TOP_LEVEL_DELAY)
 
 
     logger.info("\n")
