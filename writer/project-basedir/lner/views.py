@@ -79,7 +79,7 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
 
                 invoice_stdout["pay_req"] = "FAKE"
                 invoice_stdout["r_hash"] = "FAKE"
-                invoice_stdout["node_id"] = request_obj.lightning_node.id
+                invoice_stdout["node_id"] = node.id
 
                 if len(Invoice.objects.all()) == 0:
                     invoice_stdout["add_index"] = 1
@@ -92,7 +92,7 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
 
                 invoice_obj = Invoice(
                     invoice_request=request_obj,
-                    lightning_node=request_obj.lightning_node,
+                    lightning_node=node,
                     pay_req=serializer.validated_data.get("pay_req"),
                     r_hash=serializer.validated_data.get("r_hash"),
                     add_index=serializer.validated_data.get("add_index")
@@ -110,7 +110,7 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
                 )
                 logger.info("Finished addinvoice on the node")
 
-                invoice_stdout["node_id"] = request_obj.lightning_node.id
+                invoice_stdout["node_id"] = node.id
                 if "payment_request" in invoice_stdout:
                     # lncli returns "payment_request" instead of "pay_req", probably since
                     # commit 8f5d78c875b8eca436f7ee2e86e743afee262386 (Dec 20 2019)  build+lncli: default to hex encoding for byte slices
@@ -126,7 +126,7 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
 
                 invoice_obj = Invoice(
                     invoice_request=request_obj,
-                    lightning_node=request_obj.lightning_node,
+                    lightning_node=node,
                     pay_req=serializer.validated_data.get("pay_req"),
                     r_hash=serializer.validated_data.get("r_hash"),
                     add_index=serializer.validated_data.get("add_index")
@@ -141,7 +141,7 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
         else:
             logger.info("Good it already exists: {}".format(request_obj))
             try:
-                invoice_obj = Invoice.objects.get(invoice_request=request_obj)
+                invoice_obj = Invoice.objects.get(invoice_request=request_obj, lightning_node_id=node.id)
             except Invoice.DoesNotExist:
                 logger.info("Re-trying to create new invoice")
                 retry_num += 1
@@ -149,7 +149,7 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
                 return self.create(request, format=format, retry_addinvoice=True, retry_num=retry_num)
 
             logger.info("Fetched invoice from DB: {}".format(invoice_obj))
-            invoice_obj.node_id = request_obj.lightning_node.id
+            invoice_obj.node_id = node.id
             serializer = InvoiceSerializer(invoice_obj)
 
             if serializer.is_valid:
@@ -177,7 +177,7 @@ class CheckPaymentViewSet(viewsets.ModelViewSet):
         assert re.match(MEMO_RE, memo), "Got invalid memo {}".format(memo)
 
         invoice_request = get_object_or_404(InvoiceRequest, memo=memo, lightning_node_id=node_id)
-        invoice = get_object_or_404(Invoice, invoice_request=invoice_request)
+        invoice = get_object_or_404(Invoice, invoice_request=invoice_request, lightning_node_id=node_id)
 
         return [invoice]
 
