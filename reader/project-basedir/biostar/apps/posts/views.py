@@ -458,6 +458,8 @@ class PostPreviewView(FormView):
 
         signature = kwargs.get("signature")
         if signature:
+            signature = validators.pre_validate_signature(signature)
+
             result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=signature)
             if result["valid"]:
                 identity_pubkey = result["identity_pubkey"]
@@ -507,8 +509,13 @@ class PostPreviewView(FormView):
         errors_detected_skip_other_checks = False
         if signature:
             try:
+                signature = validators.pre_validate_signature(signature)
                 result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=signature)
             except ln.LNUtilError as msg:
+                result = {
+                    "valid": False,
+                }
+            except ValidationError as msg:
                 result = {
                     "valid": False,
                 }
@@ -595,6 +602,8 @@ class AcceptPreviewView(FormView):
 
         signature = kwargs.get("signature")
         if signature:
+            signature = validators.pre_validate_signature(signature)
+
             result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=signature)
             if result["valid"]:
                 identity_pubkey = result["identity_pubkey"]
@@ -629,6 +638,8 @@ class AcceptPreviewView(FormView):
 
         errors_detected_skip_other_checks = False
         if signature:
+            signature = validators.pre_validate_signature(signature)
+
             try:
                 result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=signature)
             except ln.LNUtilError as msg:
@@ -1040,8 +1051,13 @@ class VotePublishView(TemplateView):
         errors_detected_skip_other_checks = False
         if signature:
             try:
+                signature = validators.pre_validate_signature(signature)
                 result = ln.verifymessage(memo=json.dumps(memo, sort_keys=True), sig=signature)
             except ln.LNUtilError as msg:
+                result = {
+                    "valid": False,
+                }
+            except ValidationError as msg:
                 result = {
                     "valid": False,
                 }
