@@ -18,9 +18,22 @@ CACHE_TIMEOUT = settings.CACHE_TIMEOUT
 
 
 def get_recent_votes():
-    votes = Vote.objects.filter(post__status=Post.OPEN).select_related("post").order_by("-date")[
-            :settings.RECENT_VOTE_COUNT]
-    return votes
+    # TODO: this should be done in the background and periodic intervals, not for every request
+
+    votes = Vote.objects.filter(post__status=Post.OPEN).select_related("post").order_by("post__id")
+
+    # poor man's DISTINCT ON (because it's only supported in PostgreSQL)
+    distinct_votes = []
+    prev_vote = None
+    for v in votes:
+        if prev_vote and v.post.id != prev_vote.post.id:
+            distinct_votes.append(v)
+        prev_vote = v
+
+    distinct_votes.sort(key=lambda x: x.date, reverse=True)
+
+    return distinct_votes[:settings.RECENT_VOTE_COUNT]
+
 
 
 def get_recent_users():
