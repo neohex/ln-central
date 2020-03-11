@@ -308,9 +308,7 @@ class Runner(object):
 
                     user, created = User.objects.get_or_create(pubkey="Unknown")
 
-
-                    # Only maintain one vote for each user/post pair.
-                    votes = Vote.objects.filter(author=user, post=post, type=vote_type)
+                    logger.info("Creating a new vote: author={}, post={}, type={}".format(user, post, vote_type))
                     vote = Vote.objects.create(author=user, post=post, type=vote_type)
 
                     # Update user reputation
@@ -362,10 +360,6 @@ class Runner(object):
                             raise Exeption("Un-accepting is not supported")
                     else:
                         Post.objects.filter(pk=post.id).update(vote_count=F('vote_count') + change)
-
-                    # Clear old votes.
-                    if votes:
-                        votes.delete()
 
                     checkpoint_helper.set_checkpoint("done", action_type="upvote", action_id=post.id)
                 else:
