@@ -21,7 +21,12 @@ def init_awards():
             badge.desc = obj.desc
             badge.icon = obj.icon
             badge.type = obj.type
-            badge.save()
+
+        # Unlike Awards, all Badges are real
+        if badge.is_fake_test_data:
+            badge.is_fake_test_data = False
+
+        badge.save()
 
         if created:
             logger.info("initializing badge %s" % badge)
@@ -71,7 +76,7 @@ def create_user_award(user):
             badge = Badge.objects.get(name=obj.name)
 
             date = user.profile.last_login
-            award, created = Award.objects.get_or_create(user=user, badge=badge, date=date, context="")
+            award, created = Award.objects.get_or_create(user=user, badge=badge, date=date, context="", is_fake_test_data=False)
             if created:
                 badge.count += 1
                 badge.save()

@@ -88,7 +88,7 @@ class PostManager(models.Manager):
     def my_posts(self, target):
 
         # Show all posts for moderators or targets
-        query = self.filter(author=target).exclude(status=Post.DELETED)
+        query = self.filter(author=target).exclude(status=Post.DELETED).exclude(is_fake_test_data=True)
 
         query = query.select_related("root", "author", "lastedit_user")
         query = query.prefetch_related("tag_set")

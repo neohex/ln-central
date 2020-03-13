@@ -9,6 +9,7 @@ from optparse import make_option
 from common.log import logger
 
 from users.models import User
+
 from users.management.awards import create_user_award
 from users.management.awards import init_awards
 
@@ -24,9 +25,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--award', action='store_true', help='goes over the users and attempts to create awards')
 
-
     def handle(self, *args, **options):
-
         if options['award']:
             crawl_awards()
 
@@ -41,3 +40,4 @@ def crawl_awards():
     for pk  in ids:
         user = User.objects.get(pk=pk)
         create_user_award(user=user)
+
