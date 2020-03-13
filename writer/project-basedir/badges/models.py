@@ -62,6 +62,9 @@ class Award(models.Model):
     date = models.DateTimeField()
     context = models.CharField(max_length=1000, default='')
 
+    # Rows used for testing
+    is_fake_test_data = models.BooleanField(default=False)
+
 class AwardDef(object):
     def __init__(self, name, desc, func, icon, type=Badge.BRONZE):
         self.name = name

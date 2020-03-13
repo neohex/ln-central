@@ -111,11 +111,11 @@ def posts_by_topic(request, topic):
 
     if topic == UNANSWERED:
         # Get unanswered posts.
-        return Post.objects.top_level().filter(type=Post.QUESTION, reply_count=0)
+        return Post.objects.top_level().filter(type=Post.QUESTION, reply_count=0).exclude(is_fake_test_data=True)
 
     if topic in POST_TYPES:
         # A post type.
-        return Post.objects.top_level().filter(type=POST_TYPES[topic])
+        return Post.objects.top_level().filter(type=POST_TYPES[topic]).exclude(is_fake_test_data=True)
 
     if topic and topic != LATEST:
         return Post.objects.tag_search(topic)
@@ -189,8 +189,12 @@ class VoteList(LoginRequiredMixin, ListView):
     topic = "votes"
 
     def get_queryset(self):
-        objs = Vote.objects.select_related("author", "post").order_by('-date')
-        return objs
+        query = Vote.objects.select_related("author", "post").order_by('-date')
+
+        # Hide test data
+        query = query.exclude(is_fake_test_data=True)
+
+        return query
 
     def get_context_data(self, **kwargs):
         context = super(VoteList, self).get_context_data(**kwargs)
@@ -226,8 +230,12 @@ class UserList(ListView):
             self.limit = const.POST_LIMIT_DEFAULT
 
         # Apply the sort on users
-        obj = User.objects.get_users(sort=self.sort, limit=self.limit, q=self.q)
-        return obj
+        query = User.objects.get_users(sort=self.sort, limit=self.limit, q=self.q)
+
+        # Hide test data
+        query = query.exclude(is_fake_test_data=True)
+
+        return query
 
     def get_context_data(self, **kwargs):
         context = super(UserList, self).get_context_data(**kwargs)
@@ -429,6 +437,10 @@ class BadgeList(BaseListMixin):
 
     def get_queryset(self):
         qs = super(BadgeList, self).get_queryset()
+
+        # Hide test data
+        qs = qs.exclude(is_fake_test_data=True)
+
         qs = qs.order_by('-count')
         return qs
 

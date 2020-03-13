@@ -20,7 +20,12 @@ CACHE_TIMEOUT = settings.CACHE_TIMEOUT
 def get_recent_votes():
     # TODO: this should be done in the background and periodic intervals, not for every request
 
-    votes = Vote.objects.filter(post__status=Post.OPEN).select_related("post").order_by("post__id")
+    votes = Vote.objects.filter(post__status=Post.OPEN)
+
+    # Hide test data
+    votes = votes.exclude(is_fake_test_data=True)
+
+    votes = votes.select_related("post").order_by("post__id")
 
     # poor man's DISTINCT ON (because it's only supported in PostgreSQL)
     distinct_votes = []
@@ -43,12 +48,14 @@ def get_recent_users():
 
 def get_recent_awards():
     awards = Award.objects.all().select_related("user", "badge")
+    awards = awards.exclude(is_fake_test_data=True)  # Hide test data
     awards = awards.order_by("-date")[:6]
     return awards
 
 
 def get_recent_replies():
     posts = Post.objects.filter(type__in=(Post.ANSWER, Post.COMMENT), root__status=Post.OPEN).select_related(("author"))
+    posts = posts.exclude(is_fake_test_data=True)  # Hide test data
     posts = posts.order_by("-creation_date")
     posts = posts[:settings.RECENT_POST_COUNT]
     return posts

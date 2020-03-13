@@ -118,6 +118,9 @@ class PostManager(models.Manager):
 
         query = query.filter(status=Post.OPEN)
 
+        # Hide test data
+        query = query.exclude(is_fake_test_data=True)
+
         # Remove fields that are not used.
         query = query.defer('content', 'html')
 
@@ -137,6 +140,9 @@ class PostManager(models.Manager):
         "Returns posts"
 
         query = self.filter(type__in=Post.TOP_LEVEL).exclude(status=Post.DELETED)
+
+        # Hide test data
+        query = query.exclude(is_fake_test_data=True)
 
         return query.select_related("root", "author", "lastedit_user").prefetch_related("tag_set").defer("content", "html")
 
