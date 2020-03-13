@@ -24,7 +24,6 @@ os.environ['DJANGO_COLORS'] = 'nocolor'
 class Command(BaseCommand):
     help = 'Goes thru all posts and prompts if they should be marked as fake test data'
 
-
     def handle(self, *args, **options):
         mark_fake_test_data()
 
@@ -83,4 +82,7 @@ def mark_fake_test_data():
             a.save()
             print("Award author is not real, marked award {} as fake test data!".format(a.id))
 
-
+    # Update reply counts (in case some reply was marked as fake)
+    print("\n\nUpdating reply counts!")
+    for p in Post.objects.all().exclude(is_fake_test_data=True):
+        p.save()

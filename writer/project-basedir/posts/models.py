@@ -296,7 +296,12 @@ class Post(models.Model):
     def update_reply_count(self):
         "This can be used to set the answer count."
         if self.type == Post.ANSWER:
-            reply_count = Post.objects.filter(parent=self.parent, type=Post.ANSWER, status=Post.OPEN).count()
+            reply_count = Post.objects.filter(
+                parent=self.parent,
+                type=Post.ANSWER,
+                status=Post.OPEN
+            ).exclude(is_fake_test_data=True).count()
+
             Post.objects.filter(pk=self.parent_id).update(reply_count=reply_count)
 
     def delete(self, using=None):

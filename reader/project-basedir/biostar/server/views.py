@@ -337,7 +337,7 @@ class PostDetails(DetailView):
         thread = [post_permissions(request=self.request, post=post) for post in Post.objects.get_thread(obj)]
 
         # Do a little preprocessing.
-        answers = [p for p in thread if p.type == Post.ANSWER]
+        answers = [p for p in thread if p.type == Post.ANSWER and not p.is_fake_test_data]
 
         tree = OrderedDict()
         for post in thread:
