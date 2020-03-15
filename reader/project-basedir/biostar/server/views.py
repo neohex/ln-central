@@ -174,7 +174,7 @@ class TagList(BaseListMixin):
     paginate_by = 100
 
     def get_queryset(self):
-        objs = Tag.objects.all().order_by("-count")
+        objs = Tag.objects.all().exclude(is_fake_test_data=True).order_by("-count")
         return objs
 
 
