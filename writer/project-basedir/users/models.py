@@ -36,7 +36,7 @@ class LocalManager(models.Manager):
         days = const.POST_LIMIT_MAP.get(limit, 0)
 
         if q:
-            query = self.filter(name__icontains=q)
+            query = self.filter(pubkey__icontains=q)
         else:
             query = self
 
