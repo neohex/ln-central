@@ -71,7 +71,8 @@ urlpatterns = [
     # ==============================
 
     # Post details.
-    url(r'^p/(?P<pk>\d+)/$', views.PostDetails.as_view(), name="post-details"),
+    # NOTICE: just the domain name followed by a forward slash and a number
+    url(r'^(?P<pk>\d+)/$', views.PostDetails.as_view(), name="post-details"),
 
     # New post / answer / comment
     url(r'^x/new/post/$', views.NewPost.as_view(), name="new-post"),
