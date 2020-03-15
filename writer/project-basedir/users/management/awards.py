@@ -74,9 +74,24 @@ def create_user_award(user):
         for target in valid_targets:
             # Update the badge counts.
             badge = Badge.objects.get(name=obj.name)
-
             date = user.profile.last_login
-            award, created = Award.objects.get_or_create(user=user, badge=badge, date=date, context="", is_fake_test_data=False)
+            award, created = Award.objects.get_or_create(
+                user=user,
+                badge=badge,
+                date=date,
+                context=""
+            )
+
+            # Reresh fake_test_data satus for awards
+            if award.is_fake_test_data != user.is_fake_test_data:
+                award.is_fake_test_data = user.is_fake_test_data
+                award.save()
+
+                if user.is_fake_test_data:
+                    logger.info("User {} was fake so updated the award: {}".format(user.id, award.id))
+                else:
+                    logger.info("User {} was real so updated the award: {}".format(user.id, award.id))
+
             if created:
                 badge.count += 1
                 badge.save()
