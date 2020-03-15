@@ -8,6 +8,7 @@ from django.core.management.base import BaseCommand, CommandError
 from optparse import make_option
 from common.log import logger
 
+from posts.models import Tag
 from posts.models import Post
 from posts.models import Vote
 from users.models import User
@@ -49,13 +50,16 @@ def mark_fake_test_data():
 
     # Users
     print("\nUsers:")
-    for u in User.objects.exclude():
+    for u in User.objects.all():
+        # has real posts
         if Post.objects.filter(author=u, is_fake_test_data=False):
             if u.is_fake_test_data:
                 print("User (id={}\tpubkey={})".format(u.id, u.pubkey))
                 u.is_fake_test_data = False
                 u.save()
                 print("User has real posts, marked user {} as real!".format(u.id))
+
+        # does not have real posts
         else:
             if not u.is_fake_test_data:
                 print("User (id={}\tpubkey={})".format(u.id, u.pubkey))
@@ -81,6 +85,31 @@ def mark_fake_test_data():
             a.is_fake_test_data = True
             a.save()
             print("Award author is not real, marked award {} as fake test data!".format(a.id))
+
+        # TODO: If user is real yet the post is fake, then mark award as fake
+
+
+    # Tags
+    print("\nTags:")
+    for t in Tag.objects.exclude():
+
+        # Has real posts
+        if Post.objects.filter(tag_set=t, is_fake_test_data=False):
+            if t.is_fake_test_data:
+                print("Tag (id={}\tname={})".format(t.id, t.name))
+
+                t.is_fake_test_data = False
+                t.save()
+                print("Tag has real posts, marked {} as real!".format(t.id))
+
+        # Does not have real posts
+        else:
+            if not t.is_fake_test_data:
+                print("Tag (id={}\tname={})".format(t.id, t.name))
+
+                t.is_fake_test_data = True
+                t.save()
+                print("Tag does not have real posts, marked {} as fake test data!".format(t.id))
 
     # Update reply counts (in case some reply was marked as fake)
     print("\n\nUpdating reply counts!")
