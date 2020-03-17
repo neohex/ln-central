@@ -43,7 +43,7 @@ def serialize_memo(simple_obj):
 
     if len(serialized) > settings.MAX_MEMO_SIZE:
         raise MemoTooLarge(
-            "memo too large: {} bytes (maxsize={}})".format(
+            "memo too large: {} bytes (maxsize={})".format(
                 len(serialized),
                 settings.MAX_MEMO_SIZE
             )
