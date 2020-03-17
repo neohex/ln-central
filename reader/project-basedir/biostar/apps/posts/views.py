@@ -73,14 +73,17 @@ def valid_tag(text):
     if len(words) > 5:
         raise ValidationError('You have too many tags (5 allowed)')
 
-class PagedownWidget(forms.Textarea):
+class ContentWidget(forms.Textarea):
     TEMPLATE = "pagedown_widget.html"
 
     def render(self, name, value, attrs=None):
-        value = value or ''
-        rows = attrs.get('rows', 15)
-        klass = attrs.get('class', '')
-        params = dict(value=value, rows=rows, klass=klass)
+        attrs = attrs if attrs else {}
+        params = dict(
+            value=(value or ''),
+            rows=attrs.get('class', ''),
+            klass=attrs.get('class', ''),
+            maxlength=settings.MAX_CONTENT
+        )
         return render_to_string(self.TEMPLATE, params)
 
 
@@ -95,9 +98,10 @@ class LongForm(forms.Form):
     title = forms.CharField(
         label="Post Title",
         required=True,
-        max_length=200, min_length=10,
+        max_length=settings.MAX_TITLE,
+        min_length=10,
         validators=[valid_title, english_only, validators.validate_signable_field],
-        help_text="Descriptive titles promote better answers.")
+        help_text="Descriptive titles promote better answers (maximum of {} characters)".format(settings.MAX_TITLE))
 
     post_type = forms.ChoiceField(
         label="Post Type",
@@ -106,16 +110,21 @@ class LongForm(forms.Form):
 
     tag_val = forms.CharField(
         label="Post Tags",
-        required=True, validators=[valid_tag],
+        required=True,
+        validators=[valid_tag],
         help_text="Choose one or more tags to match the topic. To create a new tag just type it in and press ENTER.",
     )
 
     # note: max_length is larger than MAX_MEMO_SIZE because max_length applies before compression
     # max_length is here to guide the user during editing, while MAX_MEMO_SIZE is the final
     # insurance that the memo will fit into the lightning payment
-    content = forms.CharField(widget=PagedownWidget, validators=[valid_language],
-                              min_length=80, max_length=1100,
-                              label="Enter your post below")
+    content = forms.CharField(
+        widget=ContentWidget,
+        validators=[valid_language],
+        min_length=80,
+        max_length=settings.MAX_CONTENT,
+        label="Enter your post below"
+    )
 
     def __init__(self, *args, **kwargs):
         super(LongForm, self).__init__(*args, **kwargs)
@@ -124,7 +133,7 @@ class LongForm(forms.Form):
         self.helper.layout = Layout(
             Fieldset(
                 'Post Form',
-                Field('title'),
+                Field('title', maxlength=settings.MAX_TITLE),
                 Field('post_type'),
                 Field('tag_val'),
                 Field('content'),
@@ -191,7 +200,11 @@ class LongForm(forms.Form):
 class ShortForm(forms.Form):
     FIELDS = ["content", "parent_post_id"]
 
-    content = forms.CharField(widget=PagedownWidget, min_length=20, max_length=5000,)
+    content = forms.CharField(
+        widget=ContentWidget,
+        min_length=20,
+        max_length=settings.MAX_CONTENT
+    )
 
     def __init__(self, *args, **kwargs):
         super(ShortForm, self).__init__(*args, **kwargs)
@@ -199,7 +212,7 @@ class ShortForm(forms.Form):
         self.helper.layout = Layout(
             Fieldset(
                 'Post',
-                'content',
+                'content'
             ),
             ButtonHolder(
                 Submit('submit', 'Preview')

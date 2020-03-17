@@ -7,6 +7,9 @@ from datetime import timedelta
 PAYMENT_AMOUNT = 2  # in satoshi
 
 MAX_MEMO_SIZE = 600  # includes the length of the friendly prefix
+MAX_TITLE = 100
+MAX_CONTENT = MAX_MEMO_SIZE - MAX_TITLE  # minus title, tags, etc...
+
 MAX_PAYREQ_SIZE = 2000  # pay_req includes memo and routing info
 FRIENDLY_PREFIX = "ln.support"  # cannot have under-bars (_s)
 

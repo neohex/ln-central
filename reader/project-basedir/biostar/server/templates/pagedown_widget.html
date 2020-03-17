@@ -1,8 +1,10 @@
 <div class="">
     <div class="wmd-panel">
         <div id="wmd-button-bar"></div>
-         <textarea class="wmd-input" id="wmd-input" name="content" rows="{{ rows }}"
-                   placeholder="Type your post here">{{ value }}</textarea>
+        <textarea class="wmd-input" id="wmd-input" name="content"
+                   rows="{{ rows }}"
+                   maxlength="{{ maxlength }}"
+                   placeholder="Type your post here (maximum of {{ maxlength }} characters)">{{ value }}</textarea>
     </div>
 </div>
 
