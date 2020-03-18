@@ -32,6 +32,11 @@ from biostar.apps.posts.models import PostPreview, Post
 
 from common.log import logger
 
+
+class PostViewException(Exception):
+    pass
+
+
 def english_only(text):
     try:
         text.decode('ascii')
@@ -330,7 +335,7 @@ class NewPost(FormView):
             context = self.get_context_data(**kwargs)
         except Exception as e:
             logger.exception(e)
-            return HttpResponse(status=500, content="<h1>Internal Server Error 11</h1>")
+            raise
 
         context['form'] = self.form_class(initial=initial)
         context['errors_detected'] = False
@@ -353,9 +358,10 @@ class NewPost(FormView):
                 # Find the parent.
                 try:
                     parent = Post.objects.get(pk=parent_post_id)
-                except ObjectDoesNotExist, exc:
-                    logger.error("The post does not exist. Perhaps it was deleted request (Request: %s)", request)
-                    return HttpResponse(status=500, content="<h1>The post does not exist</h1>")
+                except ObjectDoesNotExist, e:
+                    msg = "The post does not exist. Perhaps it was deleted request (Request: %s)".format(request)
+                    logger.error(msg)
+                    raise PostViewException(msg)
 
                 post_preview.parent_post_id = parent_post_id
                 post_preview.title = parent.title
@@ -377,7 +383,7 @@ class NewPost(FormView):
                 context = self.get_context_data(**kwargs)
             except Exception as e:
                 logger.exception(e)
-                return HttpResponse(status=500, content="<h1>Internal Server Error 12</h1>")
+                raise
 
             context['form'] = form
             context['errors_detected'] = True
@@ -434,7 +440,8 @@ class PostPreviewView(FormView):
                 parent = Post.objects.get(pk=parent_post_id)
             except ObjectDoesNotExist, exc:
                 logger.error("The post does not exist. Perhaps it was deleted request (Request: %s)", request)
-                return HttpResponse(status=500, content="<h1>The post does not exist</h1>")
+                logger.exception(e)
+                raise
 
             post_preview.parent_post_id = parent_post_id
             post_preview.title = parent.title
@@ -509,7 +516,7 @@ class PostPreviewView(FormView):
             view_obj = super(PostPreviewView, self).get_context_data().get("view")
         except Exception as e:
             logger.exception(e)
-            return HttpResponse(status=500, content="<h1>Internal Server Error 13</h1>")
+            raise
 
         memo_serialized = view_obj.kwargs["memo"]
 
@@ -562,7 +569,7 @@ class PostPreviewView(FormView):
                 context = self.get_context_data(**kwargs)
             except Exception as e:
                 logger.exception(e)
-                return HttpResponse(status=500, content="<h1>Internal Server Error 14</h1>")
+                raise
 
             context["form"] = form
             context["errors_detected"] = not form.is_valid()
@@ -595,11 +602,12 @@ class AcceptPreviewView(FormView):
                 post = Post.objects.get(pk=post_id)
             except ObjectDoesNotExist, exc:
                 logger.error("The post does not exist. Perhaps it was deleted request (Request: %s)", request)
-                return HttpResponse(status=500, content="<h1>The post does not exist</h1>")
+                raise
 
         else:
-            logger.error("The post is was not provided in the memo (Request: %s)", request)
-            return HttpResponse(status=500, content="<h1>The post does not exist</h1>")
+            msg = "The post is was not provided in the memo (Request: %s)".format(request)
+            logger.error(msg)
+            raise
 
         return post
 
@@ -687,7 +695,7 @@ class AcceptPreviewView(FormView):
                 context = self.get_context_data(**kwargs)
             except Exception as e:
                 logger.exception(e)
-                return HttpResponse(status=500, content="<h1><Internal Server Error 15/h1>")
+                raise
 
             context["form"] = form
 
@@ -770,7 +778,7 @@ class NewAnswer(FormView):
             parent = Post.objects.get(pk=parent_post_id)
         except ObjectDoesNotExist, exc:
             logger.error("The post does not exist. Perhaps it was deleted request (Request: %s)", request)
-            return HttpResponse(status=500, content="<h1>The post does not exist</h1>")
+            raise
 
         # Validating the form.
         form = self.form_class(request.POST)
@@ -779,7 +787,7 @@ class NewAnswer(FormView):
                 context = self.get_context_data(**kwargs)
             except Exception as e:
                 logger.exception(e)
-                return HttpResponse(status=500, content="<h1>Internal Server Error 16</h1>")
+                raise
 
             context["form"] = form
             context["errors_detected"] = True
@@ -805,7 +813,6 @@ class NewAnswer(FormView):
         return HttpResponseRedirect(post_preview.get_absolute_url(memo=post_preview.memo))
 
 
-
 class EditPost(FormView):
     """
     Edits an existing post.
@@ -824,8 +831,9 @@ class EditPost(FormView):
 
         # Check and exit if not a valid edit.
         if not post.is_editable:
-            logger.error("This user may not modify the post (Request: %s)", request)
-            return HttpResponse(status=500, content="<h1>This user may not modify the post</h1>")
+            msg = "This user may not modify the post (Request: %s)".format(request)
+            logger.error(msg)
+            raise EditPostException(msg)
 
         initial = dict(title=post.title, content=post.content, post_type=post.type, tag_val=post.tag_val)
 
@@ -965,7 +973,8 @@ class PostPublishView(TemplateView):
         try:
             context = self.get_context_data(**kwargs)
         except Exception as e:
-            return HttpResponse(status=500, content="<h1>Internal Server Error 17</h1>")
+            logger.exception(e)
+            raise
 
         memo = context["memo"]
 
@@ -1051,7 +1060,7 @@ class VotePublishView(TemplateView):
 
         except Exception as e:
             logger.exception(e)
-            return HttpResponse(status=500, content="<h1>Internal Server Error 18</h1>")
+            raise
 
         memo_serialized = view_obj.kwargs["memo"]
 
@@ -1123,7 +1132,7 @@ class VotePublishView(TemplateView):
                 context = self.get_context_data(**kwargs)
             except Exception as e:
                 logger.exception(e)
-                return HttpResponse(status=500, content="<h1>Internal Server Error 19</h1>")
+                raise
 
             context["form"] = form
             context["errors_detected"] = form.is_valid()
@@ -1136,12 +1145,12 @@ class VotePublishView(TemplateView):
             context = self.get_context_data(**kwargs)
         except Exception as e:
             logger.exception(e)
-            return HttpResponse(status=500, content="<h1>Internal Server Error 20</h1>")
+            raise
 
         memo = context.get("memo")
         if not memo:
             logger.error("memo was not provided")
-            return HttpResponse(status=500, content="<h1>Internal Server Error 21</h1>")
+            raise
 
         if "node_id" in context:
             # Check payment and redirect if payment is confirmed
