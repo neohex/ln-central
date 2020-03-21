@@ -194,5 +194,9 @@ def mark_fake_test_data(fix_only, show_fake):
 
     # Update reply counts (in case some reply was marked as fake)
     print("\nUpdating reply counts!")
-    for p in Post.objects.all().exclude(is_fake_test_data=True):
+    for p in Post.objects.all():
+        # When saving update_reply_count gets called.
+        # Child posts update parents,
+        # since one parent can have multiple children, the computation
+        # is duplicated for every child, so this can potentially be an efficiency improvement.
         p.save()

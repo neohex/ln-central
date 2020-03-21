@@ -33,7 +33,7 @@
         </div>
         <div class="box {% boxclass post.root %}">
             <div class="c">{{ post.root.reply_count }}</div>
-            <div class="t">answer{{ post.reply_count|pluralize }}</div>
+            <div class="t">answer{{ post.root.reply_count|pluralize }}</div>
         </div>
     </div>
 

@@ -295,7 +295,7 @@ class Post(models.Model):
             reply_count = Post.objects.filter(
                 parent=self.parent,
                 type=Post.ANSWER,
-                status=Post.OPEN
+                status=Post.OPEN,
             ).exclude(is_fake_test_data=True).count()
 
             Post.objects.filter(pk=self.parent_id).update(reply_count=reply_count)
