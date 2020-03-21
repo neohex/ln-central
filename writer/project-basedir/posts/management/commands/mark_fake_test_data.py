@@ -83,12 +83,9 @@ class LatestUpdateTracker(object):
 def mark_fake_test_data(fix_only, show_fake):
     lut = LatestUpdateTracker()
 
-    print("Posts:")
-    posts = Post.objects.all().filter(is_fake_test_data=show_fake).order_by('-creation_date')
-
     # Ask if posts need to be maked as fake
     if not fix_only:
-        for p in posts:
+        for p in Post.objects.all().filter(is_fake_test_data=show_fake).order_by('-creation_date'):
             print(
                 "id={}\tcreation_date={}\t{}\t{}\ttitle={}".format(
                     p.id,
@@ -109,6 +106,9 @@ def mark_fake_test_data(fix_only, show_fake):
                     p.is_fake_test_data = True
                     p.save()
                     print("Marked post as fake test data!")
+
+    # Re-query posts, now that is_fake_test_data fields got modified
+    posts = Post.objects.all().filter(is_fake_test_data=show_fake).order_by('-creation_date')
 
     # Calculate latest updated for all top-level posts
     for p in posts:
