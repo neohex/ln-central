@@ -176,10 +176,6 @@ class Post(models.Model):
     title = models.CharField(max_length=200, null=False, unique=False, validators=[validators.validate_signable_field])
 
     # The user that originally created the post.
-
-    # TODO: remove
-    # author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    # lastedit_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='editor', on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 
     # The user that edited the post most recently.

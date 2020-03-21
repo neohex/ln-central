@@ -59,7 +59,7 @@
             <span class="userlink text-right muted">
             written {{ post.creation_date|time_ago }} by {% userlink post.author %}
                 {% if post.author != post.lastedit_user %}
-                    &bull; updated
+                    &bull; answered
                     <span class="ago2">{{ post.lastedit_date|time_ago }}</span> by
                     {% userlink post.lastedit_user %}
                 {% endif %}

@@ -884,16 +884,6 @@ class EditPost(FormView):
         if post.is_toplevel:
             post.add_tags(post.tag_val)
 
-        # Update the last editing user.
-
-        # TODO
-        # post.lastedit_user = request.user
-
-        # # Only editing by author bumps the post.
-        # if request.user == post.author:
-        #     post.lastedit_date = datetime.utcnow().replace(tzinfo=utc)
-        # post.save()
-
         logger.info("Post updated (Request: %s)", request)
 
         return HttpResponseRedirect(post.get_absolute_url())
