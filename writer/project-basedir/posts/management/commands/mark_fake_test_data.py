@@ -6,6 +6,8 @@ from django.db import connection, transaction
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.humanize.templatetags import humanize
 
+from django.db.models import F
+
 from optparse import make_option
 from common.log import logger
 
@@ -24,7 +26,7 @@ import os
 os.environ['DJANGO_COLORS'] = 'nocolor'
 
 class Command(BaseCommand):
-    help = 'Goes thru all posts and prompts if they should be marked as fake test data'
+    help = 'Go through all real posts and ask if they should be marked as fake test data'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -34,15 +36,15 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "--show-fake",
+            "--mark-as-real",
             action="store_true",
-            help="Ask to unfake fake posts",
+            help="Go through all fake posts and ask if they should be marked as real"
         )
 
     def handle(self, *args, **options):
         mark_fake_test_data(
             fix_only=options.get("fix_only"),
-            show_fake=options.get("show_fake")
+            mark_as_real=options.get("mark_as_real")
         )
 
 
@@ -80,12 +82,12 @@ class LatestUpdateTracker(object):
         return self.lastedit_post[parent_id]
 
 
-def mark_fake_test_data(fix_only, show_fake):
+def mark_fake_test_data(fix_only, mark_as_real):
     lut = LatestUpdateTracker()
 
-    # Ask if posts need to be maked as fake
+    # Ask if posts need to be marked as fake / real
     if not fix_only:
-        for p in Post.objects.all().filter(is_fake_test_data=show_fake).order_by('-creation_date'):
+        for p in Post.objects.all().filter(is_fake_test_data=mark_as_real).order_by('-creation_date'):
             print(
                 "id={}\tcreation_date={}\t{}\t{}\ttitle={}".format(
                     p.id,
@@ -96,7 +98,7 @@ def mark_fake_test_data(fix_only, show_fake):
                 )
             )
 
-            if show_fake:
+            if mark_as_real:
                 if yesno("Mark as real?"):
                     p.is_fake_test_data = False
                     p.save()
@@ -108,7 +110,7 @@ def mark_fake_test_data(fix_only, show_fake):
                     print("Marked post as fake test data!")
 
     # Re-query posts, now that is_fake_test_data fields got modified
-    posts = Post.objects.all().filter(is_fake_test_data=show_fake).order_by('-creation_date')
+    posts = Post.objects.all().filter(is_fake_test_data=mark_as_real).order_by('-creation_date')
 
     # Calculate latest updated for all top-level posts
     for p in posts:
@@ -130,6 +132,7 @@ def mark_fake_test_data(fix_only, show_fake):
                 print("- updated lastedit to author={} date={}".format(l.author.id, l.creation_date))
 
     # Users
+    # TODO: implement inverse when mark_as_real=True
     print("\nUsers:")
     for u in User.objects.all():
         # has real posts
@@ -150,6 +153,7 @@ def mark_fake_test_data(fix_only, show_fake):
 
 
     # Votes
+    # TODO: implement inverse when mark_as_real=True
     print("\nVotes:")
     for v in Vote.objects.exclude(is_fake_test_data=True):
         if v.post.is_fake_test_data:
@@ -158,7 +162,31 @@ def mark_fake_test_data(fix_only, show_fake):
             v.save()
             print("Vote is for a fake test data post, marked vote {} as fake test data!".format(v.id))
 
+    # Update scores
+    # TODO: implement inverse when mark_as_real=True
+    # TODO: reactor to share logic with process_tasks
+    # Now that the votes changed, we need to update User and Thread scores
+
+    logger.warning("Setting all user's reputations to 0")
+    User.objects.all().update(score=0)
+
+    logger.warning("Setting all post's thread_score to 0")
+    Post.objects.all().update(thread_score=0)
+
+    change = settings.PAYMENT_AMOUNT
+    for v in Vote.objects.exclude(is_fake_test_data=True):
+        if v.type in [Vote.UP, Vote.ACCEPT]:
+            logger.info("Counting vote {}: author={}, post={}, type={}".format(v.id, v.author.id, v.post.id, v.human_vote_type()))
+
+            # Update user reputation
+            User.objects.filter(pk=v.post.author.id).update(score=F('score') + change)
+
+            # The thread score represents all votes in a thread
+            Post.objects.filter(pk=v.post.root_id).update(thread_score=F('thread_score') + change)
+
+
     # Awards
+    # TODO: implement inverse when mark_as_real=True
     print("\nAwards:")
     for a in Award.objects.exclude(is_fake_test_data=True):
         if a.user.is_fake_test_data:
@@ -171,6 +199,7 @@ def mark_fake_test_data(fix_only, show_fake):
 
 
     # Tags
+    # TODO: implement inverse when mark_as_real=True
     print("\nTags:")
     for t in Tag.objects.exclude():
 
@@ -193,6 +222,7 @@ def mark_fake_test_data(fix_only, show_fake):
                 print("Tag does not have real posts, marked {} as fake test data!".format(t.id))
 
     # Update reply counts (in case some reply was marked as fake)
+    # TODO: implement inverse when mark_as_real=True
     print("\nUpdating reply counts!")
     for p in Post.objects.all():
         # When saving update_reply_count gets called.

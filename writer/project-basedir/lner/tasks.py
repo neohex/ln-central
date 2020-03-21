@@ -11,7 +11,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
-from django.db.models import Q, F
+from django.db.models import F
 
 from rest_framework import serializers
 from background_task import background
@@ -312,19 +312,13 @@ class Runner(object):
                     vote = Vote.objects.create(author=user, post=post, type=vote_type)
 
                     # Update user reputation
+                    # TODO: reactor score logic to be shared with "mark_fake_test_data.py"
                     User.objects.filter(pk=post.author.id).update(score=F('score') + change)
 
                     # The thread score represents all votes in a thread
                     Post.objects.filter(pk=post.root_id).update(thread_score=F('thread_score') + change)
 
-                    if vote.type == Vote.BOOKMARK:
-                        # Apply the vote
-                        Post.objects.filter(pk=post.id).update(book_count=F('book_count') + change, vote_count=F('vote_count') + change)
-                        Post.objects.filter(pk=post.id).update(subs_count=F('subs_count') + change)
-                        Post.objects.filter(pk=post.root_id).update(subs_count=F('subs_count') + change)
-
-                    elif vote_type == Vote.ACCEPT:
-
+                    if vote_type == Vote.ACCEPT:
                         if "sig" not in action_details:
                             checkpoint_helper.set_checkpoint("sig_missing")
                             continue

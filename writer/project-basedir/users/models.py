@@ -143,11 +143,6 @@ class User(models.Model):
 
         super(User, self).save(*args, **kwargs)
 
-    @property
-    def scaled_score(self):
-        "People like to see big scores."
-        return self.score
-
     def __unicode__(self):
         return "%s (id=%s, last_login: %s)" % (self.pubkey, self.id, self.last_login)
 

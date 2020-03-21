@@ -554,14 +554,19 @@ class Vote(models.Model):
     }
     TYPE_CHOICES = [(UP, "Upvote"), (DOWN, "DownVote"), (BOOKMARK, "Bookmark"), (ACCEPT, "Accept")]
 
-
-    # TODO: Remove
-    # author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, related_name='votes', on_delete=models.CASCADE)
     type = models.IntegerField(choices=TYPE_CHOICES, db_index=True)
     date = models.DateTimeField(db_index=True, auto_now=True)
     is_fake_test_data = models.BooleanField(default=False)
+
+    def human_vote_type(self):
+        human_vote_type = None
+        for vote_name, vote_id in Vote.VOTE_TYPE_MAP.items():
+            if self.type == vote_id:
+                human_vote_type = vote_name
+
+        return human_vote_type
 
     def __unicode__(self):
         return u"Vote: %s, %s, %s" % (self.post_id, self.author_id, self.get_type_display())
