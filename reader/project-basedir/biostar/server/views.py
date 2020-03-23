@@ -380,6 +380,7 @@ class PostDetails(DetailView):
         context = super(PostDetails, self).get_context_data(**kwargs)
         context['request'] = self.request
         context['form'] = ShortForm()
+        context['maxlength'] = settings.MAX_CONTENT
         return context
 
 
