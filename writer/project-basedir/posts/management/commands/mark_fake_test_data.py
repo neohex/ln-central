@@ -186,23 +186,24 @@ def mark_fake_test_data(fix_only, mark_as_real):
 
 
     # Awards
-    # TODO: implement inverse when mark_as_real=True
     print("\nAwards:")
-    for a in Award.objects.exclude(is_fake_test_data=True):
+    for a in Award.objects.all():
         if a.user.is_fake_test_data:
-            print("Award (id={})".format(a.id))
-            a.is_fake_test_data = True
-            a.save()
-            print("Award author is not real, marked award {} as fake test data!".format(a.id))
-
-        # TODO: If user is real yet the post is fake, then mark award as fake
+            if not a.is_fake_test_data:
+                a.is_fake_test_data = True
+                a.save()
+                print("Award author is not real, marked award {} as fake test data!".format(a.id))
+        else:
+            # If user is real yet the post is fake, then mark award as fake
+            if a.is_fake_test_data:
+                a.is_fake_test_data = False
+                a.save()
+                print("Award author is real, marked award {} as real!".format(a.id))
 
 
     # Tags
-    # TODO: implement inverse when mark_as_real=True
     print("\nTags:")
-    for t in Tag.objects.exclude():
-
+    for t in Tag.objects.all():
         # Has real posts
         if Post.objects.filter(tag_set=t, is_fake_test_data=False):
             if t.is_fake_test_data:
@@ -221,8 +222,9 @@ def mark_fake_test_data(fix_only, mark_as_real):
                 t.save()
                 print("Tag does not have real posts, marked {} as fake test data!".format(t.id))
 
-    # Update reply counts (in case some reply was marked as fake)
-    # TODO: implement inverse when mark_as_real=True
+
+    # Reply counts
+    # Update reply counts in case some reply was marked as fake
     print("\nUpdating reply counts!")
     for p in Post.objects.all():
         # When saving update_reply_count gets called.

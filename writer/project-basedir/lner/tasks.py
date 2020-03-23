@@ -183,8 +183,11 @@ class Runner(object):
 
         one_hour_ago = timezone.now() - timedelta(hours=1)
         recent_invoices = [i.id for i in invoice_list_from_db.values() if i.modified > one_hour_ago]
-        if len(recent_invoices) > 0:
+        if len(recent_invoices) == 0:
+            logger.info("invoice_list_from_db is empty")
+        else:
             logger.info("Recent invoice_list_from_db was: {}".format(recent_invoices))
+
 
         for raw_invoice in invoice_list_from_node:
             # Example of raw_invoice:
