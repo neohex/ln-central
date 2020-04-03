@@ -26,6 +26,10 @@ class LightningNode(CustomModel):
         default=-1
     )
     qos_score = models.IntegerField(verbose_name='Higher score means higher quality of service', default=-1)
+    enabled = models.BooleanField(
+        verbose_name="Should this node show up in the Web UI and used in process_tasks?",
+        default=True
+    )
 
 def get_first_node():
     if len(LightningNode.objects.all()) == 0:

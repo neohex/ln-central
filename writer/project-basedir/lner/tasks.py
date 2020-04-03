@@ -472,6 +472,9 @@ def run_many():
         for node in node_list:
             logger.info("--------------------- {} id={} ----------------------------".format(node.node_name, node.id))
 
+            if not node.enabled:
+                logger.info("Node {} disabled, skipping...".format(node.node_name))
+
             created = (node.global_checkpoint == -1)
             if created:
                 logger.info("Global checkpoint does not exist")

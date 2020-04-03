@@ -89,7 +89,11 @@ def get_nodes_list():
     else:
         # reader only needs to know the id and name
         return_list = [
-            {"id": n["id"], "node_name": n["node_name"], "qos_score": n["qos_score"]} for n in response.json()
+            {
+                "id": n["id"],
+                "node_name": n["node_name"],
+                "qos_score": n["qos_score"]
+            } for n in response.json() if n["enabled"] == True
         ]
 
         return sorted(return_list, key=by_name)
