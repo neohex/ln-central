@@ -474,6 +474,7 @@ def run_many():
 
             if not node.enabled:
                 logger.info("Node {} disabled, skipping...".format(node.node_name))
+                continue
 
             created = (node.global_checkpoint == -1)
             if created:
