@@ -41,10 +41,18 @@ class Command(BaseCommand):
             help="Go through all fake posts and ask if they should be marked as real"
         )
 
+        parser.add_argument(
+            "--limit",
+            type=int,
+            default=1,
+            help="How many posts to mark as fake"
+        )
+
     def handle(self, *args, **options):
         mark_fake_test_data(
             fix_only=options.get("fix_only"),
-            mark_as_real=options.get("mark_as_real")
+            mark_as_real=options.get("mark_as_real"),
+            limit=options.get("limit")
         )
 
 
@@ -82,7 +90,7 @@ class LatestUpdateTracker(object):
         return self.lastedit_post[parent_id]
 
 
-def mark_fake_test_data(fix_only, mark_as_real):
+def mark_fake_test_data(fix_only, mark_as_real, limit):
     lut = LatestUpdateTracker()
 
     # Ask if posts need to be marked as fake / real
@@ -100,14 +108,20 @@ def mark_fake_test_data(fix_only, mark_as_real):
 
             if mark_as_real:
                 if yesno("Mark as real?"):
+                    limit -= 1
                     p.is_fake_test_data = False
                     p.save()
                     print("Marked post as real!")
             else:
                 if yesno("Mark as fake?"):
+                    limit -= 1
                     p.is_fake_test_data = True
                     p.save()
                     print("Marked post as fake test data!")
+
+            if limit < 1:
+                print("Limit of 1 reached")
+                break
 
     # Re-query posts, now that is_fake_test_data fields got modified
     posts = Post.objects.all().filter(is_fake_test_data=mark_as_real).order_by('-creation_date')
