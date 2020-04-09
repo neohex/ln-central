@@ -30,6 +30,13 @@ class LightningNode(CustomModel):
         verbose_name="Should this node show up in the Web UI and used in process_tasks?",
         default=True
     )
+    is_tor = models.BooleanField(
+        verbose_name="Should this node receive open channels through Tor?",
+        default=True
+    )
+    connect_ip = models.CharField(verbose_name='Public IP:port of the target node', max_length=255, default="1.2.3.4:9735")
+    connect_tor = models.CharField(verbose_name='Public onion:port of the target node', max_length=255, default="abczyx123.onion:9735")
+
 
 def get_first_node():
     if len(LightningNode.objects.all()) == 0:
