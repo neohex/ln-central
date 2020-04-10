@@ -158,12 +158,14 @@ class ChannelOpenView(TemplateView):
                 node_name = n["node_name"]
                 list_pos = pos
 
+                node_key = n["node_key"]
                 if n["is_tor"]:
                     connect = n["connect_tor"]
                 else:
                     connect = n["connect_ip"]
 
         context["node_name"] = node_name
+        context["node_key"] = node_key
         context["connect"] = connect
 
         next_node_id = nodes_list[(list_pos + 1) % len(nodes_list)]["id"]

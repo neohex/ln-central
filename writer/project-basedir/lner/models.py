@@ -19,7 +19,8 @@ class CustomModel(models.Model):
 
 
 class LightningNode(CustomModel):
-    node_name = models.CharField(verbose_name='LN Identity Pubkey', db_index=True, max_length=255, unique=True)
+    node_name = models.CharField(verbose_name='LN Node Name', db_index=True, max_length=255, unique=True)
+    node_key = models.CharField(verbose_name='LN Identity Pubkey', db_index=True, max_length=255, unique=True, default="Unknown")
     rpcserver = models.CharField(verbose_name='host:port of ln daemon', max_length=255, default="localhost:10009")
     global_checkpoint = models.IntegerField(
         verbose_name='add_index of the last global checkpoint',
