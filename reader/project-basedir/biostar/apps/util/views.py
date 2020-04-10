@@ -8,6 +8,7 @@ from django.views.generic import  UpdateView, DetailView, TemplateView
 from django.http import HttpResponseRedirect
 from django.http import Http404
 from django.conf import settings
+from django.core.urlresolvers import reverse
 
 from biostar.apps.util import ln
 from biostar.apps.posts.models import Post
@@ -120,5 +121,53 @@ class PaymentCheck(TemplateView):
             )
 
         context['payment_check'] = dwg.tostring()
+
+        return context
+
+
+class ChannelOpenView(TemplateView):
+    """
+    """
+
+    template_name = "channel_open.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(ChannelOpenView, self).get_context_data(**kwargs)
+        nodes_list = ln.get_nodes_list()
+
+        # TODO: modularize getting best node and name lookup
+
+        if 'node_id' not in context:
+            # best node
+            node_with_top_score = nodes_list[0]
+            for node in nodes_list:
+                if node["qos_score"] > node_with_top_score["qos_score"]:
+                    node_with_top_score = node
+
+            node_id = node_with_top_score["id"]
+
+            context["node_id"] = str(node_id)
+        else:
+            node_id = int(context["node_id"])
+
+        # Lookup the node name
+        node_name = "Unknown"
+        list_pos = 0
+        for pos, n in enumerate(nodes_list):
+            if n["id"] == node_id:
+                node_name = n["node_name"]
+                list_pos = pos
+
+                if n["is_tor"]:
+                    connect = n["connect_tor"]
+                else:
+                    connect = n["connect_ip"]
+
+        context["node_name"] = node_name
+        context["connect"] = connect
+
+        next_node_id = nodes_list[(list_pos + 1) % len(nodes_list)]["id"]
+        context["next_node_url"] = reverse("open-channel-node-selected", kwargs=dict(node_id=next_node_id))
+
 
         return context

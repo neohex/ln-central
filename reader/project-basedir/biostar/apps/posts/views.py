@@ -922,6 +922,7 @@ class PostPublishView(TemplateView):
             return context
 
         if 'node_id' not in context:
+            # best node
             node_with_top_score = nodes_list[0]
             for node in nodes_list:
                 if node["qos_score"] > node_with_top_score["qos_score"]:
@@ -932,7 +933,6 @@ class PostPublishView(TemplateView):
             context["node_id"] = str(node_id)
         else:
             node_id = int(context["node_id"])
-
 
         # Lookup the node name
         node_name = "Unknown"
@@ -1024,6 +1024,12 @@ class VotePublishView(TemplateView):
             "vote-publish-node-selected",
             kwargs=dict(
                 memo=context["memo"],
+                node_id=next_node_id
+            )
+        )
+        context["open_channel_url"] = reverse(
+            "open-channel-node-selected",
+            kwargs=dict(
                 node_id=next_node_id
             )
         )

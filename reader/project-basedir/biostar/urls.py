@@ -9,8 +9,7 @@ from django.views.generic import TemplateView
 from biostar.server import views, ajax, search, moderate, api
 from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, PostPreviewView, VotePublishView, PostPublishView, AcceptPreviewView
 from biostar.apps.users.views import DigestManager
-from biostar.apps.util.views import QRCode
-from biostar.apps.util.views import PaymentCheck
+from biostar.apps.util.views import QRCode, PaymentCheck, ChannelOpenView
 import biostar.apps.info.views as info
 
 from common.const import MEMO_RE
@@ -50,6 +49,10 @@ urlpatterns = [
         PaymentCheck.as_view(content_type='image/svg+xml'),
         name="payment-check"
     ),
+
+    # Open channel
+    url(r'^x/open/channel/best_node/$'.format(MEMO_RE), ChannelOpenView.as_view(), name="open-channel"),
+    url(r'^x/open/channel/(?P<node_id>\d+)/$'.format(MEMO_RE), ChannelOpenView.as_view(), name="open-channel-node-selected"),
 
 
     # ==============================

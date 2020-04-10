@@ -33,30 +33,33 @@
             LN Node: {{ node_name }}
         </h2>
     </div>
+
     <div class="row">
         <p class="col-md-4 col-xs-4" style="text-align: right;">
-            Payment not going through?<br />
-            ln.support has multiple nodes you can pay to:
+            ln.support has multiple nodes you can pay to<br />
+            normally you only need to open channel to one
         </p>
+
         <div class="btn-group">
             <a href="{{ next_node_url }}" class="btn btn-primary">
-                    Pay to a different node
+                Open channel to a different node
             </a>
-        </div>
-
-        <div>
-            <a href="{{ open_channel_url }}">open channel</a>
         </div>
     </div>
 
-    <div><img src="/payment_check/{{ node_id }}/{{ memo }}/payment_check.svg" /></div>
+    <h2>Open Channel</h2>
 
-    <h2>Pay to vote</h2>
-    <p>The vote will be published after a payment is made on the Lightning Network using the invoice.
-    Payment of <b>{{ payment_amount }} satoshi</b> is required.</p>
-    <p>Your invoice is:</p>
-    <pre>{{ pay_req }}</pre>
-    <img src="/qr/{{ pay_req }}/qr.svg" />
+    <p>Opening channels is for large payments. Currently this only applies to Bounties. Votes and posts take small payments which are handled by the existing liquidity in the network so you normally do not need to open a channel.</p>
+
+    <p>Opening a channel is a Bitcoin on-chain transaction. The amount you put into the channel will be available only on the Lightning Network unless the channel is closed. Closing a channel is another Bitcoin on-chain transaction.</p>
+
+    <p>To open a channel from your LND node run:</p>
+    <ul>
+        <li>Choose an <code>AMOUNT</code> in sats</li>
+    </ul>
+    <pre>lncli openchannel --connect {{ connect }} --local_amt AMOUNT</pre>
+
+
 {% else %}
     <div>
         <h2>Sorry, no LN Nodes are currently available</h2>
@@ -64,7 +67,6 @@
     </div>
 {% endif %}
 
-
-{% regarding_privacy %}
+After competing this action use <b>Back</b> in your browser.
 
 {% endblock %}

@@ -87,14 +87,13 @@ def get_nodes_list():
         return []
 
     else:
-        # reader only needs to know the id and name
         return_list = [
-            {
-                "id": n["id"],
-                "node_name": n["node_name"],
-                "qos_score": n["qos_score"]
-            } for n in response.json() if n["enabled"] == True
+            n for n in response.json() if n["enabled"] == True
         ]
+
+        # reader does not need to know the rpcserver
+        for n in return_list:
+            del n["rpcserver"]
 
         return sorted(return_list, key=by_name)
 
@@ -105,9 +104,6 @@ def add_invoice(memo, node_id):
     check_expected_key(response, "pay_req", is_list=False)
 
     return response.json()
-
-
-
 
 
 def gen_check_conclusion(checkpoint_value, node_id, memo):
