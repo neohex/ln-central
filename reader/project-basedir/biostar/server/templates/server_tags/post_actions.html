@@ -2,6 +2,13 @@
 {% load humanize %}
 <div class="post-action">
 
+
+    <span class="label label-default" style="background-color: orange;">
+        <a style="color: #555555;" href="">ADD BOUNTY</a>
+    </span>
+
+    &nbsp;
+
     <span class="label label-default add-comment" data-value="{{ post.id }}" id="C{{ post.id }}">ADD {{ label }}</span>
 
     &bull; <a href="{{ post.get_absolute_url }}">link</a>
