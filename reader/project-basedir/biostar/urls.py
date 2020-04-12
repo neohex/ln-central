@@ -10,6 +10,7 @@ from biostar.server import views, ajax, search, moderate, api
 from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, PostPreviewView, VotePublishView, PostPublishView, AcceptPreviewView
 from biostar.apps.users.views import DigestManager
 from biostar.apps.util.views import QRCode, PaymentCheck, ChannelOpenView
+from biostar.apps.bounty.views import NewBountyView
 import biostar.apps.info.views as info
 
 from common.const import MEMO_RE
@@ -81,6 +82,7 @@ urlpatterns = [
     url(r'^x/new/post/$', views.NewPost.as_view(), name="new-post"),
     url(r'^x/new/answer/(?P<pid>\d+)/$', views.NewAnswer.as_view(post_type="answer"), name="new-answer"),
     url(r'^x/new/comment/(?P<pid>\d+)/$', views.NewAnswer.as_view(post_type="comment"), name="new-comment"),
+    url(r'^x/new/bounty/$', NewBountyView.as_view(), name="new-bounty"),
 
     # Preview
     url(r'^x/preview/new/(?P<memo>{})/$'.format(MEMO_RE), PostPreviewView.as_view(), name="post-preview"),
@@ -99,15 +101,15 @@ urlpatterns = [
     # # Edit an existing post. (Not implemented)
     # url(r'^x/edit/(?P<pk>\d+)/$', EditPost.as_view(), name="post-edit"),
 
-    # ==============================
-    # Moderator
-    # ==============================
+    # # ==============================
+    # # Moderator
+    # # ==============================
 
-    # Produces the moderator panel.
-    url(r'^local/moderate/post/(?P<pk>\d+)/$', moderate.PostModeration.as_view(), name="post-moderation"),
+    # # Produces the moderator panel.
+    # url(r'^local/moderate/post/(?P<pk>\d+)/$', moderate.PostModeration.as_view(), name="post-moderation"),
 
-    # Produces the moderator panel.
-    url(r'^local/moderate/user/(?P<pk>\d+)/$', moderate.UserModeration.as_view(), name="user-moderation"),
+    # # Produces the moderator panel.
+    # url(r'^local/moderate/user/(?P<pk>\d+)/$', moderate.UserModeration.as_view(), name="user-moderation"),
 
 
     # ==============================

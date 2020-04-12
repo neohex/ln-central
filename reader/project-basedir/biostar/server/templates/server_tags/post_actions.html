@@ -3,11 +3,12 @@
 <div class="post-action">
 
 
-    <span class="label label-default" style="background-color: orange;">
-        <a style="color: #555555;" href="">ADD BOUNTY</a>
-    </span>
-
-    &nbsp;
+    {% if post.type == 0 %}
+        <span class="label label-default" style="background-color: orange;">
+            <a style="color: #555555;" href="{{ add_bounty_url }}">ADD BOUNTY</a>
+        </span>
+        &nbsp;
+    {% endif %}
 
     <span class="label label-default add-comment" data-value="{{ post.id }}" id="C{{ post.id }}">ADD {{ label }}</span>
 

@@ -316,7 +316,7 @@ def post_count_box(post, context='', topic=''):
 @register.inclusion_tag('server_tags/post_actions.html')
 def post_actions(post, user, label="COMMENT"):
     "Renders post actions"
-    return dict(post=post, user=user, label=label)
+    return dict(post=post, user=user, label=label, add_bounty_url=reverse("new-bounty"))
 
 
 @register.inclusion_tag('server_tags/regarding_privacy.html')
