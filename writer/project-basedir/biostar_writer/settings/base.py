@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'lner',
     'posts',
     'users',
+    'bounty',
 ]
 
 REST_FRAMEWORK = {
