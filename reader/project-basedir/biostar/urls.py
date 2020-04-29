@@ -10,7 +10,7 @@ from biostar.server import views, ajax, search, moderate, api
 from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, PostPreviewView, VotePublishView, PostPublishView, AcceptPreviewView
 from biostar.apps.users.views import DigestManager
 from biostar.apps.util.views import QRCode, PaymentCheck, ChannelOpenView
-from biostar.apps.bounty.views import NewBountyView
+from biostar.apps.bounty.views import PreviewBountyView
 import biostar.apps.info.views as info
 
 from common.const import MEMO_RE
@@ -82,7 +82,7 @@ urlpatterns = [
     url(r'^x/new/post/$', views.NewPost.as_view(), name="new-post"),
     url(r'^x/new/answer/(?P<pid>\d+)/$', views.NewAnswer.as_view(post_type="answer"), name="new-answer"),
     url(r'^x/new/comment/(?P<pid>\d+)/$', views.NewAnswer.as_view(post_type="comment"), name="new-comment"),
-    url(r'^x/new/bounty/$', NewBountyView.as_view(), name="new-bounty"),
+    url(r'^x/new/bounty/(?P<pid>\d+)/$', PreviewBountyView.as_view(), name="preview-bounty"),
 
     # Preview
     url(r'^x/preview/new/(?P<memo>{})/$'.format(MEMO_RE), PostPreviewView.as_view(), name="post-preview"),

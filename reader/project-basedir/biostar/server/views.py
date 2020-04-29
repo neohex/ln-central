@@ -4,7 +4,7 @@ import pyzmail
 import random
 from datetime import datetime, timedelta
 
-from django.views.generic import DetailView, ListView, TemplateView, UpdateView, View
+from django.views.generic import DetailView, ListView, UpdateView, View
 from django.conf import settings
 from django.core.cache import cache
 from django.core.cache import cache
