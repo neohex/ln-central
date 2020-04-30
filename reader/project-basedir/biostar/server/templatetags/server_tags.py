@@ -303,7 +303,6 @@ def search_bar(context):
     "Displays search bar"
     return context
 
-
 @register.inclusion_tag('server_tags/post_count_box.html')
 def post_count_box(post, context='', topic=''):
     "Displays the count box for a post row"
@@ -316,8 +315,7 @@ def post_count_box(post, context='', topic=''):
 @register.inclusion_tag('server_tags/post_actions.html')
 def post_actions(post, user, label="COMMENT"):
     "Renders post actions"
-    return dict(post=post, user=user, label=label, add_bounty_url=reverse("preview-bounty", kwargs=dict(pid=post.id)))
-
+    return dict(post=post, user=user, label=label, add_bounty_url=reverse("bounty-form", kwargs=dict(pid=post.id)))
 
 @register.inclusion_tag('server_tags/regarding_privacy.html')
 def regarding_privacy():

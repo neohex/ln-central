@@ -1,6 +1,7 @@
 {% extends "starbase.html" %}
 {% load server_tags %}
 {% load humanize %}
+{% load crispy_forms_tags %}
 
 {% block page_title %}
     New Bounty
@@ -8,21 +9,25 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-xs-9">
+        <div class="row">
+        <div class="col-md-8 col-md-offset-1">
             <p>Bounty is a sum of money to incentivise a good answer</p>
             <ol>
                 <li>Bounty is anonymous</li>
                 <li>Anyone can increase the current bounty</li>
                 <li>Bounty is awarded to the answer with the most votes</li>
-                <li>Answers that existed before the Bounty was started are excluded from the bounty process</li>
                 <li>Bounty is awarded 3 days after the first answer is posted unless there is a better answer</li>
-                <li>Every time a better answer is posted the 3 day timer resets</li>
+                <li>Every time a better answer is posted the 3 day timer starts over</li>
+                <li>Bounty only applies to answers that are posted after the bounty was started</li>
                 <li>If the answer author does not take custody of the bounty sats within 7 days the award becomes available to the next best answer</li>
             </ol>
-        </div>
-        <div class="col-xs-3">
-            <div class="user-sidebar">
-            </div>
+
+            {% crispy form %}
         </div>
     </div>
+    <div class="col-xs-3">
+        <div class="user-sidebar">
+        </div>
+    </div>
+
 {% endblock %}
