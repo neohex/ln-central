@@ -1,3 +1,5 @@
+import time
+
 from django.shortcuts import render
 from django.views.generic import  TemplateView
 from django.http import HttpResponseRedirect
@@ -7,6 +9,7 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Fieldset, Div, Submit, ButtonHolder
 
+from common import json_util
 from biostar.apps.util import ln
 
 from common.log import logger
@@ -21,7 +24,7 @@ class BontyForm(forms.Form):
         error_messages={
             'required': "Bounty ammount is required"
         },
-        max_length=200, min_length=10,
+        max_length=20, min_length=1,
         validators=[],
         help_text="Ammount of sats to start or increase the bounty",
     )
@@ -60,7 +63,43 @@ class BountyFormView(TemplateView):
         return render(request, self.template_name, {'form': form})
 
     def post(self, request, *args, **kwargs):
-        return HttpResponseRedirect(reverse("bounty-publish", kwargs=dict(memo="ln.support_abc")))
+        try:
+            context = self.get_context_data(**kwargs)
+        except Exception as e:
+            logger.exception(e)
+            raise
+
+        # Validating the form.
+        form = self.form_class(request.POST)
+        if not form.is_valid():
+            try:
+                context = self.get_context_data(**kwargs)
+            except Exception as e:
+                logger.exception(e)
+                raise
+
+            context['form'] = form
+            context['errors_detected'] = True
+
+            return render(
+                request,
+                self.template_name,
+                context
+            )
+
+        pid = context["pid"]
+        amt = form.cleaned_data.get("amt")
+
+        logger.debug("Bounty ammount is {} for post_id {}".format(amt, pid))
+        memo = {
+            "post_id": pid,
+            "ammount": amt,
+            "unixtime": int(time.time())
+        }
+
+        memo_serialized = json_util.serialize_memo(memo)
+
+        return HttpResponseRedirect(reverse("bounty-publish", kwargs=dict(memo=memo_serialized)))
 
 
 class BountyPublishView(TemplateView):
@@ -101,7 +140,7 @@ class BountyPublishView(TemplateView):
 
         next_node_id = nodes_list[(list_pos + 1) % len(nodes_list)]["id"]
         context["next_node_url"] = reverse(
-            "bounty-publish-node-selected",  # TODO: take as argument
+            "bounty-publish-node-selected",  # TODO: when refactored, take as argument
             kwargs=dict(
                 memo=context["memo"],
                 node_id=next_node_id
