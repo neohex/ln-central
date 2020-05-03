@@ -4,7 +4,7 @@ Setting common to reader and writer
 
 from datetime import timedelta
 
-PAYMENT_AMOUNT = 2  # in satoshi
+PAYMENT_AMOUNT = 2  # in sats
 
 MAX_MEMO_SIZE = 600  # includes the length of the friendly prefix
 MAX_TITLE = 100
