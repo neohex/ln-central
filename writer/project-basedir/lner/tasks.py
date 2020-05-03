@@ -359,12 +359,20 @@ class Runner(object):
                         Post.objects.filter(pk=post.id).update(vote_count=F('vote_count') + change)
 
                     checkpoint_helper.set_checkpoint("done", action_type="upvote", action_id=post.id)
+
+                if action == "Bounty":
+                    post_id = action_details["post_id"]
+                    logger.info("Starting bounty for post {} !".format(post_id))
+
+                    # TODO: write to DB
+
+                    checkpoint_helper.set_checkpoint("done", action_type="bonty", action_id=post_id)
                 else:
                     logger.error("Invalid action: {}".format(action_details))
                     checkpoint_helper.set_checkpoint("invalid_action")
                     continue
             else:
-
+                # Posts do not include the "action" key to save on memo space
                 logger.info("Action details {}".format(action_details))
 
                 if "sig" in action_details:

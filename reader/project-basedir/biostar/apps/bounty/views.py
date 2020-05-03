@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.views.generic import  TemplateView
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.conf import settings
 
 from django import forms
 from crispy_forms.helper import FormHelper
@@ -19,14 +20,14 @@ class BontyForm(forms.Form):
 
     amt = forms.CharField(
         widget=forms.NumberInput,
-        label="Ammount (in sats)",
+        label="Amount (in sats)",
         required=True,
         error_messages={
-            'required': "Bounty ammount is required"
+            'required': "Bounty amount is required"
         },
         max_length=20, min_length=1,
         validators=[],
-        help_text="Ammount of sats to start or increase the bounty",
+        help_text="Amount of sats to start or increase the bounty",
     )
 
     def __init__(self, *args, **kwargs):
@@ -90,10 +91,11 @@ class BountyFormView(TemplateView):
         pid = context["pid"]
         amt = form.cleaned_data.get("amt")
 
-        logger.debug("Bounty ammount is {} for post_id {}".format(amt, pid))
+        logger.debug("Bounty amount is {} for post_id {}".format(amt, pid))
         memo = {
+            "action": "Bounty",
             "post_id": pid,
-            "ammount": amt,
+            "amount": amt,
             "unixtime": int(time.time())
         }
 
@@ -152,6 +154,15 @@ class BountyPublishView(TemplateView):
                 node_id=next_node_id
             )
         )
+
+        try:
+            details = ln.add_invoice(context["memo"], node_id=context["node_id"])
+        except ln.LNUtilError as e:
+            logger.exception(e)
+            raise
+
+        context['pay_req'] = details['pay_req']
+        context['payment_amount'] = settings.PAYMENT_AMOUNT
 
         return context
 

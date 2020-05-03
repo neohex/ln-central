@@ -31,8 +31,8 @@ class Bounty(CustomModel):
         on_delete=models.CASCADE
     )
 
-    ammount = models.IntegerField(
-        verbose_name='ammount in sats of the total award for winning the bounty',
+    amt = models.IntegerField(
+        verbose_name='amount in sats of the total award for winning the bounty',
         default=-1
     )
 
@@ -65,6 +65,6 @@ class BountyAward(CustomModel):
 
     post_id = models.ForeignKey(
         to=Post,
-        verbose_name="post_id which post won the awarded",
+        verbose_name="post_id which Answer post won the awarded",
         on_delete=models.CASCADE
     )
