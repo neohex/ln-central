@@ -29,6 +29,7 @@ from common import validators
 from biostar.apps.util import ln
 from biostar.apps.users.models import User
 from biostar.apps.posts.models import PostPreview, Post
+from biostar.apps.util import view_helpers
 
 from common.log import logger
 
@@ -412,6 +413,7 @@ class NewPost(FormView):
             )
 
         return HttpResponseRedirect(post_preview.get_absolute_url(memo=post_preview.serialize_memo()))
+
 
 class PostPreviewView(FormView):
     """
@@ -891,6 +893,7 @@ class EditPost(FormView):
     def get_success_url(self):
         return reverse("user_details", kwargs=dict(pk=self.kwargs['pk']))
 
+
 def post_redirect(request, pid, permanent=True):
     """
     Redirect to a post
@@ -916,46 +919,11 @@ class PostPublishView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(PostPublishView, self).get_context_data(**kwargs)
-        nodes_list = ln.get_nodes_list()
 
-        if len(nodes_list) == 0:
-            return context
+        inovice_details = view_helpers.gen_invoice(publish_url="post-publish-node-selected", memo=context["memo"])
 
-        if 'node_id' not in context:
-            # best node
-            node_with_top_score = nodes_list[0]
-            for node in nodes_list:
-                if node["qos_score"] > node_with_top_score["qos_score"]:
-                    node_with_top_score = node
-
-            node_id = node_with_top_score["id"]
-
-            context["node_id"] = str(node_id)
-        else:
-            node_id = int(context["node_id"])
-
-        # Lookup the node name
-        node_name = "Unknown"
-        list_pos = 0
-        for pos, n in enumerate(nodes_list):
-            if n["id"] == node_id:
-                node_name = n["node_name"]
-                list_pos = pos
-
-
-        context["node_name"] = node_name
-
-        next_node_id = nodes_list[(list_pos + 1) % len(nodes_list)]["id"]
-        context["next_node_url"] = reverse("post-publish-node-selected", kwargs=dict(memo=context["memo"], node_id=next_node_id))
-
-        try:
-            details = ln.add_invoice(context["memo"], node_id=context["node_id"])
-        except ln.LNUtilError as e:
-            logger.exception(e)
-            raise
-
-        context['pay_req'] = details['pay_req']
-        context['payment_amount'] = settings.PAYMENT_AMOUNT
+        for i in ["pay_req", "payment_amount", "open_channel_url", "next_node_url", "node_name", "node_id"]:
+            context[i] = inovice_details[i]
 
         return context
 
@@ -966,17 +934,9 @@ class PostPublishView(TemplateView):
             logger.exception(e)
             raise
 
-        memo = context["memo"]
-
-        if "node_id" in context:
-            # Check payment and redirect if payment is confirmed
-            node_id = int(context["node_id"])
-            result = ln.check_payment(memo, node_id=node_id)
-            checkpoint_value = result["checkpoint_value"]
-            conclusion = ln.gen_check_conclusion(checkpoint_value, node_id=node_id, memo=memo)
-            if conclusion == ln.CHECKPOINT_DONE:
-                post_id = result["performed_action_id"]
-                return post_redirect(pid=post_id, request=request, permanent=False)
+        post_id = view_helpers.check_invoice(memo=context.get("memo"), node_id=context.get("node_id"))
+        if post_id:
+            return view_helpers.post_redirect(pid=post_id, request=request, permanent=False)
 
         return super(PostPublishView, self).get(request, *args, **kwargs)
 
@@ -990,54 +950,11 @@ class VotePublishView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(VotePublishView, self).get_context_data(**kwargs)
-        nodes_list = ln.get_nodes_list()
 
-        if len(nodes_list) == 0:
-            return context
+        inovice_details = view_helpers.gen_invoice(publish_url="vote-publish-node-selected", memo=context["memo"])
 
-        if 'node_id' not in context:
-            node_with_top_score = nodes_list[0]
-            for node in nodes_list:
-                if node["qos_score"] > node_with_top_score["qos_score"]:
-                    node_with_top_score = node
-
-            node_id = node_with_top_score["id"]
-
-            context["node_id"] = str(node_id)
-        else:
-            node_id = int(context["node_id"])
-
-
-        # Lookup the node name
-        node_name = "Unknown"
-        list_pos = 0
-        for pos, n in enumerate(nodes_list):
-            if n["id"] == node_id:
-                node_name = n["node_name"]
-                list_pos = pos
-
-
-        context["node_name"] = node_name
-
-        next_node_id = nodes_list[(list_pos + 1) % len(nodes_list)]["id"]
-        context["next_node_url"] = reverse(
-            "vote-publish-node-selected",
-            kwargs=dict(
-                memo=context["memo"],
-                node_id=next_node_id
-            )
-        )
-        context["open_channel_url"] = reverse(
-            "open-channel-node-selected",
-            kwargs=dict(
-                node_id=next_node_id
-            )
-        )
-
-        details = ln.add_invoice(context["memo"], node_id=node_id)
-
-        context['pay_req'] = details['pay_req']
-        context['payment_amount'] = settings.PAYMENT_AMOUNT
+        for i in ["pay_req", "payment_amount", "open_channel_url", "next_node_url", "node_name", "node_id"]:
+            context[i] = inovice_details[i]
 
         return context
 
@@ -1143,20 +1060,8 @@ class VotePublishView(TemplateView):
             logger.exception(e)
             raise
 
-        memo = context.get("memo")
-        if not memo:
-            logger.error("memo was not provided")
-            raise
-
-        if "node_id" in context:
-            # Check payment and redirect if payment is confirmed
-            node_id = int(context["node_id"])
-            result = ln.check_payment(memo, node_id=node_id)
-            checkpoint_value = result["checkpoint_value"]
-            conclusion = ln.gen_check_conclusion(checkpoint_value, node_id=node_id, memo=memo)
-            if conclusion == ln.CHECKPOINT_DONE:
-                post_id = result["performed_action_id"]
-                return post_redirect(pid=post_id, request=request, permanent=False)
-
+        post_id = view_helpers.check_invoice(memo=context.get("memo"), node_id=context.get("node_id"))
+        if post_id:
+            return view_helpers.post_redirect(pid=post_id, request=request, permanent=False)
 
         return super(VotePublishView, self).get(request, *args, **kwargs)

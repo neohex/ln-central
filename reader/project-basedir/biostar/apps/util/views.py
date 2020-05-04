@@ -5,7 +5,6 @@ import time
 
 from django import forms
 from django.views.generic import  UpdateView, DetailView, TemplateView
-from django.http import HttpResponseRedirect
 from django.http import Http404
 from django.conf import settings
 from django.core.urlresolvers import reverse

@@ -1,4 +1,4 @@
-{% extends "starbase.html" %}
+{% extends "starbase_refresh.html" %}
 {% load server_tags %}
 {% load humanize %}
 
@@ -29,16 +29,6 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="row">
-        <div class="col-md-8 col-md-offset-1">
-            Hi
-        </div>
-    </div>
-    <div class="col-xs-3">
-        <div class="user-sidebar">
-        </div>
-    </div>
 
     <div><img src="/payment_check/{{ node_id }}/{{ memo }}/payment_check.svg" /></div>
 
@@ -54,5 +44,7 @@
         <p>Please try again later. If the problem persists please contact the site owners.</p>
     </div>
 {% endif %}
+
+{% regarding_privacy %}
 
 {% endblock %}

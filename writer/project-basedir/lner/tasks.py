@@ -360,7 +360,7 @@ class Runner(object):
 
                     checkpoint_helper.set_checkpoint("done", action_type="upvote", action_id=post.id)
 
-                if action == "Bounty":
+                elif action == "Bounty":
                     post_id = action_details["post_id"]
                     logger.info("Starting bounty for post {} !".format(post_id))
 

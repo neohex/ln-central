@@ -4,15 +4,14 @@ from django.shortcuts import render
 from django.views.generic import  TemplateView
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.conf import settings
 
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Fieldset, Div, Submit, ButtonHolder
 
-from common import json_util
-from biostar.apps.util import ln
+from biostar.apps.util import view_helpers
 
+from common import json_util
 from common.log import logger
 
 class BontyForm(forms.Form):
@@ -110,59 +109,10 @@ class BountyPublishView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(BountyPublishView, self).get_context_data(**kwargs)
 
-        # TODO: move this to a common lib
-        nodes_list = ln.get_nodes_list()
+        inovice_details = view_helpers.gen_invoice(publish_url="bounty-publish-node-selected", memo=context["memo"])
 
-        if len(nodes_list) == 0:
-            return context
-
-        if 'node_id' not in context:
-            node_with_top_score = nodes_list[0]
-            for node in nodes_list:
-                if node["qos_score"] > node_with_top_score["qos_score"]:
-                    node_with_top_score = node
-
-            node_id = node_with_top_score["id"]
-
-            context["node_id"] = str(node_id)
-        else:
-            node_id = int(context["node_id"])
-
-
-        # Lookup the node name
-        node_name = "Unknown"
-        list_pos = 0
-        for pos, n in enumerate(nodes_list):
-            if n["id"] == node_id:
-                node_name = n["node_name"]
-                list_pos = pos
-
-
-        context["node_name"] = node_name
-
-        next_node_id = nodes_list[(list_pos + 1) % len(nodes_list)]["id"]
-        context["next_node_url"] = reverse(
-            "bounty-publish-node-selected",  # TODO: when refactored, take as argument
-            kwargs=dict(
-                memo=context["memo"],
-                node_id=next_node_id
-            )
-        )
-        context["open_channel_url"] = reverse(
-            "open-channel-node-selected",
-            kwargs=dict(
-                node_id=next_node_id
-            )
-        )
-
-        try:
-            details = ln.add_invoice(context["memo"], node_id=context["node_id"])
-        except ln.LNUtilError as e:
-            logger.exception(e)
-            raise
-
-        context['pay_req'] = details['pay_req']
-        context['payment_amount'] = settings.PAYMENT_AMOUNT
+        for i in ["pay_req", "payment_amount", "open_channel_url", "next_node_url", "node_name", "node_id"]:
+            context[i] = inovice_details[i]
 
         return context
 
@@ -172,5 +122,9 @@ class BountyPublishView(TemplateView):
         except Exception as e:
             logger.exception(e)
             raise
+
+        post_id = view_helpers.check_invoice(memo=context.get("memo"), node_id=context.get("node_id"))
+        if post_id:
+            return view_helpers.post_redirect(pid=post_id, request=request, permanent=False)
 
         return render(request, self.template_name, context)
