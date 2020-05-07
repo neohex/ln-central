@@ -28,6 +28,7 @@ from lner.serializers import VerifyMessageResponseSerializer
 from common import log
 from common import lnclient
 from common import validators
+from common import json_util
 
 from common.const import MEMO_RE
 
@@ -57,6 +58,8 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
     RETRY_SLEEP_SECONDS = 1
 
     def create(self, request, format=None, retry_addinvoice=False, retry_num=0):
+        memo = request.POST["memo"]
+
         if retry_num >= CreateInvoiceViewSet.MAX_RETRIES:
             raise CreateInvoiceError(
                 "Retry count exceeded: {}".format(retry_num)
@@ -65,7 +68,7 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
         node = LightningNode.objects.get(id=request.POST["node_id"])
         request_obj, created = InvoiceRequest.objects.get_or_create(
             lightning_node=node,
-            memo=request.POST["memo"]
+            memo=memo
         )
 
         if created or retry_addinvoice:
@@ -102,10 +105,12 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
 
             else:
                 # TODO: surface addinvoice timeout and other exceptions back to the user
+                # Bonties can specify amount in the memo, everithing else defaults to settings.PAYMENT_AMOUNT
+                deserialized_memo = json_util.deserialize_memo(memo)
                 invoice_stdout = lnclient.addinvoice(
-                    request.POST["memo"],
+                    memo,
                     node.rpcserver,
-                    amt=settings.PAYMENT_AMOUNT,
+                    amt=deserialized_memo.get("amt", settings.PAYMENT_AMOUNT),
                     expiry=settings.INVOICE_EXPIRY,
                 )
                 logger.info("Finished addinvoice on the node")

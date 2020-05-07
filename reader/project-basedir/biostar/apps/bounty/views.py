@@ -94,7 +94,7 @@ class BountyFormView(TemplateView):
         memo = {
             "action": "Bounty",
             "post_id": pid,
-            "amount": amt,
+            "amt": amt,
             "unixtime": int(time.time())
         }
 

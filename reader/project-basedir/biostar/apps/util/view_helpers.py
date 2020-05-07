@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from biostar.apps.util import ln
 from biostar.apps.posts.models import Post
 
+from common import json_util
 from common.log import logger
 
 
@@ -63,7 +64,9 @@ def gen_invoice(publish_url, memo):
         raise
 
     context['pay_req'] = details['pay_req']
-    context['payment_amount'] = settings.PAYMENT_AMOUNT
+
+    deserialized_memo = json_util.deserialize_memo(memo)
+    context['payment_amount'] = deserialized_memo.get("amt", settings.PAYMENT_AMOUNT)
 
     return context
 
