@@ -29,6 +29,8 @@ from posts.models import Vote
 
 from users.models import User
 
+from bounty.models import Bounty
+
 from lner.models import LightningNode
 from lner.models import Invoice
 from lner.models import InvoiceRequest
@@ -361,10 +363,35 @@ class Runner(object):
                     checkpoint_helper.set_checkpoint("done", action_type="upvote", action_id=post.id)
 
                 elif action == "Bounty":
-                    post_id = action_details["post_id"]
-                    logger.info("Starting bounty for post {} !".format(post_id))
+                    valid = True
+                    for keyword in ["post_id", "amt"]:
+                        if keyword not in action_details:
+                            logger.warn("Bounty invalid because {} is missing".format(keyword))
+                            valid = False
 
-                    # TODO: write to DB
+                    if not valid:
+                        logger.warn("Could not start Bounty: bounty_invalid")
+                        checkpoint_helper.set_checkpoint("bounty_invalid")
+                        continue
+
+                    post_id = action_details["post_id"]
+                    amt = action_details["amt"]
+
+                    try:
+                        post_obj = Post.objects.get(pk=post_id)
+                    except (ObjectDoesNotExist, ValueError):
+                        logger.error("Bounty invalid because post {} does not exist".format(post_id))
+                        checkpoint_helper.set_checkpoint("bounty_invalid_post_does_not_exist")
+                        continue
+
+                    logger.info("Starting bounty for post {}!".format(post_id))
+
+                    new_b = Bounty(
+                        post_id=post_obj,
+                        amt=amt,
+                        activation_time=timezone.now(),
+                    )
+                    new_b.save()
 
                     checkpoint_helper.set_checkpoint("done", action_type="bonty", action_id=post_id)
                 else:

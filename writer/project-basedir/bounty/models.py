@@ -48,11 +48,12 @@ class Bounty(CustomModel):
 
     activation_time = models.DateTimeField(
         verbose_name="activation_time is when the bounty became active most recently",
-        default=False
     )
 
     award_time = models.DateTimeField(
         verbose_name="award_time is when the winner was announced",
+        null=True,
+        blank=True,
     )
 
 
