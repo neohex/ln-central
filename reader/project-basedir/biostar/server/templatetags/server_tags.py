@@ -253,11 +253,12 @@ def page_bar_sort_users(context):
 
 
 @register.inclusion_tag('server_tags/post_body.html', takes_context=True)
-def post_body(context, post, user, tree):
+def post_body(context, post, user, tree, bounty_sats=None):
     "Renders the post body"
     return dict(
         post=post,
         user=user,
+        bounty_sats=bounty_sats,
         tree=tree,
         request=context['request'],
         vote_url=post.get_vote_url(),
@@ -304,13 +305,13 @@ def search_bar(context):
     return context
 
 @register.inclusion_tag('server_tags/post_count_box.html')
-def post_count_box(post, context='', topic=''):
+def post_count_box(post, context='', topic='', bounty_sats=None):
     "Displays the count box for a post row"
     topic = Tag.fixcase(topic)
     topic = topic.split('+')
     if LATEST in topic:
         topic.remove(LATEST)
-    return dict(post=post, context=context, topic=topic)
+    return dict(post=post, context=context, topic=topic, todo_bounty_sats_for_this_post=bounty_sats)
 
 @register.inclusion_tag('server_tags/post_actions.html')
 def post_actions(post, user, label="COMMENT"):

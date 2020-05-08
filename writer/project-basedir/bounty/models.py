@@ -1,8 +1,6 @@
 from django.db import models
 from django.utils import timezone
 
-from django.apps import apps
-
 try:
     # writer
     from posts.models import Post

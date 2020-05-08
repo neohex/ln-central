@@ -285,6 +285,7 @@ INSTALLED_APPS = [
     'biostar.apps.posts',
     'biostar.apps.messages',
     'biostar.apps.badges',
+    'biostar.apps.bounty',
 
     # The main Biostar server.
     'biostar.server',

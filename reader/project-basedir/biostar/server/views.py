@@ -28,6 +28,7 @@ from biostar.apps.badges.models import Badge, Award
 from biostar.apps.posts.auth import post_permissions
 from biostar.apps.util import ln
 from biostar.apps.util.email_reply_parser import EmailReplyParser
+from biostar.apps.bounty.models import Bounty
 
 from common import general_util
 from common import html_util
@@ -159,6 +160,7 @@ class PostList(BaseListMixin):
     def get_context_data(self, **kwargs):
         context = super(PostList, self).get_context_data(**kwargs)
         context['topic'] = self.topic or self.LATEST
+
 
         return context
 
@@ -371,9 +373,6 @@ class PostDetails(DetailView):
         obj.tree = tree
         obj.answers = answers
 
-        # Add the more like this field
-        post = super(PostDetails, self).get_object()
-
         return obj
 
     def get_context_data(self, **kwargs):
@@ -381,6 +380,15 @@ class PostDetails(DetailView):
         context['request'] = self.request
         context['form'] = ShortForm()
         context['maxlength'] = settings.MAX_CONTENT
+
+        bounty_sats = 0
+        for b in Bounty.objects.filter(post_id=context["post"], is_active=True, is_payed=False):
+            bounty_sats += b.amt
+
+        if bounty_sats == 0:
+            bounty_sats = None
+
+        context['bounty_sats'] = bounty_sats
         return context
 
 

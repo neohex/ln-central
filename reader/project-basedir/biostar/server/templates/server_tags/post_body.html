@@ -1,12 +1,17 @@
 {% load server_tags %}
 
+
 <div class="post-body {{ post.get_status_display }} clearfix">
 
 
     {% if post.is_toplevel %}
         {% include "banners/leaderboard.html" %}
 
-        <div class="title" >{{ post.get_type_display }}: <span itemprop="name">{{ post.get_title }}</span></div>
+        {% if bounty_sats %}
+            <div class="title" ><img width=30 src="/static/bitcoin.png"></a>ounty {{ bounty_sats }} sats {{ post.get_type_display }}: <span itemprop="name">{{ post.get_title }}</span></div>
+        {% else %}
+            <div class="title" >{{ post.get_type_display }}: <span itemprop="name">{{ post.get_title }}</span></div>
+        {% endif %}
 
     {% endif %}
 

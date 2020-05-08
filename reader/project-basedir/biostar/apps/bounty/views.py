@@ -111,6 +111,7 @@ class BountyPublishView(TemplateView):
 
         inovice_details = view_helpers.gen_invoice(publish_url="bounty-publish-node-selected", memo=context["memo"])
 
+        # TODO: if payment fails, "pay_req" will not be present so this will throw a KeyError, make more user friendly
         for i in ["pay_req", "payment_amount", "open_channel_url", "next_node_url", "node_name", "node_id"]:
             context[i] = inovice_details[i]
 
