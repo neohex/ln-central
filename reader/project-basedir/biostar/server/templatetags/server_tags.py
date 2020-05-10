@@ -97,11 +97,7 @@ def hide_pubkey(value):
 
 @register.simple_tag
 def avataaar(user, size=80):
-    if user.is_suspended:
-        # Removes spammy images for suspended users
-        pubkey = 'suspended@biostars.org'
-    else:
-        pubkey = user.pubkey.encode('utf8')
+    pubkey = user.pubkey.encode('utf8')
     hash = hashlib.md5(pubkey).hexdigest()
 
     avataaars_url = settings.AVATAR_SERVER_NAME.rstrip('/') + "/v2/avataaars/%s.svg" % hash
@@ -115,11 +111,7 @@ def avataaar(user, size=80):
 
 @register.simple_tag
 def coolname(user):
-    if user.is_suspended:
-        # Removes spammy images for suspended users
-        pubkey = 'suspended@biostars.org'
-    else:
-        pubkey = user.pubkey.encode('utf8')
+    pubkey = user.pubkey.encode('utf8')
     hash = hashlib.md5(pubkey).digest()
 
     NUM_WORDS = 3
@@ -288,8 +280,7 @@ def post_preview_body(context, post_preview):
 
 @register.inclusion_tag('server_tags/accept_preview_body.html', takes_context=True)
 def accept_preview_body(context, post):
-
-    "Renders the post preview body"
+    "Renders the post preview body with next steps for Accpet process"
     memo = json_util.deserialize_memo(context["memo"])
     return dict(
         post=post,
@@ -299,9 +290,18 @@ def accept_preview_body(context, post):
         memo_json=json.dumps(memo, sort_keys=True),
     )
 
+@register.inclusion_tag('server_tags/bounty_preview_body.html')
+def bounty_preview_body(post, bounty_sats):
+    "Renders the post preview body"
+
+    return dict(
+        post=post,
+        bounty_sats=bounty_sats,
+    )
+
 @register.inclusion_tag('server_tags/bounty_title.html')
 def bounty_title(post, bounty_sats):
-    "Renders the post preview body"
+    "Renders the post title"
     return dict(
         post=post,
         bounty_sats=bounty_sats,

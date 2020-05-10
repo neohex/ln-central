@@ -23,6 +23,14 @@
                 <li>If the answer author does not take custody of the bounty sats within 7 days the award becomes available to the next best answer</li>
             </ol>
 
+             <span itemscope itemtype="http://schema.org/Question">
+                {% bounty_preview_body post previous_bounty_sats %}
+             </span>
+
+             {% if previous_bounty_sats %}
+                 You are adding to a previous bounty
+             {% endif %}
+
             {% crispy form %}
         </div>
     </div>

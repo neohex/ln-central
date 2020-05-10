@@ -382,6 +382,7 @@ class PostDetails(DetailView):
         context['form'] = ShortForm()
         context['maxlength'] = settings.MAX_CONTENT
 
+        # TODO: put into a shard function get_bounty_sats
         bounty_sats = 0
         for b in Bounty.objects.filter(post_id=context["post"], is_active=True, is_payed=False):
             bounty_sats += b.amt
@@ -390,6 +391,7 @@ class PostDetails(DetailView):
             bounty_sats = None
 
         context['bounty_sats'] = bounty_sats
+
         return context
 
 

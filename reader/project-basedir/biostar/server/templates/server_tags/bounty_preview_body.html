@@ -1,0 +1,43 @@
+{% load server_tags %}
+{% load crispy_forms_tags %}
+{% load cache %}
+{% load more_like_this %}
+
+
+<div class="post-body {{ post.get_status_display }} clearfix">
+
+    <h2><div class="title" >{% bounty_title post bounty_sats %}</div></h2>
+
+
+    <div class="post vote-box visible-lg visible-md" >
+        <div class="count" itemprop="voteCount">{{ post.vote_count }}</div>
+    </div>
+
+    <div>
+        <a name="{{ post.id }}"></a>
+        {# The body of the post #}
+        <div class="content" >
+
+            <div class="col-xs-3 col-md-3 box pull-right text-center visible-lg visible-md">
+                <div><a href="{{ post.author.get_absolute_url }}">{% avataaar post.author 82 %}</a></div>
+                <div class="ago">{{ post.lastedit_date|time_ago }} by</div>
+                <div class="uname">{% userlink post.author %}</div>
+            </div>
+
+            <span itemprop="text">{{ post.html|safe }}</span>
+
+            <div class="clearfix">
+                {% if post.is_toplevel %}
+                    <div class="tags clearfix" style="margin-bottom:0.5em;">
+                        {% for tag in post.tag_value %}
+                            <span class="tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -9,6 +9,8 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Fieldset, Div, Submit, ButtonHolder
 
+from biostar.apps.posts.models import Post
+from biostar.apps.bounty.models import Bounty
 from biostar.apps.util import view_helpers
 
 from common import json_util
@@ -55,12 +57,34 @@ class BountyFormView(TemplateView):
 
         logger.debug("New bounty form for post_id {}".format(pid))
 
+        post = Post.objects.get(pk=pid)
+        context["post"] = post
+
+
+        # TODO: put into a shard function get_bounty_sats
+        bounty_sats = 0
+        for b in Bounty.objects.filter(post_id=context["post"], is_active=True, is_payed=False):
+            bounty_sats += b.amt
+
+        if bounty_sats == 0:
+            bounty_sats = None
+
+        context["previous_bounty_sats"] = bounty_sats
+
         return context
 
     def get(self, request, *args, **kwargs):
         form = self.form_class(initial={"amt": 10000})
 
-        return render(request, self.template_name, {'form': form})
+        try:
+            context = self.get_context_data(**kwargs)
+        except Exception as e:
+            logger.exception(e)
+            raise
+
+        context['form'] = form
+
+        return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         try:
