@@ -16,7 +16,7 @@ def gen_invoice(publish_url, memo):
     nodes_list = ln.get_nodes_list()
 
     if len(nodes_list) == 0:
-        return context
+        raise ln.LNUtilError("No nodes found")
 
     if 'node_id' not in context:
         node_with_top_score = nodes_list[0]
@@ -62,6 +62,7 @@ def gen_invoice(publish_url, memo):
     except ln.LNUtilError as e:
         logger.exception(e)
         raise
+
 
     context['pay_req'] = details['pay_req']
 

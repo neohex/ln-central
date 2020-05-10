@@ -34,10 +34,13 @@
 
     <h2>Pay to publish</h2>
     <p>The bonty will be published after a payment is made on the Lightning Network using the invoice.
-    Payment of <b>{{ payment_amount }} sats</b> is required.</p>
+    Payment of <b>{{ payment_amount|intcomma }} sats</b> is required.</p>
     <p>Your invoice is:</p>
     <pre>{{ pay_req }}</pre>
     <img src="/qr/{{ pay_req }}/qr.svg" />
+
+
+    {% regarding_privacy %}
 {% else %}
     <div>
         <h2>Sorry, no LN Nodes are currently available</h2>
@@ -45,6 +48,5 @@
     </div>
 {% endif %}
 
-{% regarding_privacy %}
 
 {% endblock %}
