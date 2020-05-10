@@ -7,11 +7,7 @@
     {% if post.is_toplevel %}
         {% include "banners/leaderboard.html" %}
 
-        {% if bounty_sats %}
-            <div class="title" ><img width=30 src="/static/bitcoin.png"></a>ounty {{ bounty_sats }} sats {{ post.get_type_display }}: <span itemprop="name">{{ post.get_title }}</span></div>
-        {% else %}
-            <div class="title" >{{ post.get_type_display }}: <span itemprop="name">{{ post.get_title }}</span></div>
-        {% endif %}
+        {% bounty_title post bounty_sats %}
 
     {% endif %}
 

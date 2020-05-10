@@ -299,6 +299,14 @@ def accept_preview_body(context, post):
         memo_json=json.dumps(memo, sort_keys=True),
     )
 
+@register.inclusion_tag('server_tags/bounty_title.html')
+def bounty_title(post, bounty_sats):
+    "Renders the post preview body"
+    return dict(
+        post=post,
+        bounty_sats=bounty_sats,
+    )
+
 @register.inclusion_tag('server_tags/search_bar.html', takes_context=True)
 def search_bar(context):
     "Displays search bar"
@@ -311,7 +319,7 @@ def post_count_box(post, context='', topic='', bounty_sats=None):
     topic = topic.split('+')
     if LATEST in topic:
         topic.remove(LATEST)
-    return dict(post=post, context=context, topic=topic, todo_bounty_sats_for_this_post=bounty_sats)
+    return dict(post=post, context=context, topic=topic, bounty_sats=bounty_sats)
 
 @register.inclusion_tag('server_tags/post_actions.html')
 def post_actions(post, user, label="COMMENT"):

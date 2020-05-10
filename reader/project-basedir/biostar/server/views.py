@@ -160,6 +160,7 @@ class PostList(BaseListMixin):
     def get_context_data(self, **kwargs):
         context = super(PostList, self).get_context_data(**kwargs)
         context['topic'] = self.topic or self.LATEST
+        context['todo_bounty_sats_for_this_post'] = None
 
 
         return context

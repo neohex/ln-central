@@ -44,10 +44,7 @@
                 {{ post.get_type_display }}:
             {% endif %}
 
-            {% if post.type == 0 and bounty_sats %}
-                Hello
-            {% endif %}
-            <a href="{{ post.get_absolute_url }}">{{ post.get_title }}</a>
+              <a href="{{ post.get_absolute_url }}">{% bounty_title post bounty_sats %}</a>
         </div>
 
         {% if context %}
