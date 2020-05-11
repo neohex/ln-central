@@ -27,10 +27,7 @@ MESSAGING_TYPE_CHOICES = MESSAGING_MAP.items()
 # Connects a user sort dropdown word to a data model field.
 USER_SORT_MAP = OrderedDict([
     ("recent visit", "-profile__last_login"),
-    ("reputation", "-score"),
     ("date joined", "profile__date_joined"),
-    #("number of posts", "-score"),
-    ("activity level", "-activity"),
 ])
 
 # These are the fields rendered in the user sort order drop down.
@@ -43,11 +40,8 @@ USER_SORT_INVALID_MSG = "Invalid sort parameter received"
 POST_SORT_MAP = OrderedDict([
     ("update", "-lastedit_date"),
     ("views", "-view_count"),
-    ("followers", "-subs_count"),
     ("answers", "-reply_count"),
-    ("bookmarks", "-book_count"),
     ("votes", "-vote_count"),
-    ("rank", "-rank"),
     ("creation", "-creation_date"),
 ])
 
