@@ -74,8 +74,9 @@ def gen_invoice(publish_url, memo):
 
 def check_invoice(memo, node_id):
     if not memo:
-        logger.error("memo was not provided")
-        raise
+        msg = "memo was not provided"
+        logger.error(msg)
+        raise ln.LNUtilError(msg)
 
     # Check payment and redirect if payment is confirmed
     node_id = int(node_id)

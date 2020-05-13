@@ -58,6 +58,9 @@
     <p>Your invoice is:</p>
     <pre>{{ pay_req }}</pre>
     <img src="/qr/{{ pay_req }}/qr.svg" />
+
+    {% regarding_privacy %}
+
 {% else %}
     <div>
         <h2>Sorry, no LN Nodes are currently available</h2>
@@ -65,7 +68,5 @@
     </div>
 {% endif %}
 
-
-{% regarding_privacy %}
 
 {% endblock %}

@@ -951,7 +951,10 @@ class VotePublishView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(VotePublishView, self).get_context_data(**kwargs)
 
-        inovice_details = view_helpers.gen_invoice(publish_url="vote-publish-node-selected", memo=context["memo"])
+        try:
+            inovice_details = view_helpers.gen_invoice(publish_url="vote-publish-node-selected", memo=context["memo"])
+        except ln.LNUtilError as msg:
+            return {}
 
         for i in ["pay_req", "payment_amount", "open_channel_url", "next_node_url", "node_name", "node_id"]:
             context[i] = inovice_details[i]
@@ -1059,6 +1062,9 @@ class VotePublishView(TemplateView):
         except Exception as e:
             logger.exception(e)
             raise
+
+        if "node_name" not in context:
+            return render(request, self.template_name, context)  # Prints a firendy No Nodes found error
 
         post_id = view_helpers.check_invoice(memo=context.get("memo"), node_id=context.get("node_id"))
         if post_id:
