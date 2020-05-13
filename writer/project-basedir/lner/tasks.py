@@ -85,6 +85,9 @@ def award_bounty(question_post):
         '-creation_date'
     )
     logger.info("{} candidate answers found".format(len(a_list)))
+    if len(a_list) == 0:
+        return
+
     top_answer = a_list.last()
     logger.info("Top voted answer is {}".format(top_answer))
 
