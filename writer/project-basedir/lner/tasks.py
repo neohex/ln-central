@@ -29,7 +29,7 @@ from posts.models import Vote
 
 from users.models import User
 
-from bounty.models import Bounty
+from bounty.models import Bounty, BountyAward
 
 from lner.models import LightningNode
 from lner.models import Invoice
@@ -48,6 +48,59 @@ def human_time(ts):
 def sleep(seconds):
     logger.info("Sleeping for {} seconds".format(seconds))
     time.sleep(seconds)
+
+def get_anon_user():
+    user, created = User.objects.get_or_create(pubkey="Unknown")
+    if created:
+        logger.info("This is probably an empty DB! Anonymous user created: {}".format(user))
+
+    return user
+
+def award_bounty(question_post):
+    """
+    Award Prelimenary Bounty (actual award happens after timer runs out)
+    """
+
+    # 1. find all bounties
+    b_list = Bounty.objects.filter(post_id=question_post.id, is_active=True).order_by(
+        'activation_time'
+    )
+    logger.info("{} active bounties found".format(len(b_list)))
+    if len(b_list) == 0:
+        return
+
+    # 2. find earliest bounty start time
+    earliest_bounty = b_list.first()
+    logger.info("earliest_bounty start time is {}".format(earliest_bounty.activation_time))
+
+    # 3. find the top voted answer among answers after the bounty start time
+    # creation date breaks ties, olderst wins
+    a_list = Post.objects.filter(
+        parent=question_post.id,
+        creation_date__gt=earliest_bounty.activation_time,
+    ).exclude(
+        author=get_anon_user(),
+    ).order_by(
+        'vote_count',
+        '-creation_date'
+    )
+    logger.info("{} candidate answers found".format(len(a_list)))
+    top_answer = a_list.last()
+    logger.info("Top voted answer is {}".format(top_answer))
+
+    # 4. create or update the award
+    try:
+        award = BountyAward.objects.get(bounty=earliest_bounty)
+    except BountyAward.DoesNotExist:
+        award = BountyAward.objects.create(bounty=earliest_bounty, post=top_answer)
+        logger.info("Created new award {}".format(award))
+    else:
+        if award.post == top_answer:
+            logger.info("Already awarded to this answer")
+        else:
+            award.post = top_answer
+            award.save()
+            logger.info("Updated existing award {}".format(award))
 
 
 class CheckpointHelper(object):
@@ -311,7 +364,7 @@ class Runner(object):
                         checkpoint_helper.set_checkpoint("invalid_post")
                         continue
 
-                    user, created = User.objects.get_or_create(pubkey="Unknown")
+                    user = get_anon_user()
 
                     logger.info("Creating a new vote: author={}, post={}, type={}".format(user, post, vote_type))
                     vote = Vote.objects.create(author=user, post=post, type=vote_type)
@@ -359,6 +412,10 @@ class Runner(object):
                             raise Exeption("Un-accepting is not supported")
                     else:
                         Post.objects.filter(pk=post.id).update(vote_count=F('vote_count') + change)
+
+                        # Upvote on an Aswer is the trigger for potentian bounty awards
+                        if post.type == Post.ANSWER and post.author != get_anon_user():
+                            award_bounty(question_post=post.parent)
 
                     checkpoint_helper.set_checkpoint("done", action_type="upvote", action_id=post.id)
 
@@ -451,6 +508,10 @@ class Runner(object):
 
                 # TODO: Catch failures when post title is duplicate (e.g. another node already saved post)
                 post.save()
+
+                # New Answer is the trigger for potentian bounty awards
+                if post.type == Post.ANSWER and user != get_anon_user():
+                    award_bounty(question_post=post.parent)
 
                 # Save tags
                 if "tag_val" in action_details:

@@ -56,14 +56,14 @@ class Bounty(CustomModel):
 
 
 class BountyAward(CustomModel):
-    bounty_id = models.ForeignKey(
+    bounty = models.ForeignKey(
         to=Bounty,
-        verbose_name="bounty_id which bounty is awarded",
+        verbose_name="bounty which bounty is awarded",
         on_delete=models.CASCADE
     )
 
-    post_id = models.ForeignKey(
+    post = models.ForeignKey(
         to=Post,
-        verbose_name="post_id which Answer post won the awarded",
+        verbose_name="post which Answer post won the awarded",
         on_delete=models.CASCADE
     )
