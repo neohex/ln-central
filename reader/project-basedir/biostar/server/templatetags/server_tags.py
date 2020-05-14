@@ -282,6 +282,11 @@ def post_preview_body(context, post_preview):
 def accept_preview_body(context, post):
     "Renders the post preview body with next steps for Accpet process"
     memo = json_util.deserialize_memo(context["memo"])
+
+    # Don't propagate old signature
+    if "sig" in memo:
+        del memo["sig"]
+
     return dict(
         post=post,
         request=context['request'],

@@ -632,9 +632,6 @@ class AcceptPreviewView(FormView):
                 identity_pubkey = result["identity_pubkey"]
                 context['user'] = User(id=1, pubkey=identity_pubkey)
                 memo["sig"] = signature  # add signature to memo
-            else:
-                if "sig" in memo:
-                    del memo["sig"]  # delete invalid signature
 
         context['post'] = self.get_model(memo)
 
