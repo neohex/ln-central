@@ -412,7 +412,9 @@ class Runner(object):
                             Post.objects.filter(pk=post.id).update(vote_count=F('vote_count') + change, has_accepted=True)
                             Post.objects.filter(pk=post.root_id).update(has_accepted=True)
                         else:
-                            raise Exeption("Un-accepting is not supported")
+                            # TODO: change "change". here change is set to payment ammount, so does not make sense to be called change
+                            # TODO: detect un-accept attempt and raise "Un-accept not yet supported"
+                            raise Exeption("Payment ammount has to be positive")
                     else:
                         Post.objects.filter(pk=post.id).update(vote_count=F('vote_count') + change)
 

@@ -22,6 +22,8 @@
 
 {% block content %}
 
+{% if nodes_list|length > 0 %}
+
     {% if errors_detected %}
         <div style="background: #a94442; color: #ffffff; text-align: center; padding: 0.5em; font-size: 150%;">
         Errors Detected
@@ -56,6 +58,13 @@
 
         </div>
     </div>
-    <script src="/static/lib/prism/prism.js" type="text/javascript"></script>
+
+
+{% else %}
+    <div>
+        <h2>Sorry, no LN Nodes are currently available</h2>
+        <p>Please try again later. If the problem persists please contact the site owners.</p>
+    </div>
+{% endif %}
 
 {% endblock %}

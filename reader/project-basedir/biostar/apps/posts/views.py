@@ -632,11 +632,17 @@ class AcceptPreviewView(FormView):
                 identity_pubkey = result["identity_pubkey"]
                 context['user'] = User(id=1, pubkey=identity_pubkey)
                 memo["sig"] = signature  # add signature to memo
+            else:
+                if "sig" in memo:
+                    del memo["sig"]  # delete invalid signature
 
         context['post'] = self.get_model(memo)
 
         # re-serialized because signature was added
         context['memo'] = json_util.serialize_memo(memo)
+
+        # gives user a friendy error message if no LN nodes are avaialble
+        context["nodes_list"] = [n["node_name"] for n in ln.get_nodes_list()]
 
         return context
 
@@ -1025,9 +1031,6 @@ class VotePublishView(TemplateView):
             else:
                 # Signature is valid, check if Accept belongs to the author of the post
                 assert post.type == Post.ANSWER and post.parent.type == Post.QUESTION, "Accept only Answers to Questions"
-
-                # TODO: remove
-                print(post.parent.author.pubkey)
 
                 if post.parent.author.pubkey != result["identity_pubkey"]:
                     context = {
