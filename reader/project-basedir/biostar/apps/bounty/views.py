@@ -12,7 +12,7 @@ from crispy_forms.layout import Layout, Field, Fieldset, Div, Submit, ButtonHold
 from biostar.apps.posts.models import Post
 from biostar.apps.bounty.models import Bounty
 from biostar.apps.util import view_helpers
-from biostar.apps.util.ln import LNUtilError
+from biostar.apps.util import ln
 
 from common import json_util
 from common.log import logger
@@ -136,7 +136,6 @@ class BountyPublishView(TemplateView):
 
         inovice_details = view_helpers.gen_invoice(publish_url="bounty-publish-node-selected", memo=context["memo"])
 
-        # TODO: "pay_req" will not be present so this will throw a KeyError, make more user friendly
         for i in ["pay_req", "payment_amount", "open_channel_url", "next_node_url", "node_name", "node_id"]:
             context[i] = inovice_details[i]
 
@@ -145,7 +144,8 @@ class BountyPublishView(TemplateView):
     def get(self, request, *args, **kwargs):
         try:
             context = self.get_context_data(**kwargs)
-        except LNUtilError:
+        except ln.LNUtilError as msg:
+            logger.exception(msg)
             # empty context will trigger "Sorry, no LN Nodes are currently available"
             context = {}
             return render(request, self.template_name, context)

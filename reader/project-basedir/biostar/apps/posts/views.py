@@ -923,7 +923,11 @@ class PostPublishView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(PostPublishView, self).get_context_data(**kwargs)
 
-        inovice_details = view_helpers.gen_invoice(publish_url="post-publish-node-selected", memo=context["memo"])
+        try:
+            inovice_details = view_helpers.gen_invoice(publish_url="post-publish-node-selected", memo=context["memo"])
+        except ln.LNUtilError as msg:
+            logger.exception(msg)
+            return {}
 
         for i in ["pay_req", "payment_amount", "open_channel_url", "next_node_url", "node_name", "node_id"]:
             context[i] = inovice_details[i]
@@ -957,6 +961,7 @@ class VotePublishView(TemplateView):
         try:
             inovice_details = view_helpers.gen_invoice(publish_url="vote-publish-node-selected", memo=context["memo"])
         except ln.LNUtilError as msg:
+            logger.exception(msg)
             return {}
 
         for i in ["pay_req", "payment_amount", "open_channel_url", "next_node_url", "node_name", "node_id"]:
