@@ -41,7 +41,11 @@
                 {# Render each answer for the post #}
                 {% for answer in post.answers %}
                     <span itemscope itemtype="http://schema.org/Answer">
-                        {% post_body answer user post.tree %}
+                        {% if candidate_award_pid == answer.id %}
+                            {% post_body answer user post.tree "0" candidate_award_sats preliminary_award_time %}
+                        {% else %}
+                            {% post_body answer user post.tree "0" %}
+                        {% endif %}
                     </span>
                 {% endfor %}
 

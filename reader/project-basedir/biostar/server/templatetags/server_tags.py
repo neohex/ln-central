@@ -245,7 +245,7 @@ def page_bar_sort_users(context):
 
 
 @register.inclusion_tag('server_tags/post_body.html', takes_context=True)
-def post_body(context, post, user, tree, bounty_sats=None):
+def post_body(context, post, user, tree, bounty_sats=None, candidate_award_sats=None, preliminary_award_time=None):
     "Renders the post body"
     return dict(
         post=post,
@@ -255,6 +255,8 @@ def post_body(context, post, user, tree, bounty_sats=None):
         request=context['request'],
         vote_url=post.get_vote_url(),
         accept_url=post.get_accept_url(),
+        candidate_award_sats=candidate_award_sats,
+        preliminary_award_time=preliminary_award_time,
     )
 
 @register.inclusion_tag('server_tags/post_preview_body.html', takes_context=True)
@@ -327,9 +329,16 @@ def post_count_box(post, context='', topic='', bounty_sats=None):
     return dict(post=post, context=context, topic=topic, bounty_sats=bounty_sats)
 
 @register.inclusion_tag('server_tags/post_actions.html')
-def post_actions(post, user, label="COMMENT"):
+def post_actions(post, user, label="COMMENT", candidate_award_sats=None, preliminary_award_time=None):
     "Renders post actions"
-    return dict(post=post, user=user, label=label, add_bounty_url=reverse("bounty-form", kwargs=dict(pid=post.id)))
+    return dict(
+        post=post,
+        user=user,
+        label=label,
+        add_bounty_url=reverse("bounty-form", kwargs=dict(pid=post.id)),
+        candidate_award_sats=candidate_award_sats,
+        preliminary_award_time=preliminary_award_time
+    )
 
 @register.inclusion_tag('server_tags/regarding_privacy.html')
 def regarding_privacy():

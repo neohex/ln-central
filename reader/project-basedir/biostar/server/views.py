@@ -2,7 +2,7 @@ import os
 import markdown
 import pyzmail
 import random
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.views.generic import DetailView, ListView, UpdateView, View
 from django.conf import settings
@@ -28,7 +28,7 @@ from biostar.apps.badges.models import Badge, Award
 from biostar.apps.posts.auth import post_permissions
 from biostar.apps.util import ln
 from biostar.apps.util.email_reply_parser import EmailReplyParser
-from biostar.apps.bounty.models import Bounty
+from biostar.apps.bounty.models import Bounty, BountyAward
 
 from common import general_util
 from common import html_util
@@ -384,13 +384,30 @@ class PostDetails(DetailView):
 
         # TODO: put into a shard function get_bounty_sats
         bounty_sats = 0
-        for b in Bounty.objects.filter(post_id=context["post"], is_active=True, is_payed=False):
+        awards = []
+        bounties = Bounty.objects.filter(post_id=context["post"], is_active=True, is_payed=False).order_by("created")
+        for b in bounties:
             bounty_sats += b.amt
+
+            awards += BountyAward.objects.filter(bounty=b)
 
         if bounty_sats == 0:
             bounty_sats = None
 
         context['bounty_sats'] = bounty_sats
+
+        if len(awards) > 0:
+            if len(awards) > 1:
+                msg = "More than 1 award found {}".format(awards)
+                logger.error(msg)
+                raise Exception(msg)
+
+            award = awards[0]
+            oldest_bounty = bounties.first()
+
+            context['candidate_award_sats'] = bounty_sats
+            context['candidate_award_pid'] = award.post.id
+            context['preliminary_award_time'] = oldest_bounty.activation_time + timedelta(days=3)
 
         return context
 

@@ -1,8 +1,7 @@
 {% load server_tags %}
 {% load humanize %}
+
 <div class="post-action">
-
-
     {% if post.type == 0 %}
         <span class="label label-default" style="background-color: orange;">
             <a style="color: #555555;" href="{{ add_bounty_url }}">ADD BOUNTY</a>
@@ -25,3 +24,9 @@
         {{ post.creation_date|time_ago }}</span>
     </span>
 </div>
+
+{% if candidate_award_sats %}
+<div class="post-action">
+If no signed answers with higher vote count emerge the <span style="color: orange;">{{candidate_award_sats|intcomma}} sat <img width=20 src="/static/bitcoin.png"></a>ounty</span> will be awared to this answer <b title="{{preliminary_award_time}}">in {{preliminary_award_time|naturaltime}}</b>
+</div>
+{% endif %}
