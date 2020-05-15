@@ -19,15 +19,9 @@
         {% if post.book_count %} &bull; {{ post.book_count }} bookmark{{ post.book_count|pluralize }}{% endif %}
     {% endif %}
 
-    <span class="userlink muted">
-            {% if post.creation_date != post.lastedit_date %}
-                modified {{ post.lastedit_date|time_ago }}
-            {%  if post.author != post.lastedit_user %}
-                by {% userlink post.lastedit_user %}
-            {%  endif %}
-            &bull;
-        {% endif %}
-        written <span itemprop="dateCreated" content="{{ post.creation_date|date:'c' }}">
-        {{ post.creation_date|time_ago }}</span> by {% userlink post.author %}
+    &bull;
+    <span class="muted">
+         written <span itemprop="dateCreated" content="{{ post.creation_date|date:'c' }}">
+        {{ post.creation_date|time_ago }}</span>
     </span>
 </div>
