@@ -8,7 +8,6 @@
    --ANSWERED_POST: #1C1C1C;
    --COMMENTED_POST: #434343;
    --ACCEPTED_POST: #6C6 CC;
-   --UNANSWERED_POST: #8F8F8F;
    --DEFAULT_QUESTION: #5B5B5B;
    --ANSWERED_QUESTION: #8C8C8C;
    --DEFAULT_FORUM: #B7B7B7;
@@ -201,11 +200,11 @@
    color: white;
 }
  .post-row .accepted {
-   background-color: black;
-   color: #FFD700;
+   background-color: gray;
+   color: white;
 }
  .post-row .unanswered {
-   background-color: var(--UNANSWERED_POST);
+   background-color: black;
    color: white;
 }
  .post-row.Deleted {
