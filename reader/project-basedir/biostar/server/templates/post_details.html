@@ -43,7 +43,7 @@
                     <span itemscope itemtype="http://schema.org/Answer">
                         {% if award_pid == answer.id %}
                             {% if award_recieved_sats %}
-                                {% post_body answer user post.tree "0" "0" "0" award_recieved_sats %}
+                                {% post_body answer user post.tree "0" "0" "0" award_recieved_sats take_custody_url %}
                             {% else %}
                                 {% post_body answer user post.tree "0" candidate_award_sats preliminary_award_time %}
                             {% endif %}

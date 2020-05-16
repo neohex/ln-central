@@ -32,7 +32,7 @@
 
 {% elif award_recieved_sats and award_recieved_sats != "0" %}
     <div class="post-action" style="width: 70%">
-    Congratulations {% coolname post.author %} you won <span style="color: orange;">{{award_recieved_sats|intcomma}} sat <img width=20 src="/static/bitcoin.png"></a>ounty</span>! Please take custody of your sats here
+    Congratulations {% coolname post.author %} you won <span style="color: orange;">{{award_recieved_sats|intcomma}} sat <img width=20 src="/static/bitcoin.png"></a>ounty</span>! Please <a href="{{ take_custody_url }}">take sats here</a>.
     </div>
 
 {% endif %}

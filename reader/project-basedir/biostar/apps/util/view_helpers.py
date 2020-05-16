@@ -37,8 +37,6 @@ def gen_invoice(publish_url, memo, node_id):
             node_name = n["node_name"]
             list_pos = pos
 
-    print(node_name)
-
     context["node_name"] = node_name
 
     next_node_id = nodes_list[(list_pos + 1) % len(nodes_list)]["id"]

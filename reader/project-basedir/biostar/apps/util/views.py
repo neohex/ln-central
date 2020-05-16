@@ -178,3 +178,14 @@ class ChannelOpenView(TemplateView):
 
 
         return context
+
+
+class TakeCustodyView(TemplateView):
+    """
+    """
+
+    template_name = "channel_open.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(TakeCustodyView, self).get_context_data(**kwargs)
+        return context

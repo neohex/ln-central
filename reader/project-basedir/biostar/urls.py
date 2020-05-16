@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 from biostar.server import views, ajax, search, moderate, api
 from biostar.apps.posts.views import NewAnswer, NewPost, EditPost, PostPreviewView, VotePublishView, PostPublishView, AcceptPreviewView
 from biostar.apps.users.views import DigestManager
-from biostar.apps.util.views import QRCode, PaymentCheck, ChannelOpenView
+from biostar.apps.util.views import QRCode, PaymentCheck, ChannelOpenView, TakeCustodyView
 from biostar.apps.bounty.views import BountyFormView, BountyPublishView
 import biostar.apps.info.views as info
 
@@ -102,6 +102,10 @@ urlpatterns = [
 
     url(r'^x/publish/bounty/best_node/(?P<memo>{})/$'.format(MEMO_RE), BountyPublishView.as_view(), name="bounty-publish"),
     url(r'^x/publish/bounty/(?P<node_id>\d+)/(?P<memo>{})/$'.format(MEMO_RE), BountyPublishView.as_view(), name="bounty-publish-node-selected"),
+
+    # Take Custody
+    url(r'^x/take/custody/best_node/(?P<award_id>\d+)/$', TakeCustodyView.as_view(), name="take-custody"),
+    url(r'^x/take/custody/(?P<node_id>\d+)/(?P<awardid>\d+)/$', TakeCustodyView.as_view(), name="take-custody-node-selected"),
 
     # # Edit an existing post. (Not implemented)
     # url(r'^x/edit/(?P<pk>\d+)/$', EditPost.as_view(), name="post-edit"),

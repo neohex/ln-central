@@ -405,6 +405,8 @@ class PostDetails(DetailView):
             award = awards[0]
 
             context['award_pid'] = award.post.id
+            context['take_custody_url'] = reverse("take-custody", kwargs={"award_id": award.id})
+
             if bounties.first().award_time <= timezone.now():
                 context['award_recieved_sats'] = bounty_sats
             else:
