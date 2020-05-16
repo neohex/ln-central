@@ -50,7 +50,7 @@ class Bounty(CustomModel):
     )
 
     award_time = models.DateTimeField(
-        verbose_name="award_time is when the winner was announced",
+        verbose_name="award_time is when the winner will be announced",
         null=True,
     )
 

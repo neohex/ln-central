@@ -105,6 +105,15 @@ def award_bounty(question_post):
             award.save()
             logger.info("Updated existing award {}".format(award))
 
+    # 5. update award time on the Bounty
+    earliest_bounty.award_time = timezone.now() + settings.AWARD_TIMEDELTA
+    earliest_bounty.save()
+    logger.info(
+        "Updated award time to {} on {}".format(
+          earliest_bounty.award_time,
+            earliest_bounty,
+        )
+    )
 
 class CheckpointHelper(object):
     def __init__(self, node, invoice, creation_date):

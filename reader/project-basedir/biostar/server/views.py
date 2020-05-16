@@ -13,7 +13,7 @@ from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator
 from django.http import Http404
 from django.core.urlresolvers import reverse
-from django.utils.timezone import utc
+from django.utils import timezone
 
 from . import moderate
 from braces.views import LoginRequiredMixin, JSONResponseMixin
@@ -403,11 +403,13 @@ class PostDetails(DetailView):
                 raise Exception(msg)
 
             award = awards[0]
-            oldest_bounty = bounties.first()
 
-            context['candidate_award_sats'] = bounty_sats
-            context['candidate_award_pid'] = award.post.id
-            context['preliminary_award_time'] = oldest_bounty.activation_time + timedelta(days=3)
+            context['award_pid'] = award.post.id
+            if bounties.first().award_time <= timezone.now():
+                context['award_recieved_sats'] = bounty_sats
+            else:
+                context['candidate_award_sats'] = bounty_sats
+                context['preliminary_award_time'] = bounties.first().award_time
 
         return context
 

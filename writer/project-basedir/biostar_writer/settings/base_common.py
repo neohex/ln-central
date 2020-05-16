@@ -15,3 +15,8 @@ FRIENDLY_PREFIX = "ln.support"  # cannot have under-bars (_s)
 
 INVOICE_EXPIRY = 3600  # in seconds
 INVOICE_RETENTION = timedelta(weeks=1)  # how long to keep invoice requests and invoices
+
+# Bounty
+AWARD_TIMEDELTA = timedelta(days=3)
+#AWARD_TIMEDELTA = timedelta(seconds=30)
+CLAIM_TIMEDELTA = timedelta(days=7)
