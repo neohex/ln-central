@@ -134,6 +134,9 @@ class ChannelOpenView(TemplateView):
         context = super(ChannelOpenView, self).get_context_data(**kwargs)
         nodes_list = ln.get_nodes_list()
 
+        if len(nodes_list) == 0:
+            raise ln.LNUtilError("No nodes found")
+
         # TODO: modularize getting best node and name lookup
 
         if 'node_id' not in context:
@@ -151,6 +154,9 @@ class ChannelOpenView(TemplateView):
 
         # Lookup the node name
         node_name = "Unknown"
+        node_key = "Unknown"
+        connect = "Unknown"
+
         list_pos = 0
         for pos, n in enumerate(nodes_list):
             if n["id"] == node_id:

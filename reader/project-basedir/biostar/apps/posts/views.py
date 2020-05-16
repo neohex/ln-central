@@ -924,13 +924,17 @@ class PostPublishView(TemplateView):
         context = super(PostPublishView, self).get_context_data(**kwargs)
 
         try:
-            inovice_details = view_helpers.gen_invoice(publish_url="post-publish-node-selected", memo=context["memo"])
+            invoice_details = view_helpers.gen_invoice(
+                publish_url="post-publish-node-selected",
+                memo=context["memo"],
+                node_id=context.get("node_id"),
+            )
         except ln.LNUtilError as msg:
             logger.exception(msg)
             return {}
 
         for i in ["pay_req", "payment_amount", "open_channel_url", "next_node_url", "node_name", "node_id"]:
-            context[i] = inovice_details[i]
+            context[i] = invoice_details[i]
 
         return context
 
@@ -959,13 +963,17 @@ class VotePublishView(TemplateView):
         context = super(VotePublishView, self).get_context_data(**kwargs)
 
         try:
-            inovice_details = view_helpers.gen_invoice(publish_url="vote-publish-node-selected", memo=context["memo"])
+            invoice_details = view_helpers.gen_invoice(
+                publish_url="vote-publish-node-selected",
+                memo=context["memo"],
+                node_id=context.get("node_id"),
+            )
         except ln.LNUtilError as msg:
             logger.exception(msg)
             return {}
 
         for i in ["pay_req", "payment_amount", "open_channel_url", "next_node_url", "node_name", "node_id"]:
-            context[i] = inovice_details[i]
+            context[i] = invoice_details[i]
 
         return context
 

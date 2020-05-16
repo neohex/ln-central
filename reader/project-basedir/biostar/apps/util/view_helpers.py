@@ -9,27 +9,25 @@ from common import json_util
 from common.log import logger
 
 
-def gen_invoice(publish_url, memo):
+def gen_invoice(publish_url, memo, node_id):
     context = {}
 
-    # TODO: move this to a common lib
     nodes_list = ln.get_nodes_list()
 
     if len(nodes_list) == 0:
         raise ln.LNUtilError("No nodes found")
 
-    if 'node_id' not in context:
+    if not node_id:
         node_with_top_score = nodes_list[0]
         for node in nodes_list:
             if node["qos_score"] > node_with_top_score["qos_score"]:
                 node_with_top_score = node
 
         node_id = node_with_top_score["id"]
-
-        context["node_id"] = str(node_id)
     else:
-        node_id = int(context["node_id"])
+        node_id = int(node_id)
 
+    context["node_id"] = str(node_id)
 
     # Lookup the node name
     node_name = "Unknown"
@@ -39,6 +37,7 @@ def gen_invoice(publish_url, memo):
             node_name = n["node_name"]
             list_pos = pos
 
+    print(node_name)
 
     context["node_name"] = node_name
 
@@ -58,7 +57,7 @@ def gen_invoice(publish_url, memo):
     )
 
     try:
-        details = ln.add_invoice(memo, node_id=context["node_id"])
+        details = ln.add_invoice(memo, node_id=node_id)
     except ln.LNUtilError as e:
         logger.exception(e)
         raise
