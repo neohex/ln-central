@@ -105,7 +105,7 @@ urlpatterns = [
 
     # Take Custody
     url(r'^x/take/custody/best_node/(?P<award_id>\d+)/$', TakeCustodyView.as_view(), name="take-custody"),
-    url(r'^x/take/custody/(?P<node_id>\d+)/(?P<awardid>\d+)/$', TakeCustodyView.as_view(), name="take-custody-node-selected"),
+    url(r'^x/take/custody/(?P<node_id>\d+)/(?P<award_id>\d+)/$', TakeCustodyView.as_view(), name="take-custody-node-selected"),
 
     # # Edit an existing post. (Not implemented)
     # url(r'^x/edit/(?P<pk>\d+)/$', EditPost.as_view(), name="post-edit"),

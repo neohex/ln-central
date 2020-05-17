@@ -11,6 +11,7 @@ from django.core.urlresolvers import reverse
 
 from biostar.apps.util import ln
 from biostar.apps.posts.models import Post
+from biostar.apps.bounty.models import BountyAward
 
 import qrcode
 import qrcode.image.svg
@@ -184,8 +185,53 @@ class TakeCustodyView(TemplateView):
     """
     """
 
-    template_name = "channel_open.html"
+    template_name = "take_custody.html"
 
     def get_context_data(self, **kwargs):
         context = super(TakeCustodyView, self).get_context_data(**kwargs)
+        award_id = int(context["award_id"])
+
+        nodes_list = ln.get_nodes_list()
+
+        if len(nodes_list) == 0:
+            raise ln.LNUtilError("No nodes found")
+
+        # TODO: modularize getting best node and name lookup
+
+        if 'node_id' not in context:
+            # best node
+            node_with_top_score = nodes_list[0]
+            for node in nodes_list:
+                if node["qos_score"] > node_with_top_score["qos_score"]:
+                    node_with_top_score = node
+
+            node_id = node_with_top_score["id"]
+
+            context["node_id"] = str(node_id)
+        else:
+            node_id = int(context["node_id"])
+
+        # Lookup the node name
+        node_name = "Unknown"
+
+        list_pos = 0
+        for pos, n in enumerate(nodes_list):
+            if n["id"] == node_id:
+                node_name = n["node_name"]
+                list_pos = pos
+
+        context["node_name"] = node_name
+
+        next_node_id = nodes_list[(list_pos + 1) % len(nodes_list)]["id"]
+
+        context["next_node_url"] = reverse("take-custody-node-selected", kwargs=dict(node_id=next_node_id, award_id=award_id))
+
+
+        # Lookup author and other bounty details
+        award = BountyAward.objects.get(id=award_id)
+
+        context["author"] = award.post.author
+        context["amt"] = 100000
+
+
         return context
