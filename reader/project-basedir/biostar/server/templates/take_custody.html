@@ -26,33 +26,60 @@
 
 
 
-{% if node_name %}
-    <div class="row">
-        <h2 class="col-md-4 col-xs-4" style="text-align: right;">
-            LN Node: {{ node_name }}
-        </h2>
+{% if errors_detected %}
+    <div style="background: #a94442; color: #ffffff; text-align: center; padding: 0.5em; font-size: 150%;">
+    Errors Detected
     </div>
-    <div class="row">
-        <p class="col-md-4 col-xs-4" style="text-align: right;">
-            Payment not going through?<br />
-            1. Make sure you have enough inbound liquidity</p>
-    </div>
-    <div class="row">
-        <p class="col-md-4 col-xs-4" style="text-align: right;">
-            2. ln.support has multiple nodes you can receive from:
-        </p>
-        <div class="btn-group">
-            <a href="{{ next_node_url }}" class="btn btn-primary">
-                    Receive from a different node
-            </a>
+
+    {% if show_error_summary %}
+        <div style="background: #a94442; color: #ffffff; text-align: left; padding: 0.5em; font-size: 150%;">
+        <ul>
+            {% for e in error_summary_list %}
+                <li>{{ e }}</li>
+            {% endfor %}
+        </ul>
         </div>
-    </div>
+    {% endif %}
 
-    <h2>Take sats for the bounty award</h2>
+{% endif %}
 
-    Congratulations <a href="{% url 'user-details' author.id %}">{% coolname author %}</a> you won <span style="color: orange;">{{amt|intcomma}} sat <img width=20 src="/static/bitcoin.png"></a>ounty</span>! Please create a Lightning invoice for {{amt|intcomma}} sats and paste it bellow.
+{% if node_name %}
+    {% if invoice %}
+
+        <p>Please sign your Lightning invoice</p>
+        {% crispy sign_form %}
+
+    {% else %}
+        <div class="row">
+            <h2 class="col-md-4 col-xs-4" style="text-align: right;">
+                LN Node: {{ node_name }}
+            </h2>
+        </div>
+        <div class="row">
+            <p class="col-md-4 col-xs-4" style="text-align: right;">
+                Payment not going through?<br />
+                1. Make sure you have enough inbound liquidity</p>
+        </div>
+        <div class="row">
+            <p class="col-md-4 col-xs-4" style="text-align: right;">
+                2. ln.support has multiple nodes you can receive from:
+            </p>
+            <div class="btn-group">
+                <a href="{{ next_node_url }}" class="btn btn-primary">
+                        Receive from a different node
+                </a>
+            </div>
+        </div>
+
+        <h2>Take sats for the bounty award</h2>
+
+        <p>Congratulations <a href="{% url 'user-details' post.author.id %}">{% coolname post.author %}</a> you won <span style="color: orange;">{{amt|intcomma}} sat <img width=20 src="/static/bitcoin.png"></a>ounty</span> for your answer! The winning answer was: <a href="{% url 'post-details' post.id }}">ln.support/{{ post.id }}</a></p>
 
 
+        <p>Please create a Lightning invoice for {{amt|intcomma}} sats and paste it bellow.</p>
+        {% crispy invoice_form %}
+
+    {% endif %}
 
 
 {% else %}

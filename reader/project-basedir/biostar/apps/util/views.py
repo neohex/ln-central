@@ -3,20 +3,25 @@ import os
 import io
 import time
 
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Field, Fieldset, Div, Submit, ButtonHolder
+
 from django import forms
 from django.views.generic import  UpdateView, DetailView, TemplateView
 from django.http import Http404
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.shortcuts import render
 
 from biostar.apps.util import ln
 from biostar.apps.posts.models import Post
-from biostar.apps.bounty.models import BountyAward
+from biostar.apps.bounty.models import Bounty, BountyAward
 
 import qrcode
 import qrcode.image.svg
 import svgwrite
 
+from common import validators
 from common.log import logger
 
 
@@ -181,11 +186,85 @@ class ChannelOpenView(TemplateView):
         return context
 
 
+class TakeCustodyInvoiceForm(forms.Form):
+    FIELDS = ["invoice"]
+
+    invoice = forms.CharField(
+        widget=forms.TextInput,
+        label="Lightning Invoice",
+        required=True,
+        error_messages={
+            'required': "Invoice is required"
+        },
+        max_length=settings.MAX_MEMO_SIZE, min_length=5,
+        validators=[],
+        help_text="Invoice to take custody of the sats won",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(TakeCustodyInvoiceForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Fieldset(
+                'Invoice',
+                'invoice'
+            ),
+            ButtonHolder(
+                Submit('submit', 'Next')
+            )
+        )
+
+class TakeCustodySignForm(forms.Form):
+    FIELDS = ["invoice", "signature"]
+
+    invoice = forms.CharField(
+        widget=forms.TextInput,
+        label="Lightning Invoice",
+        required=True,
+        error_messages={
+            'required': "Invoice is required"
+        },
+        max_length=settings.MAX_MEMO_SIZE, min_length=5,
+        validators=[],
+        help_text="Invoice to take custody of the sats won",
+    )
+
+    signature = forms.CharField(
+        widget=forms.Textarea,
+        label="Signature",
+        required=True,
+        error_messages={
+            'required': (
+                "Signature is required"
+            )
+        },
+        max_length=200, min_length=10,
+        validators=[validators.pre_validate_signature],
+        help_text="JSON output of the signmessage command or just text of the signature")
+
+    def __init__(self, *args, **kwargs):
+        super(TakeCustodySignForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+
+        self.helper.layout = Layout(
+            Fieldset(
+                'Invoice with signature',
+                'invoice'
+            ),
+            Field('signature', rows="4"),
+            ButtonHolder(
+                Submit('submit', 'Initiate Payment')
+            )
+        )
+
+
 class TakeCustodyView(TemplateView):
     """
     """
 
     template_name = "take_custody.html"
+    form_class1 = TakeCustodyInvoiceForm
+    form_class2 = TakeCustodySignForm
 
     def get_context_data(self, **kwargs):
         context = super(TakeCustodyView, self).get_context_data(**kwargs)
@@ -226,12 +305,77 @@ class TakeCustodyView(TemplateView):
 
         context["next_node_url"] = reverse("take-custody-node-selected", kwargs=dict(node_id=next_node_id, award_id=award_id))
 
-
         # Lookup author and other bounty details
         award = BountyAward.objects.get(id=award_id)
+        context["post"] = award.post
 
-        context["author"] = award.post.author
-        context["amt"] = 100000
+        # TODO: put into a shard function get_bounty_sats
+        bounty_sats = 0
 
+        for b in Bounty.objects.filter(post_id=award.post.parent.id, is_active=True, is_payed=False):
+            bounty_sats += b.amt
+
+        context["amt"] = bounty_sats
 
         return context
+
+
+    def get(self, request, *args, **kwargs):
+        try:
+            context = self.get_context_data(**kwargs)
+        except Exception as e:
+            logger.exception(e)
+            return render(request, self.template_name, {})
+
+        form1 = self.form_class1(initial={"invoice": ""})
+        context['invoice_form'] = form1
+
+        return render(request, self.template_name, context)
+
+
+    def post(self, request, *args, **kwargs):
+        try:
+            context = self.get_context_data(**kwargs)
+        except Exception as e:
+            logger.exception(e)
+            raise
+
+        invoice_pre_validation = request.POST.get("invoice")
+        sign_pre_validation = request.POST.get("signature")
+
+        if not invoice_pre_validation:
+            # Invoice not provided, back to first form to get invoice
+
+            form1 = self.form_class1(request.POST)
+            context['invoice_form'] = form1
+            context['errors_detected'] = True
+
+        elif not sign_pre_validation:
+            # Time to sign
+            form2 = self.form_class2(initial={"invoice": invoice_pre_validation, "signature": ""})
+            context['sign_form'] = form2
+            context['invoice'] = invoice_pre_validation
+
+        elif invoice_pre_validation and sign_pre_validation:
+            # Got everithing
+            form2 = self.form_class2(request.POST)
+            context['sign_form'] = form2
+            context['invoice'] = invoice_pre_validation
+
+            error_summary_list = []
+
+            if not form2.is_valid():
+                context['errors_detected'] = True
+            else:
+                # TODO: make API call and report back the results, potentially populating error_summary_list
+                error_summary_list.append("This type of pyament is not yet implemented")
+
+                if len(error_summary_list) > 0:
+                    context['errors_detected'] = True
+                    context["show_error_summary"] = True
+                    context["error_summary_list"] = error_summary_list
+
+        else:
+            raise ln.LNUtilError("Invaild state")
+
+        return render(request, self.template_name, context)
