@@ -379,9 +379,9 @@ class TakeCustodyView(TemplateView):
                     context["show_error_summary"] = True
                     context["error_summary_list"] = error_summary_list
                 else:
-                    render(request, self.template_name, context)
+                    render(request, "payment_successful.html", context)
 
         else:
             raise ln.LNUtilError("Invalid state")
 
-        return render(request, "payment_successful.html", context)
+        return render(request, self.template_name, context)
