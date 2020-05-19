@@ -288,7 +288,7 @@ class PayAwardViewSet(viewsets.ModelViewSet):
 
         # Check invoice amount
         if not settings.MOCK_LN_CLIENT:
-            if bounty_sats != num_satoshis:
+            if int(bounty_sats) != int(num_satoshis):
                 raise PayAwardError(
                     (
                         "Invoice num_satoshis amount is incorrect, "
@@ -296,12 +296,12 @@ class PayAwardViewSet(viewsets.ModelViewSet):
                     ).format(bounty_sats, num_satoshis)
                 )
 
-            if bounty_sats != int(num_msat / 1000):
+            if int(bounty_sats) != int(int(num_msat) / 1000):
                 raise PayAwardError(
                     (
                         "Invoice num_satoshis amount is incorrect, "
                         "we expect to send you {} sats, yet the invoice says {} msats which is {} sats"
-                    ).format(bounty_sats, num_msat, int(num_msat / 1000))
+                    ).format(bounty_sats, num_msat, int(int(num_msat) / 1000))
                 )
 
         logger.info("Entered critical section")
