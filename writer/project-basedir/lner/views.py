@@ -18,12 +18,16 @@ from lner.models import LightningNode
 from lner.models import Invoice
 from lner.models import InvoiceRequest
 from lner.models import VerifyMessageResult
+from lner.models import PayAwardResult
+
+from bounty.models import Bounty, BountyAward
 
 from lner.serializers import LightningNodeSerializer
 from lner.serializers import InvoiceSerializer
 from lner.serializers import InvoiceRequestSerializer
 from lner.serializers import CheckPaymentSerializer
 from lner.serializers import VerifyMessageResponseSerializer
+from lner.serializers import PayAwardResponseSerializer
 
 from common import log
 from common import lnclient
@@ -46,6 +50,11 @@ class LightningNodeViewSet(viewsets.ModelViewSet):
 
 class CreateInvoiceError(Exception):
     pass
+
+
+class PayAwardError(Exception):
+    pass
+
 
 class CreateInvoiceViewSet(viewsets.ModelViewSet):
     """
@@ -205,7 +214,7 @@ class VerifyMessageViewSet(viewsets.ModelViewSet):
 
         sig = validators.pre_validate_signature(sig)
 
-        node = LightningNode.objects.order_by("?").first()
+        node = LightningNode.objects.filter(enabled=True).order_by("-qos_score").first()
 
         result_json = lnclient.verifymessage(msg=memo, sig=sig, rpcserver=node.rpcserver, mock=settings.MOCK_LN_CLIENT)
         pubkey = result_json["pubkey"]
@@ -215,3 +224,91 @@ class VerifyMessageViewSet(viewsets.ModelViewSet):
 
         return [verify_message_result]
 
+
+class PayAwardViewSet(viewsets.ModelViewSet):
+    """
+    Check message against a signature
+    """
+
+    queryset = []
+    serializer_class = PayAwardResponseSerializer
+
+    def get_queryset(self):
+        node_id = self.request.query_params.get("node_id")
+        award_id = self.request.query_params.get("award_id")
+        invoice = self.request.query_params.get("invoice")
+        sig = self.request.query_params.get("sig")
+
+        assert invoice is not None, "Missing a required field: invoice"
+        assert sig is not None, "Missing a required field: sig"
+
+        sig = validators.pre_validate_signature(sig)
+
+        node_id = self.request.query_params.get("node_id")
+        logger.info("Looking up node id: {}".format(node_id))
+
+        # Lookup node
+        node = get_object_or_404(LightningNode.objects, id=node_id)
+        if not node.enabled:
+            raise PayAwardError("Node is not enabled, try a different node")
+
+        sig_verify_json = lnclient.verifymessage(msg=invoice, sig=sig, rpcserver=node.rpcserver, mock=settings.MOCK_LN_CLIENT)
+        logger.info("Attempting to pay award for: {}".format(sig_verify_json))
+
+        valid = sig_verify_json["valid"]
+        sig_pubkey = sig_verify_json["pubkey"]
+
+        if not valid:
+            raise PayAwardError("Signature is invalid")
+
+        # Lookup Award
+        award = BountyAward.objects.get(id=award_id)
+
+        # Check award recipient
+        award_pubkey = award.post.author.pubkey
+        if award_pubkey != sig_pubkey:
+            raise PayAwardError("Incorrect signature, this award will be payed out only to {}".format(award_pubkey))
+
+        # Calculate award amount
+        # TODO: put into a shard function get_bounty_sats
+        bounty_sats = 0
+
+        bounties_to_pay = []
+        for b in Bounty.objects.filter(post_id=award.post.parent.id, is_active=True, is_payed=False):
+            bounties_to_pay.append(b)
+            bounty_sats += b.amt
+
+        logger.info("Need to pay award in the amount of: {} sat".format(bounty_sats))
+
+        # Decode invoice and lookup amount
+        payreq_decoded = lnclient.decodepayreq(payreq=invoice, rpcserver=node.rpcserver, mock=settings.MOCK_LN_CLIENT)
+        num_satoshis = payreq_decoded["num_satoshis"]
+        num_msat = payreq_decoded["num_msat"]
+        logger.info("User requested: num_satoshis={} and num_msat={} ".format(num_satoshis, num_msat))
+
+        if not settings.MOCK_LN_CLIENT:
+            if bounty_sats != num_satoshis or bounty_sats != int(num_msat / 1000):
+                raise PayAwardError("Invoice amount is incorrect, we expect to send you {} sats".format(bounty_sats))
+
+        logger.info("Entered critical section")
+
+        # ! TODO (2020-05-19): Check for recent payments on all nodes, in case we crash in the middle of critical section
+
+        # Pay
+        logger.info("about to pay")
+        pay_results = lnclient.payinvoice(payreq=invoice, rpcserver=node.rpcserver, mock=settings.MOCK_LN_CLIENT)
+
+        logger.info("payed, about to update db")
+
+        # Update DB
+        for b in bounties_to_pay:
+            b.is_payed = True
+            b.is_active = False
+            b.save()
+
+        logger.info("db updated")
+        logger.info("Existed critical section")
+
+        result = PayAwardResult(node_id=node_id, invoice=invoice, valid=valid, identity_pubkey=award_pubkey)
+
+        return [result]

@@ -44,6 +44,7 @@ class CheckPaymentSerializer(HyperlinkedModelSerializer):
         model = Invoice
         fields = ['checkpoint_value', 'pay_req', 'performed_action_type', 'performed_action_id']
 
+
 class VerifyMessageResponseSerializer(HyperlinkedModelSerializer):
     memo = CharField(max_length=settings.MAX_MEMO_SIZE)
     identity_pubkey = CharField(max_length=255)
@@ -52,3 +53,14 @@ class VerifyMessageResponseSerializer(HyperlinkedModelSerializer):
     class Meta:
         model = VerifyMessageResult
         fields = ['memo', 'valid', 'identity_pubkey']
+
+
+class PayAwardResponseSerializer(HyperlinkedModelSerializer):
+    node_id = IntegerField()
+    invoice = CharField(max_length=settings.MAX_MEMO_SIZE)
+    valid = BooleanField()
+    identity_pubkey = CharField(max_length=255)
+
+    class Meta:
+        model = VerifyMessageResult
+        fields = ['node_id', 'invoice', 'valid', 'identity_pubkey']

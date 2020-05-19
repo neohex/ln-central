@@ -64,7 +64,36 @@ def verifymessage(msg, sig, rpcserver, mock=False):
     cmd =  [LNCLI_BIN] + _auth_args(rpcserver) + [
         "verifymessage",
         "--msg", msg,
-        "--sig", sig
+        "--sig", sig,
+    ]
+
+    return cli.run(cmd, log_cmd=True)
+
+def decodepayreq(payreq, rpcserver, mock=False):
+    if mock:
+        return {
+            "num_satoshis": 123,
+            "num_msat": 123000,
+            "pubkey": "FAKE2"
+        }
+
+    cmd =  [LNCLI_BIN] + _auth_args(rpcserver) + [
+        "decodepayreq",
+        "--pay_req", payreq,
+    ]
+
+    return cli.run(cmd, log_cmd=True)
+
+def payinvoice(payreq, rpcserver, mock=False):
+    # TODO: capture STDERR and return it
+    if mock:
+        return ""
+
+    cmd =  [LNCLI_BIN] + _auth_args(rpcserver) + [
+        "payinvoice",
+        "-f",  # force, no interactive prompt
+        "--json",
+        "--pay_req", payreq,
     ]
 
     return cli.run(cmd, log_cmd=True)

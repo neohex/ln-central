@@ -67,6 +67,7 @@ class PaymentCheck(TemplateView):
                 break
 
             # TODO: shutdown if sigterm is caught
+
             time.sleep(1)
             count += 1
             if count > 10:
@@ -357,7 +358,7 @@ class TakeCustodyView(TemplateView):
             context['invoice'] = invoice_pre_validation
 
         elif invoice_pre_validation and sign_pre_validation:
-            # Got everithing
+            # Got everything
             form2 = self.form_class2(request.POST)
             context['sign_form'] = form2
             context['invoice'] = invoice_pre_validation
@@ -367,15 +368,20 @@ class TakeCustodyView(TemplateView):
             if not form2.is_valid():
                 context['errors_detected'] = True
             else:
-                # TODO: make API call and report back the results, potentially populating error_summary_list
-                error_summary_list.append("This type of pyament is not yet implemented")
+                # make API call and report back the results, potentially populating error_summary_list
+                award_id = int(context["award_id"])
+                node_id = int(context["node_id"])
+
+                ln.payaward(node_id=node_id, award_id=award_id, invoice=invoice_pre_validation, sig=sign_pre_validation)
 
                 if len(error_summary_list) > 0:
                     context['errors_detected'] = True
                     context["show_error_summary"] = True
                     context["error_summary_list"] = error_summary_list
+                else:
+                    render(request, self.template_name, context)
 
         else:
-            raise ln.LNUtilError("Invaild state")
+            raise ln.LNUtilError("Invalid state")
 
-        return render(request, self.template_name, context)
+        return render(request, "payment_successful.html", context)

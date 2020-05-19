@@ -161,3 +161,22 @@ def verifymessage(memo, sig):
 
     response_parsed = response.json()[0]
     return response_parsed
+
+def payaward(node_id, award_id, invoice, sig):
+    response = call_endpoint('ln/payaward', args={"node_id": node_id, "award_id": award_id, "invoice": invoice, "sig": sig})
+    if response.status_code != 200:
+        error_msg = (
+            "Got API error when calling payaward, http_status={},node_id={},award_id={},invoice={},sig={}".format(
+                response.status_code,
+                node_id,
+                award_id,
+                invoice,
+                sig
+            )
+        )
+
+        logger.error(error_msg)
+        raise LNUtilError(error_msg)
+
+    response_parsed = response.json()[0]
+    return response_parsed
