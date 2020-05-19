@@ -89,10 +89,11 @@ def payinvoice(payreq, rpcserver, mock=False):
     if mock:
         return ""
 
+    # TODO: add --json, note that this flag is not defined in older versions of lncli
+
     cmd =  [LNCLI_BIN] + _auth_args(rpcserver) + [
         "payinvoice",
         "-f",  # force, no interactive prompt
-        "--json",
         "--pay_req", payreq,
     ]
 
