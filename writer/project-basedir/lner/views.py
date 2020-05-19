@@ -286,9 +286,23 @@ class PayAwardViewSet(viewsets.ModelViewSet):
         num_msat = payreq_decoded["num_msat"]
         logger.info("User requested: num_satoshis={} and num_msat={} ".format(num_satoshis, num_msat))
 
+        # Check invoice amount
         if not settings.MOCK_LN_CLIENT:
-            if bounty_sats != num_satoshis or bounty_sats != int(num_msat / 1000):
-                raise PayAwardError("Invoice amount is incorrect, we expect to send you {} sats".format(bounty_sats))
+            if bounty_sats != num_satoshis:
+                raise PayAwardError(
+                    (
+                        "Invoice num_satoshis amount is incorrect, "
+                        "we expect to send you {} sats, yet the invoice says {}"
+                    ).format(bounty_sats, num_satoshis)
+                )
+
+            if bounty_sats != int(num_msat / 1000):
+                raise PayAwardError(
+                    (
+                        "Invoice num_satoshis amount is incorrect, "
+                        "we expect to send you {} sats, yet the invoice says {} msats which is {} sats"
+                    ).format(bounty_sats, num_msat, int(num_msat / 1000))
+                )
 
         logger.info("Entered critical section")
 
