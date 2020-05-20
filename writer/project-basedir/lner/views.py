@@ -96,7 +96,7 @@ class CreateInvoiceViewSet(viewsets.ModelViewSet):
                 if len(Invoice.objects.all()) == 0:
                     invoice_stdout["add_index"] = 1
                 else:
-                    # TODO: Mock mulitiple nodes. Currently Mock uses Invoice.objects.aggregate which ignores node.
+                    # TODO: Mock multiple nodes. Currently Mock uses Invoice.objects.aggregate which ignores node.
                     invoice_stdout["add_index"] = Invoice.objects.aggregate(Max('add_index'))["add_index__max"] + 1
 
                 serializer = InvoiceSerializer(data=invoice_stdout, many=False)  # re-serialize
@@ -321,7 +321,7 @@ class PayAwardViewSet(viewsets.ModelViewSet):
             b.save()
 
         logger.info("db updated")
-        logger.info("Existed critical section")
+        logger.info("Exited critical section")
 
         result = PayAwardResult(node_id=node_id, invoice=invoice, valid=valid, identity_pubkey=award_pubkey)
 
