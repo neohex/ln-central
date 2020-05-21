@@ -52,10 +52,6 @@ class CreateInvoiceError(Exception):
     pass
 
 
-class PayAwardError(Exception):
-    pass
-
-
 class CreateInvoiceViewSet(viewsets.ModelViewSet):
     """
     Create a new lightning invoice
@@ -225,6 +221,11 @@ class VerifyMessageViewSet(viewsets.ModelViewSet):
         return [verify_message_result]
 
 
+def payment_fail(msg):
+    logger.error(msg)
+    return [PayAwardResult(payment_successful=False, failure_message=msg)]
+
+
 class PayAwardViewSet(viewsets.ModelViewSet):
     """
     Check message against a signature
@@ -250,7 +251,7 @@ class PayAwardViewSet(viewsets.ModelViewSet):
         # Lookup node
         node = get_object_or_404(LightningNode.objects, id=node_id)
         if not node.enabled:
-            raise PayAwardError("Node is not enabled, try a different node")
+            return payment_fail("Node is not enabled, try a different node")
 
         sig_verify_json = lnclient.verifymessage(msg=invoice, sig=sig, rpcserver=node.rpcserver, mock=settings.MOCK_LN_CLIENT)
         logger.info("Attempting to pay award for: {}".format(sig_verify_json))
@@ -259,7 +260,7 @@ class PayAwardViewSet(viewsets.ModelViewSet):
         sig_pubkey = sig_verify_json["pubkey"]
 
         if not valid:
-            raise PayAwardError("Signature is invalid")
+            return payment_fail("Signature is invalid")
 
         # Lookup Award
         award = BountyAward.objects.get(id=award_id)
@@ -267,7 +268,7 @@ class PayAwardViewSet(viewsets.ModelViewSet):
         # Check award recipient
         award_pubkey = award.post.author.pubkey
         if award_pubkey != sig_pubkey:
-            raise PayAwardError("Incorrect signature, this award will be payed out only to {}".format(award_pubkey))
+            return payment_fail("Incorrect signature, this award will be payed out only to {}".format(award_pubkey))
 
         # Calculate award amount
         # TODO: put into a shard function get_bounty_sats
@@ -286,10 +287,13 @@ class PayAwardViewSet(viewsets.ModelViewSet):
         num_msat = payreq_decoded["num_msat"]
         logger.info("User requested: num_satoshis={} and num_msat={} ".format(num_satoshis, num_msat))
 
+        if int(bounty_sats) == 0:
+            return payment_fail("This bounty has already been payed out")
+
         # Check invoice amount
         if not settings.MOCK_LN_CLIENT:
             if int(bounty_sats) != int(num_satoshis):
-                raise PayAwardError(
+                return payment_fail(
                     (
                         "Invoice num_satoshis amount is incorrect, "
                         "we expect to send you {} sats, yet the invoice says {}"
@@ -297,11 +301,15 @@ class PayAwardViewSet(viewsets.ModelViewSet):
                 )
 
             if int(bounty_sats) != int(int(num_msat) / 1000):
-                raise PayAwardError(
+                return payment_fail(
                     (
                         "Invoice num_satoshis amount is incorrect, "
-                        "we expect to send you {} sats, yet the invoice says {} msats which is {} sats"
-                    ).format(bounty_sats, num_msat, int(int(num_msat) / 1000))
+                        "we expect to send you {} sats, yet your invoice says {} msats which is {} sats"
+                    ).format(
+                        bounty_sats,
+                        num_msat,
+                        int(int(num_msat) / 1000)
+                    )
                 )
 
         logger.info("Entered critical section")
@@ -323,6 +331,4 @@ class PayAwardViewSet(viewsets.ModelViewSet):
         logger.info("db updated")
         logger.info("Exited critical section")
 
-        result = PayAwardResult(node_id=node_id, invoice=invoice, valid=valid, identity_pubkey=award_pubkey)
-
-        return [result]
+        return [PayAwardResult(payment_successful=True)]

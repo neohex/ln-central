@@ -9,6 +9,8 @@ from lner.models import LightningNode
 from lner.models import Invoice
 from lner.models import InvoiceRequest
 from lner.models import VerifyMessageResult
+from lner.models import PayAwardResult
+
 from common import validators
 
 
@@ -56,11 +58,12 @@ class VerifyMessageResponseSerializer(HyperlinkedModelSerializer):
 
 
 class PayAwardResponseSerializer(HyperlinkedModelSerializer):
-    node_id = IntegerField()
-    invoice = CharField(max_length=settings.MAX_MEMO_SIZE)
-    valid = BooleanField()
-    identity_pubkey = CharField(max_length=255)
+    payment_successful = BooleanField()
+    failure_message =  CharField(
+        max_length=255,
+        default=""
+    )
 
     class Meta:
-        model = VerifyMessageResult
-        fields = ['node_id', 'invoice', 'valid', 'identity_pubkey']
+        model = PayAwardResult
+        fields = ['payment_successful', 'failure_message']

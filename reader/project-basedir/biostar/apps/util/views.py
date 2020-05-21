@@ -372,14 +372,16 @@ class TakeCustodyView(TemplateView):
                 award_id = int(context["award_id"])
                 node_id = int(context["node_id"])
 
-                ln.payaward(node_id=node_id, award_id=award_id, invoice=invoice_pre_validation, sig=sign_pre_validation)
+                result = ln.payaward(node_id=node_id, award_id=award_id, invoice=invoice_pre_validation, sig=sign_pre_validation)
 
-                if len(error_summary_list) > 0:
+                if result["payment_successful"] == True:
+                    return render(request, "payment_successful.html", context)
+                else:
+                    error_summary_list.append("Payment failed: {}".format(result["failure_message"]))
+
                     context['errors_detected'] = True
                     context["show_error_summary"] = True
                     context["error_summary_list"] = error_summary_list
-                else:
-                    return render(request, "payment_successful.html", context)
 
         else:
             raise ln.LNUtilError("Invalid state")

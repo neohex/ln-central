@@ -86,13 +86,12 @@ class VerifyMessageResult(models.Model):
 
 
 class PayAwardResult(models.Model):
-    node_id = models.IntegerField(verbose_name='LN Node ID', default=-1)
-    invoice = models.CharField(
-        verbose_name='Invoice',
-        max_length=settings.MAX_MEMO_SIZE
+    payment_successful = models.BooleanField(verbose_name="Is message valid against it's signature?")
+    failure_message =  models.CharField(
+        verbose_name="The failure message to report back to the user",
+        max_length=255,
+        default=""
     )
-    valid = models.BooleanField(verbose_name="Is message valid against it's signature?")
-    identity_pubkey = models.CharField(verbose_name='LN Identity Pubkey', max_length=255)
 
     class Meta:
         managed = False

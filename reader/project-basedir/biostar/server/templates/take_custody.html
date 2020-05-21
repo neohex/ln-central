@@ -41,11 +41,46 @@
         </div>
     {% endif %}
 
+    <p>&nbsp;</p>
+    This maybe caused by a number of issues depending on the error message:
+     <ul>
+        <li>Does your Lighting node have enough inbound liquidity to receive this payment? You can use any wallet to receive. Mobile apps such as Breez provide inbound liquidity.</li>
+        <li>Are there issues with the signature? Only the author of the awarded answer post is able to receive the award. The signature message must by the invoice.</li>
+        <li>Finally, feel free to contact us to resolve get help in resolving this issue.</li>
+    </ul>
+    <p>To contact me use one of the following:</p>
+    <ul>
+        <li>Ask a <a href="https://ln.support/t/Meta/">Meta question on the website</a></li>
+        <ul>
+            <li>(most privacy, yet question will be visible publicly)</li>
+        </ul>
+        <li>Email</li>
+        <ul>
+            <li><img src="/static/img/contact-email.png" style="width: auto; height: 2em;" /></li>
+            <li>(less privacy, email is used to communicate with me)</li>
+        </ul>
+        <li>File a <a href="https://github.com/alevchuk/ln-central/issues">GitHub Issue</a></li>
+        <ul>
+            <li>(least private, GitHub knows your email and other info, question is shared publicly)</li>
+        </ul>
+    </ul>
+
+    <p>When contacting, please mention:</p>
+    <ul>
+       <li>The error message above (under Errors Detected)</li>
+       <li>The URL of this web-page</li>
+       <li>The exact time of the failure (please convert time to UTC timezone)</li>
+   </ul>
+
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+
+    <p>Your can also try again later or submit a different payment request bellow:</p>
 {% endif %}
 
 {% if node_name %}
     {% if invoice %}
-
         <p>Please sign your Lightning invoice</p>
         {% crispy sign_form %}
 
