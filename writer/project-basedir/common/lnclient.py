@@ -1,6 +1,7 @@
 from common import cli
 
 import time
+import json
 import random
 
 LNCLI_BIN = "/home/lightning/gocode/bin/lncli"
@@ -85,9 +86,8 @@ def decodepayreq(payreq, rpcserver, mock=False):
     return cli.run(cmd, log_cmd=True)
 
 def payinvoice(payreq, rpcserver, mock=False):
-    # TODO: capture STDERR and return it
     if mock:
-        return ""
+        return {"success": True, "stdouterr": ""}
 
     # TODO: add --json, note that this flag is not defined in older versions of lncli
 
@@ -97,4 +97,4 @@ def payinvoice(payreq, rpcserver, mock=False):
         "--pay_req", payreq,
     ]
 
-    return cli.run(cmd, log_cmd=True)
+    return cli.run(cmd, log_cmd=True, return_stderr_on_fail=True, try_num=3, timeout=60)  # 12x the default timeout!

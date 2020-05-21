@@ -316,19 +316,26 @@ class PayAwardViewSet(viewsets.ModelViewSet):
 
         # ! TODO (2020-05-19): Check for recent payments on all nodes, in case we crash in the middle of critical section
 
-        # Pay
         logger.info("about to pay")
-        pay_results = lnclient.payinvoice(payreq=invoice, rpcserver=node.rpcserver, mock=settings.MOCK_LN_CLIENT)
+
+        pay_result = lnclient.payinvoice(payreq=invoice, rpcserver=node.rpcserver, mock=settings.MOCK_LN_CLIENT)
+        logger.info("pay_result: {}".format(pay_result))
+
+        if pay_result["success"] is not True:
+            if pay_result["failure_type"] == "timeout":
+                return payment_fail("LND payinvoice timed out")
+            else:
+                return payment_fail("LND payinvoice failed. LND error message was: {}".format(pay_result["stdouterr"]))
 
         logger.info("payed, about to update db")
 
-        # Update DB
         for b in bounties_to_pay:
             b.is_payed = True
             b.is_active = False
             b.save()
 
-        logger.info("db updated")
+        logger.info("updated db")
+
         logger.info("Exited critical section")
 
         return [PayAwardResult(payment_successful=True)]
