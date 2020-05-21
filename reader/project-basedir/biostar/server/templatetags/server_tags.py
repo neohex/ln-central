@@ -119,7 +119,11 @@ def coolname(user):
     seed = int(hash.encode('hex'), 16) % max_seed
     name_list = coolname_lib.impl._default._lists[NUM_WORDS][seed]
 
-    return '-'.join(name_list)
+    msg = ""
+    if user.is_unsigned:
+        msg += " (not signed)"
+
+    return '-'.join(name_list) + msg
 
 
 def pluralize(value, word):
