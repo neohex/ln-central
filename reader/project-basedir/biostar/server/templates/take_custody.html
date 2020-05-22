@@ -82,7 +82,7 @@
 
 {% if node_name %}
     {% if invoice %}
-        <p>Please sign your Lightning invoice</p>
+        <p>Please sign your {{amt|intcomma}} sat Lightning invoice</p>
         <p>To sign with CLI run:
 
         <pre>lncli signmessage '{{ invoice }}'</pre>
