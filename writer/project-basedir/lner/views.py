@@ -288,6 +288,8 @@ class PayAwardViewSet(viewsets.ModelViewSet):
             if decodepayreq_out["failure_type"] == "timeout":
                 return payment_fail("LND decodepayreq timed out")
             else:
+                # TODO: from stdouterr remove anything that looks like an IP address
+                # E.g. [lncli] rpc error: code = Unknown desc = caveat "ipaddr 172.1.1.1" not satisfied: macaroon locked to different IP address
                 return payment_fail("LND decodepayreq failed. LND error message was: {}".format(decodepayreq_out["stdouterr"]))
 
         payreq_decoded = json.loads(decodepayreq_out["stdouterr"])
@@ -334,6 +336,8 @@ class PayAwardViewSet(viewsets.ModelViewSet):
             if pay_result["failure_type"] == "timeout":
                 return payment_fail("LND payinvoice timed out")
             else:
+                # TODO: from stdouterr remove anything that looks like an IP address
+                # E.g. [lncli] rpc error: code = Unknown desc = caveat "ipaddr 172.1.1.1" not satisfied: macaroon locked to different IP address
                 return payment_fail("LND payinvoice failed. LND error message was: {}".format(pay_result["stdouterr"]))
 
         logger.info("payed, about to update db")
