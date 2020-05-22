@@ -49,12 +49,25 @@ def sleep(seconds):
     logger.info("Sleeping for {} seconds".format(seconds))
     time.sleep(seconds)
 
+
 def get_anon_user():
     user, created = User.objects.get_or_create(pubkey="Unknown")
     if created:
         logger.info("This is probably an empty DB! Anonymous user created: {}".format(user))
 
     return user
+
+
+def update_deadline(earliest_bounty, new_deadline):
+    earliest_bounty.award_time = new_deadline
+    earliest_bounty.save()
+    logger.info(
+        "Updated award time to {} on {}".format(
+            earliest_bounty.award_time,
+            earliest_bounty,
+        )
+    )
+
 
 def award_bounty(question_post):
     """
@@ -74,11 +87,14 @@ def award_bounty(question_post):
     logger.info("earliest_bounty start time is {}".format(earliest_bounty.activation_time))
 
     # 3. check award time to see if bounty is still in the game
-    deadline = earliest_bounty.award_time + settings.AWARD_TIMEDELTA
-    if timezone.now() > deadline:
-        # TODO: check if CLAIM_TIMEDELTA is passed and make available to the next top answer
-        logger.info("The deadline is already passed, so don't change the winner")
-        return
+    if earliest_bounty.award_time:
+        deadline = earliest_bounty.award_time + settings.AWARD_TIMEDELTA
+        if timezone.now() > deadline:
+            # TODO: check if CLAIM_TIMEDELTA is passed and make available to the next top answer
+            logger.info("The deadline is already passed, so don't change the winner")
+            return
+    else:
+        logger.info("This bounty has no awards yet")
 
     # 4. find the top voted answer among answers after the bounty start time
     # creation date breaks ties, olderst wins
@@ -99,11 +115,14 @@ def award_bounty(question_post):
     logger.info("Top voted answer is {}".format(top_answer))
 
     # 5. create or update the award
+    new_deadline = timezone.now() + settings.AWARD_TIMEDELTA
     try:
         award = BountyAward.objects.get(bounty=earliest_bounty)
     except BountyAward.DoesNotExist:
         award = BountyAward.objects.create(bounty=earliest_bounty, post=top_answer)
         logger.info("Created new award {}".format(award))
+
+        update_deadline(earliest_bounty, new_deadline)
     else:
         if award.post == top_answer:
             logger.info("Already awarded to this answer")
@@ -114,15 +133,8 @@ def award_bounty(question_post):
 
     # 6. update award time on the Bounty
     if award.post != top_answer:
-        new_deadline = timezone.now() + settings.AWARD_TIMEDELTA
-        earliest_bounty.award_time = new_deadline
-        earliest_bounty.save()
-        logger.info(
-            "Updated award time to {} on {}".format(
-              earliest_bounty.award_time,
-                earliest_bounty,
-            )
-        )
+        update_deadline(earliest_bounty, new_deadline)
+
 
 class CheckpointHelper(object):
     def __init__(self, node, invoice, creation_date):

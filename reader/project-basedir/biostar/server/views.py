@@ -404,14 +404,21 @@ class PostDetails(DetailView):
 
             award = awards[0]
 
-            context['award_pid'] = award.post.id
-            context['take_custody_url'] = reverse("take-custody", kwargs={"award_id": award.id})
+            first_active_bounty = bounties.first()
+            if not first_active_bounty.award_time:
+                msg = "award {} exists yet award_time is not set on the Bounty!".format(award.id)
+                logger.error(msg)
+                raise Exception(msg)
 
-            if bounties.first().award_time <= timezone.now():
-                context['award_recieved_sats'] = bounty_sats
             else:
-                context['candidate_award_sats'] = bounty_sats
-                context['preliminary_award_time'] = bounties.first().award_time
+                context['award_pid'] = award.post.id
+                context['take_custody_url'] = reverse("take-custody", kwargs={"award_id": award.id})
+
+                if first_active_bounty.award_time <= timezone.now():
+                    context['award_recieved_sats'] = bounty_sats
+                else:
+                    context['candidate_award_sats'] = bounty_sats
+                    context['preliminary_award_time'] = first_active_bounty.award_time
 
         return context
 
