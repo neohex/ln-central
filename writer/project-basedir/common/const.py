@@ -26,12 +26,16 @@ MESSAGING_TYPE_CHOICES = MESSAGING_MAP.items()
 
 # Connects a user sort dropdown word to a data model field.
 USER_SORT_MAP = OrderedDict([
-    ("recent visit", "-profile__last_login"),
+    ("reputation", "-score"),
     ("date joined", "profile__date_joined"),
+    ("number of posts", "-score"),  # TODO: model needs fixing
+
+    ("recent visit", "-profile__last_login"), # depricated
+    ("activity level", "-activity"),  # depricated
 ])
 
 # These are the fields rendered in the user sort order drop down.
-USER_SORT_FIELDS = USER_SORT_MAP.keys()
+USER_SORT_FIELDS = ["reputation", "date joined"]
 USER_SORT_DEFAULT = list(USER_SORT_FIELDS)[0]
 
 USER_SORT_INVALID_MSG = "Invalid sort parameter received"
@@ -39,14 +43,18 @@ USER_SORT_INVALID_MSG = "Invalid sort parameter received"
 # Connects a post sort dropdown word to a data model field.
 POST_SORT_MAP = OrderedDict([
     ("update", "-lastedit_date"),
-    ("views", "-view_count"),
     ("answers", "-reply_count"),
     ("votes", "-vote_count"),
     ("creation", "-creation_date"),
+
+    ("views", "-view_count"),  # depricated
+    ("followers", "-subs_count"),  # depricated
+    ("bookmarks", "-book_count"),  # depricated
+    ("rank", "-rank"),  # depricated
 ])
 
 # These are the fields rendered in the post sort order drop down.
-POST_SORT_FIELDS = POST_SORT_MAP.keys()
+POST_SORT_FIELDS = ["update", "answers", "votes", "creation"]
 POST_SORT_DEFAULT = list(POST_SORT_FIELDS)[0]
 
 POST_SORT_INVALID_MSG = "Invalid sort parameter received"

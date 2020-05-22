@@ -60,11 +60,11 @@ class BaseListMixin(ListView):
         limit = self.request.GET.get('limit', const.POST_LIMIT_DEFAULT)
 
         if sort not in const.POST_SORT_MAP:
-            logger.warning("No sort in POST_SORT_MAP: '%s' '%s'", const.POST_SORT_INVALID_MSG, self.request)
+            logger.warning("No sort in POST_SORT_MAP: '%s' URI:'%s'", const.POST_SORT_INVALID_MSG, self.request.META["RAW_URI"])
             sort = const.POST_SORT_DEFAULT
 
         if limit not in const.POST_LIMIT_MAP:
-            logger.warning("No limit in POST_SORT_MAP: '%s' '%s'", const.POST_LIMIT_INVALID_MSG, self.request)
+            logger.warning("No limit in POST_SORT_MAP: '%s' URI:'%s'", const.POST_LIMIT_INVALID_MSG, self.request.META["RAW_URI"])
             limit = const.POST_LIMIT_DEFAULT
 
         context['sort'] = sort
