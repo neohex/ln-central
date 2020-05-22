@@ -30,6 +30,8 @@ def addinvoice(memo, rpcserver, amt, expiry):
     TODO (2019-??-??): check for [lncli] rpc error: code = Unknown desc = memo too large: 1192 bytes (maxsize=1024)
     """
     cmd = [LNCLI_BIN] + _auth_args(rpcserver) + ["addinvoice", "--memo", memo, "--amt", str(amt), "--expiry", str(expiry)]
+
+    # TODO: return_stderr_on_fail=True, and adjust all the call sites
     output = cli.run(cmd)
     print("Command finished, addinvoice json stdout: {}".format(output))
     return output
@@ -50,6 +52,7 @@ def listinvoices(index_offset, rpcserver, max_invoices=100, mock=False):
         "--paginate-forwards",
     ]
 
+    # TODO: return_stderr_on_fail=True, and adjust all the call sites
     return cli.run(cmd, log_cmd=False)
 
 def verifymessage(msg, sig, rpcserver, mock=False):
@@ -68,14 +71,20 @@ def verifymessage(msg, sig, rpcserver, mock=False):
         "--sig", sig,
     ]
 
+    # TODO: return_stderr_on_fail=True, and adjust all the call sites
     return cli.run(cmd, log_cmd=True)
 
 def decodepayreq(payreq, rpcserver, mock=False):
     if mock:
         return {
-            "num_satoshis": 123,
-            "num_msat": 123000,
-            "pubkey": "FAKE2"
+            "success": True,
+            "stdouterr": json.dumps(
+                {
+                    "num_satoshis": 123,
+                    "num_msat": 123000,
+                    "pubkey": "FAKE2"
+                }
+            )
         }
 
     cmd =  [LNCLI_BIN] + _auth_args(rpcserver) + [
@@ -83,7 +92,7 @@ def decodepayreq(payreq, rpcserver, mock=False):
         "--pay_req", payreq,
     ]
 
-    return cli.run(cmd, log_cmd=True)
+    return cli.run(cmd, log_cmd=True, return_stderr_on_fail=True)
 
 def payinvoice(payreq, rpcserver, mock=False):
     if mock:

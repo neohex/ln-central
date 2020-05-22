@@ -1,5 +1,6 @@
 import time
 import re
+import json
 
 from django.shortcuts import get_object_or_404
 from django.http import Http404
@@ -282,7 +283,15 @@ class PayAwardViewSet(viewsets.ModelViewSet):
         logger.info("Need to pay award in the amount of: {} sat".format(bounty_sats))
 
         # Decode invoice and lookup amount
-        payreq_decoded = lnclient.decodepayreq(payreq=invoice, rpcserver=node.rpcserver, mock=settings.MOCK_LN_CLIENT)
+        decodepayreq_out = lnclient.decodepayreq(payreq=invoice, rpcserver=node.rpcserver, mock=settings.MOCK_LN_CLIENT)
+        if decodepayreq_out["success"] is not True:
+            if decodepayreq_out["failure_type"] == "timeout":
+                return payment_fail("LND decodepayreq timed out")
+            else:
+                return payment_fail("LND decodepayreq failed. LND error message was: {}".format(decodepayreq_out["stdouterr"]))
+
+        payreq_decoded = json.loads(decodepayreq_out["stdouterr"])
+
         num_satoshis = payreq_decoded["num_satoshis"]
         num_msat = payreq_decoded["num_msat"]
         logger.info("User requested: num_satoshis={} and num_msat={} ".format(num_satoshis, num_msat))
