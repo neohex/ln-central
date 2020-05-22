@@ -73,7 +73,14 @@ def award_bounty(question_post):
     earliest_bounty = b_list.first()
     logger.info("earliest_bounty start time is {}".format(earliest_bounty.activation_time))
 
-    # 3. find the top voted answer among answers after the bounty start time
+    # 3. check award time to see if bounty is still in the game
+    deadline = earliest_bounty.award_time + settings.AWARD_TIMEDELTA
+    if timezone.now() > deadline:
+        # TODO: check if CLAIM_TIMEDELTA is passed and make available to the next top answer
+        logger.info("The deadline is already passed, so don't change the winner")
+        return
+
+    # 4. find the top voted answer among answers after the bounty start time
     # creation date breaks ties, olderst wins
     a_list = Post.objects.filter(
         parent=question_post.id,
@@ -91,7 +98,7 @@ def award_bounty(question_post):
     top_answer = a_list.last()
     logger.info("Top voted answer is {}".format(top_answer))
 
-    # 4. create or update the award
+    # 5. create or update the award
     try:
         award = BountyAward.objects.get(bounty=earliest_bounty)
     except BountyAward.DoesNotExist:
@@ -105,9 +112,10 @@ def award_bounty(question_post):
             award.save()
             logger.info("Updated existing award {}".format(award))
 
-    # 5. update award time on the Bounty
+    # 6. update award time on the Bounty
     if award.post != top_answer:
-        earliest_bounty.award_time = timezone.now() + settings.AWARD_TIMEDELTA
+        new_deadline = timezone.now() + settings.AWARD_TIMEDELTA
+        earliest_bounty.award_time = new_deadline
         earliest_bounty.save()
         logger.info(
             "Updated award time to {} on {}".format(
